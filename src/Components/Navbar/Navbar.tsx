@@ -11,7 +11,7 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 
@@ -20,7 +20,7 @@ interface NavbarProps {
   handleTheme: () => void;
 }
 
-type Links = "home" | "events" | "about" | "contact";
+type Links = "home" | "events" | "about" | "contact" | "";
 
 const pages: Links[] = ["home", "events", "about", "contact"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
@@ -185,7 +185,20 @@ const Navbar = ({ theme, handleTheme }: NavbarProps) => {
             </Button>
           </Box>
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
+            <NavLink to={"/login"}>
+              <Button
+                sx={{
+                  color: "white",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+                onClick={() => setActvLink("")}
+              >
+                Login
+              </Button>
+            </NavLink>
+            {/* <Tooltip title="Open menu">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
               </IconButton>
@@ -213,7 +226,7 @@ const Navbar = ({ theme, handleTheme }: NavbarProps) => {
                   </Typography>
                 </MenuItem>
               ))}
-            </Menu>
+            </Menu> */}
           </Box>
         </Toolbar>
       </Container>
