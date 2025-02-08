@@ -1,17 +1,23 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Link } from "react-router-dom";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { useState } from "react";
 
 type Inputs = {
+  displayName: string;
+  photoURL: string;
   email: string;
   password: string;
 };
 
-const LoginPage = () => {
-  const { register, handleSubmit } = useForm<Inputs>();
+const RegisterPage = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>();
   const [isPassShowing, setIsPassShowing] = useState<boolean>(false);
 
   const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
@@ -34,34 +40,63 @@ const LoginPage = () => {
           variant="h5"
           sx={{ fontWeight: "bold", textAlign: "center" }}
         >
-          Sign in
+          Register
         </Typography>
         <Typography
           variant="subtitle1"
           sx={{ opacity: 0.7, textAlign: "center" }}
         >
-          Welcome, please sign in to continue
+          Welcome, please complete registration
         </Typography>
         <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <Box sx={{ marginTop: "10px" }}>
             <TextField
+              {...register("displayName", { required: true })}
+              label="Your full name"
+              type="text"
+              sx={{ width: "100%" }}
+              id="outlined-size-small-displayName"
+              size="small"
+            />
+          </Box>
+          <Box sx={{ marginTop: "10px" }}>
+            <TextField
               {...register("email", { required: true })}
-              label="Email"
+              label="Email address"
               type="email"
               sx={{ width: "100%" }}
               id="outlined-size-small-email"
               size="small"
             />
           </Box>
+          <Box sx={{ marginTop: "10px" }}>
+            <TextField
+              {...register("photoURL", { required: true })}
+              label="Photo URL"
+              type="text"
+              sx={{ width: "100%" }}
+              id="outlined-size-small-photoURL"
+              size="small"
+            />
+          </Box>
           <Box sx={{ position: "relative" }}>
             <TextField
-              {...register("password", { required: true })}
+              {...register("password", {
+                required: true,
+                pattern: /^(?=(.*[a-z]))(?=(.*[A-Z]))(?=(.*\d)).{6,}$/,
+              })}
               type={isPassShowing ? "text" : "password"}
               label="Password"
               sx={{ width: "100%" }}
               id="outlined-size-small-password"
               size="small"
             />
+            {errors?.password && (
+              <p className="text-justify text-red-400 text-xs">
+                Must contain at least one uppercase, one lowercase, one number
+                and length at least 6
+              </p>
+            )}
             <button
               type="button"
               className="absolute right-4 top-2"
@@ -72,13 +107,13 @@ const LoginPage = () => {
           </Box>
           <Box>
             <Button type="submit" sx={{ width: "100%" }} variant="contained">
-              Login
+              register
             </Button>
           </Box>
           <Typography variant="caption" sx={{ textAlign: "center" }}>
-            <span>Don't have an account? Register </span>{" "}
+            <span>Already have an account? Login </span>{" "}
             <span className="text-[#00f] hover:underline">
-              <Link to={"/register"}>here.</Link>
+              <Link to={"/login"}>here.</Link>
             </span>
           </Typography>
         </Box>
@@ -87,4 +122,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

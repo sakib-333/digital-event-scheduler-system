@@ -5,6 +5,7 @@ import EventsPage from "../Pages/EventsPage/EventsPage";
 import AboutPage from "../Pages/AboutPage/AboutPage";
 import ContactPage from "../Pages/ContactPage/ContactPage";
 import LoginPage from "../Pages/LoginPage/LoginPage";
+import RegisterPage from "../Pages/RegisterPage/RegisterPage";
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginPage />,
+      },
+      {
+        path: "/register",
+        element: <RegisterPage />,
       },
     ],
   },
