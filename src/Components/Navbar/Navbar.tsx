@@ -11,10 +11,12 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import useAuthInfo from "../../Hooks/useAuthInfo/useAuthInfo";
+import SuccessSnackBar from "../../Alerts/SuccessSnackBar/SuccessSnackBar";
+import ErrorSnackBar from "../../Alerts/ErrorSnackBar/ErrorSnackBar";
 
 interface NavbarProps {
   theme: "light" | "dark";
@@ -27,6 +29,9 @@ const pages: Links[] = ["home", "events", "about", "contact"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 const Navbar = ({ theme, handleTheme }: NavbarProps) => {
+  const { user, signoutUser, setUserLoading } = useAuthInfo();
+  const [showSuccSnkbar, setShowSuccSnkbar] = React.useState(false);
+  const [showErrSnkbar, setShowErrSnkbar] = React.useState(false);
   const [actvLink, setActvLink] = React.useState<Links>("home");
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
@@ -48,6 +53,19 @@ const Navbar = ({ theme, handleTheme }: NavbarProps) => {
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+  };
+
+  const handleLogout = () => {
+    signoutUser()
+      .then(() => {
+        setShowSuccSnkbar(true);
+      })
+      .catch(() => setShowErrSnkbar(true))
+      .finally(() => {
+        if (setUserLoading) {
+          setUserLoading(false);
+        }
+      });
   };
 
   return (
@@ -186,51 +204,74 @@ const Navbar = ({ theme, handleTheme }: NavbarProps) => {
             </Button>
           </Box>
           <Box sx={{ flexGrow: 0 }}>
-            <NavLink to={"/login"}>
-              <Button
-                sx={{
-                  color: "white",
-                  "&:hover": {
-                    textDecoration: "underline",
-                  },
-                }}
-                onClick={() => setActvLink("")}
-              >
-                Login
-              </Button>
-            </NavLink>
-            {/* <Tooltip title="Open menu">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography sx={{ textAlign: "center" }}>
-                    {setting}
-                  </Typography>
-                </MenuItem>
-              ))}
-            </Menu> */}
+            {user ? (
+              <>
+                <Tooltip title="Open menu">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar alt="Remy Sharp" src={user.photoURL} />
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: "45px" }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                >
+                  {settings.map((setting) => (
+                    <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                      {setting === "Logout" ? (
+                        <Button onClick={handleLogout}>{setting}</Button>
+                      ) : (
+                        <Typography sx={{ textAlign: "center" }}>
+                          {setting}
+                        </Typography>
+                      )}
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </>
+            ) : (
+              <NavLink to={"/login"}>
+                <Button
+                  sx={{
+                    color: "white",
+                    "&:hover": {
+                      textDecoration: "underline",
+                    },
+                  }}
+                  onClick={() => setActvLink("")}
+                >
+                  Login
+                </Button>
+              </NavLink>
+            )}
           </Box>
         </Toolbar>
       </Container>
+      {showSuccSnkbar && (
+        <SuccessSnackBar
+          showSuccSnkbar={showSuccSnkbar}
+          setShowSuccSnkbar={setShowSuccSnkbar}
+          message={"Logout successful"}
+        />
+      )}
+      {showErrSnkbar && (
+        <ErrorSnackBar
+          showErrSnkbar={showErrSnkbar}
+          setShowErrSnkbar={setShowErrSnkbar}
+          message={"Something went wrong"}
+        />
+      )}
     </AppBar>
   );
 };

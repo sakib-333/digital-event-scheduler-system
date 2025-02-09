@@ -4,6 +4,9 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Link } from "react-router-dom";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import useAuthInfo from "../../Hooks/useAuthInfo/useAuthInfo";
+import SuccessSnackBar from "../../Alerts/SuccessSnackBar/SuccessSnackBar";
+import ErrorSnackBar from "../../Alerts/ErrorSnackBar/ErrorSnackBar";
 
 type Inputs = {
   email: string;
@@ -11,10 +14,25 @@ type Inputs = {
 };
 
 const LoginPage = () => {
-  const { register, handleSubmit } = useForm<Inputs>();
+  const { register, handleSubmit, reset } = useForm<Inputs>();
   const [isPassShowing, setIsPassShowing] = useState<boolean>(false);
+  const { setUserLoading, signinUser } = useAuthInfo();
+  const [showSuccSnkbar, setShowSuccSnkbar] = useState(false);
+  const [showErrSnkbar, setShowErrSnkbar] = useState(false);
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    signinUser(data.email, data.password)
+      .then(() => {
+        setShowSuccSnkbar(true);
+        reset();
+      })
+      .catch(() => setShowErrSnkbar(true))
+      .finally(() => {
+        if (setUserLoading) {
+          setUserLoading(false);
+        }
+      });
+  };
 
   return (
     <div className="w-full h-screen flex items-center justify-center">
@@ -83,6 +101,20 @@ const LoginPage = () => {
           </Typography>
         </Box>
       </Box>
+      {showSuccSnkbar && (
+        <SuccessSnackBar
+          showSuccSnkbar={showSuccSnkbar}
+          setShowSuccSnkbar={setShowSuccSnkbar}
+          message={"Login successful"}
+        />
+      )}
+      {showErrSnkbar && (
+        <ErrorSnackBar
+          showErrSnkbar={showErrSnkbar}
+          setShowErrSnkbar={setShowErrSnkbar}
+          message={"Something went wrong"}
+        />
+      )}
     </div>
   );
 };
