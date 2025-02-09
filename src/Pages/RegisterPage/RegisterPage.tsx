@@ -4,6 +4,9 @@ import { Link } from "react-router-dom";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useState } from "react";
+import useAuthInfo from "../../Hooks/useAuthInfo/useAuthInfo";
+import SuccessSnackBar from "../../Alerts/SuccessSnackBar/SuccessSnackBar";
+import ErrorSnackBar from "../../Alerts/ErrorSnackBar/ErrorSnackBar";
 
 type Inputs = {
   displayName: string;
@@ -17,10 +20,31 @@ const RegisterPage = () => {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<Inputs>();
   const [isPassShowing, setIsPassShowing] = useState<boolean>(false);
+  const { setUserLoading, signupUser, updateUserProfile } = useAuthInfo();
+  const [showSuccSnkbar, setShowSuccSnkbar] = useState(false);
+  const [showErrSnkbar, setShowErrSnkbar] = useState(false);
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    signupUser(data.email, data.password)
+      .then(() => {
+        updateUserProfile({
+          displayName: data.displayName,
+          photoURL: data.photoURL,
+        }).then(() => {
+          setShowSuccSnkbar(true);
+          reset();
+        });
+      })
+      .catch(() => setShowErrSnkbar(true))
+      .finally(() => {
+        if (setUserLoading) {
+          setUserLoading(false);
+        }
+      });
+  };
 
   return (
     <div className="w-full h-screen flex items-center justify-center">
@@ -118,6 +142,20 @@ const RegisterPage = () => {
           </Typography>
         </Box>
       </Box>
+      {showSuccSnkbar && (
+        <SuccessSnackBar
+          showSuccSnkbar={showSuccSnkbar}
+          setShowSuccSnkbar={setShowSuccSnkbar}
+          message={"Registration successful"}
+        />
+      )}
+      {showErrSnkbar && (
+        <ErrorSnackBar
+          showErrSnkbar={showErrSnkbar}
+          setShowErrSnkbar={setShowErrSnkbar}
+          message={"Something went wrong"}
+        />
+      )}
     </div>
   );
 };
