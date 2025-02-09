@@ -3,7 +3,7 @@ import Heading from "../../../Components/Heading/Heading";
 
 const EventsCounter = () => {
   return (
-    <div>
+    <div className="py-8">
       <Heading title={"Events Counter"} />
       <div className="grid grid-cols-1 sm:grid-cols-3 justify-items-center">
         <div className="flex flex-col items-center">
