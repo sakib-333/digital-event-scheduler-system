@@ -14,6 +14,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { Link, NavLink } from "react-router-dom";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
+import useAuthInfo from "../../Hooks/useAuthInfo/useAuthInfo";
 
 interface NavbarProps {
   theme: "light" | "dark";
