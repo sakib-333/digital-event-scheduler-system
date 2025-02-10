@@ -42,7 +42,12 @@ const faqs = [
 
 const FAQs = () => {
   return (
-    <div className="py-8 px-4">
+    <div
+      className="py-8 px-4"
+      data-aos="fade-up"
+      data-aos-duration="1000"
+      data-aos-once="false"
+    >
       <Heading title={"FAQs"} />
       <div>
         {faqs.map(({ id, faq, answer }, indx) => (

@@ -1,9 +1,11 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "../../Components/Navbar/Navbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Footer from "../../Components/Footer/Footer";
+import Aos from "aos";
+import "aos/dist/aos.css";
 
 const HomeLayout = () => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -15,6 +17,10 @@ const HomeLayout = () => {
       setTheme("light");
     }
   };
+
+  useEffect(() => {
+    Aos.init();
+  }, []);
 
   const darkTheme = createTheme({
     palette: {

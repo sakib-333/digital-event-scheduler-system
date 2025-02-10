@@ -9,6 +9,9 @@ const EventsCounter = () => {
 
   return (
     <div
+      data-aos="fade-up"
+      data-aos-duration="1000"
+      data-aos-once="false"
       className={`py-8  ${
         mode === "light" ? "bg-[#cfd8dc]" : "bg-[#333333]"
       } px-4`}

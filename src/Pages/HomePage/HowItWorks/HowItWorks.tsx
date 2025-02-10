@@ -5,7 +5,12 @@ import viewEvents from "../Assets/viewEvents.svg";
 
 const HowItWorks = () => {
   return (
-    <div className="py-8 px-4">
+    <div
+      className="py-8 px-4"
+      data-aos="fade-up"
+      data-aos-duration="1000"
+      data-aos-once="false"
+    >
       <Heading title={"How It Works"} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
         <div className="flex flex-col items-center">

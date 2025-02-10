@@ -10,7 +10,13 @@ import EventDefaultLogo from "/EventDefaultLogo.png";
 
 const EventCard = () => {
   return (
-    <Card sx={{ maxWidth: 345 }}>
+    <Card
+      sx={{ maxWidth: 345 }}
+      data-aos="zoom-in"
+      data-aos-easing="ease"
+      data-aos-once="false"
+      data-aos-duration="1000"
+    >
       <CardMedia
         sx={{ height: 140 }}
         image={EventDefaultLogo}
