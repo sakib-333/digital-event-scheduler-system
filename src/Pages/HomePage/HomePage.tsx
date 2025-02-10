@@ -1,4 +1,5 @@
 import Banner from "./Banner/Banner";
+import FAQs from "./FAQs/FAQs";
 import HowItWorks from "./HowItWorks/HowItWorks";
 import EventsCounter from "./SuccessCounter/EventsCounter";
 import UpComingEvents from "./UpComingEvents/UpComingEvents";
@@ -10,6 +11,7 @@ const HomePage = () => {
       <UpComingEvents />
       <HowItWorks />
       <EventsCounter />
+      <FAQs />
     </div>
   );
 };
