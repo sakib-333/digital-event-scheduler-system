@@ -46,7 +46,7 @@ const Banner = () => {
   ];
 
   return (
-    <div>
+    <div className="p-4">
       <Carousel stopAutoPlayOnHover={false}>
         {items.map((item) => (
           <div

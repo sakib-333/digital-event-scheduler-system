@@ -27,7 +27,7 @@ const HomeLayout = () => {
       <CssBaseline />
       <div className="max-w-screen-2xl mx-auto">
         <Navbar theme={theme} handleTheme={handleTheme} />
-        <div className="min-h-screen p-4">
+        <div className="min-h-screen">
           <Outlet />
         </div>
         <Footer />

@@ -42,11 +42,11 @@ const faqs = [
 
 const FAQs = () => {
   return (
-    <div className="py-8">
+    <div className="py-8 px-4">
       <Heading title={"FAQs"} />
       <div>
-        {faqs.map(({ faq, answer }, indx) => (
-          <Accordion defaultExpanded={indx === 0}>
+        {faqs.map(({ id, faq, answer }, indx) => (
+          <Accordion key={id} defaultExpanded={indx === 0}>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="panel1-content"

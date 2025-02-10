@@ -1,9 +1,18 @@
+import { useTheme } from "@mui/material";
 import CountUp from "react-countup";
 import Heading from "../../../Components/Heading/Heading";
 
 const EventsCounter = () => {
+  const {
+    palette: { mode },
+  } = useTheme();
+
   return (
-    <div className="py-8">
+    <div
+      className={`py-8  ${
+        mode === "light" ? "bg-[#cfd8dc]" : "bg-[#333333]"
+      } px-4`}
+    >
       <Heading title={"Events Counter"} />
       <div className="grid grid-cols-1 sm:grid-cols-3 justify-items-center">
         <div className="flex flex-col items-center">
