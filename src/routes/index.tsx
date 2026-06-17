@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/context/auth-context";
+import { HomePage } from "@/components/home/home-page";
 
 export const Route = createFileRoute("/")({
-  component: HomePage,
+  component: IndexRoute,
 });
 
-function HomePage() {
+function IndexRoute() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -21,9 +22,5 @@ function HomePage() {
     }
   }
 
-  return (
-    <button onClick={handleGetStarted}>
-      Get Started
-    </button>
-  );
+  return <HomePage onGetStarted={handleGetStarted} />;
 }
