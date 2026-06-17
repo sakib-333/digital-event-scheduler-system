@@ -1,28 +1,27 @@
 import ReactDOM from 'react-dom/client'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { RouterProvider } from '@tanstack/react-router'
 import './index.css'
 
-// Import the generated route tree
-import { routeTree } from './routeTree.gen'
 import { ThemeProvider } from './components/theme-provider'
+import { AuthProvider, useAuth } from './context/auth-context'
+import { router } from './router'
 
-// Create a new router instance
-const router = createRouter({ routeTree })
+function AppRouter() {
+    const auth = useAuth()
 
-// Register the router instance for type safety
-declare module '@tanstack/react-router' {
-    interface Register {
-        router: typeof router
-    }
+    return <RouterProvider router={router} context={{ auth }} />
 }
 
 // Render the app
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement)
+
     root.render(
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-            <RouterProvider router={router} />
+            <AuthProvider>
+                <AppRouter />
+            </AuthProvider>
         </ThemeProvider>
     )
 }
