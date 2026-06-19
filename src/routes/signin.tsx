@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, CalendarCheck, HelpCircle, ShieldCheck } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, CalendarCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -107,32 +107,15 @@ function SigninPage() {
           <div className="mt-8 text-center">
             <p className="text-sm leading-5 text-muted-foreground">
               New to the platform?{" "}
-              <a
+              <Link
                 className="font-semibold text-primary underline-offset-4 transition-colors hover:underline"
-                href="#"
+                to="/signup"
               >
-                Register
-              </a>
+                Signup
+              </Link>
             </p>
           </div>
         </section>
-
-        <div className="mt-6 flex justify-center gap-6">
-          <a
-            className="inline-flex items-center gap-1 text-xs font-semibold leading-4 text-muted-foreground transition-colors hover:text-primary"
-            href="#"
-          >
-            <HelpCircle className="size-4" aria-hidden="true" />
-            <span>Need Help?</span>
-          </a>
-          <a
-            className="inline-flex items-center gap-1 text-xs font-semibold leading-4 text-muted-foreground transition-colors hover:text-primary"
-            href="#"
-          >
-            <ShieldCheck className="size-4" aria-hidden="true" />
-            <span>Privacy Policy</span>
-          </a>
-        </div>
       </div>
     </main>
   );
