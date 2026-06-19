@@ -3,7 +3,7 @@ import { Users } from "lucide-react";
 
 import { DashboardPlaceholderPage } from "@/components/dashboard/admin-dashboard";
 
-export const Route = createFileRoute("/_authenticated/users")({
+export const Route = createFileRoute("/_authenticated/manage-users")({
   component: UsersPage,
 });
 

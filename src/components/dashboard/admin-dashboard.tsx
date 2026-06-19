@@ -59,7 +59,7 @@ const primaryNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Overview", to: "/dashboard" },
   { icon: CalendarDays, label: "My Events", to: "/my-events" },
   { icon: CalendarCheck, label: "Manage Events", to: "/manage-events" },
-  { icon: Users, label: "Users", to: "/users" },
+  { icon: Users, label: "Manage Users", to: "/manage-users" },
   { icon: BarChart3, label: "Analytics", to: "/analytics" },
 ];
 
