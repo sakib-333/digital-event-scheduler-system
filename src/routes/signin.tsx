@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, CalendarCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ export const Route = createFileRoute("/signin")({
 });
 
 function SigninPage() {
+  const navigate = useNavigate();
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10 text-foreground">
       <div className="w-full max-w-110 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -27,7 +29,10 @@ function SigninPage() {
 
           <form
             className="space-y-6"
-            onSubmit={(event) => event.preventDefault()}
+            onSubmit={(event) => {
+              event.preventDefault();
+              navigate({ to: "/dashboard" });
+            }}
           >
             <div className="group space-y-1">
               <label

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { DashboardOverview } from "@/components/dashboard/admin-dashboard";
 
 export const Route = createFileRoute(
   "/_authenticated/dashboard"
@@ -7,5 +8,5 @@ export const Route = createFileRoute(
 });
 
 function DashboardPage() {
-  return <h1>Dashboard</h1>;
+  return <DashboardOverview />;
 }

@@ -19,7 +19,7 @@ export function AuthProvider({
 }: {
     children: ReactNode;
 }) {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState({ name: "sakib" });
 
     return (
         <AuthContext.Provider value={{ user, setUser }}>

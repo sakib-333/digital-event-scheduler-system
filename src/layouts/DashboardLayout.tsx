@@ -1,13 +1,5 @@
-import { Outlet } from "@tanstack/react-router";
+import { DashboardShell } from "@/components/dashboard/admin-dashboard";
 
 export default function DashboardLayout() {
-    return (
-        <>
-            <div>Sidebar</div>
-
-            <main>
-                <Outlet />
-            </main>
-        </>
-    );
+    return <DashboardShell />;
 }
