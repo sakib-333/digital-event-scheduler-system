@@ -5,4 +5,5 @@ export interface UserType {
     phone?: string | null;
     avatar?: string | null;
     user_role?: "admin" | "morderator" | "general";
+    created_at?: string
 }

@@ -1,7 +1,15 @@
-import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type ReactNode,
+} from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { Camera, Mail, Phone, Save, ShieldCheck, User } from "lucide-react";
 
+import manageUsers from "@/api/manage-users";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,62 +19,100 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/context/auth-context";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth-store";
+import type { UserType } from "@/types/user";
+import { getNameInitials, isValidBDPhoneNumber, uploadImage } from "@/utils";
+import moment from "moment";
 
+/*━━ Profile route ━━━━━━ */
 export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
 });
 
-type ProfileForm = {
-  avatar: string;
-  createdAt: string;
-  email: string;
-  id: string;
-  name: string;
-  phone: string;
-  userType: string;
+/*━━ Default profile data ━━━━━━ */
+const defaultProfile: UserType = {
+  avatar: null,
+  email: "",
+  name: "",
+  phone: "",
+  uid: "",
+  user_role: "general",
 };
 
-const defaultProfile: ProfileForm = {
-  avatar:
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuAfuUlvg_Rp6fFXCpgX2NqRr-3OjD0vGTUH8zyoyIGmqVzopS_JxCYscC2FFo_9CCoUBMmLGwlep2jGM44dQ66RbixJsQRDeqxhAvMPN0k6kSSue8yEvMIX18NaPJ_wAEULxSFI9QtW1y8grRad7gXJBpVy06oTQ5SdtTkByIZgWGTgzhgdclgFKD7Bk3jcZSd9mmp_1917YX35O59zdDM-o9RQn159W0w6Kdue1Ouh0l8004A93iEx3aMrusoNX1HdVl0xJTPen-o",
-  createdAt: "Jan 12, 2024",
-  email: "sakib@university.edu",
-  id: "USR-1001",
-  name: "Sakib Ahmed",
-  phone: "+880 1712 345 678",
-  userType: "Admin",
-};
-
+/*━━ Profile page component ━━━━━━ */
 function ProfilePage() {
-  const { setUser, user } = useAuth();
-  const [profile, setProfile] = useState<ProfileForm>({
-    ...defaultProfile,
-    name: user?.name ?? defaultProfile.name,
-    email: user?.email ?? defaultProfile.email,
-  });
+  const authUser = useAuthStore((state) => state.user);
+  const setAuthUser = useAuthStore((state) => state.setUser);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [savedMessage, setSavedMessage] = useState("");
+  const {
+    formState: { errors, isSubmitting },
+    handleSubmit,
+    register,
+    reset,
+    setValue,
+    watch,
+  } = useForm<ProfileFormValues>({
+    defaultValues: authUser ?? defaultProfile,
+    mode: "onChange",
+  });
+  const profile = watch();
+  const profileAvatar = profile.avatar;
+  const profileName = profile.name;
+  const profileEmail = profile.email;
+  const profileRole = profile.user_role;
+  const profileUid = profile.uid;
+  const initials = useMemo(() => getNameInitials(profileName ?? ""), [profileName]);
+  const nameField = register("name", { required: true });
+  const phoneField = register("phone", {
+    validate: (value) =>
+      !value ||
+      isValidBDPhoneNumber(value) ||
+      "Please enter a valid Bangladesh phone number.",
+  });
 
-  function updateField(field: keyof ProfileForm, value: string) {
-    setProfile((currentProfile) => ({
-      ...currentProfile,
-      [field]: value,
-    }));
+  /*━━ Sync zustand user with form ━━━━━━ */
+  useEffect(() => {
+    if (authUser) {
+      reset(authUser);
+    }
+  }, [authUser, reset]);
+
+  /*━━ Save profile method ━━━━━━ */
+  const handleSave: SubmitHandler<ProfileFormValues> = async (formData) => {
+    if (!formData.uid) {
+      setSavedMessage("No authenticated user found.");
+      return;
+    }
+
     setSavedMessage("");
-  }
 
-  function handleSave(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setUser((currentUser: any) => ({
-      ...currentUser,
-      avatar: profile.avatar,
-      name: profile.name,
-      phone: profile.phone,
-    }));
-    setSavedMessage("Profile changes saved.");
-  }
+    try {
+      const avatarUrl = avatarFile
+        ? await uploadImage(avatarFile)
+        : formData.avatar;
 
+      const updatedUser = await manageUsers.updateUser(formData.uid, {
+        avatar: avatarUrl,
+        name: formData.name,
+        phone: formData.phone,
+      });
+
+      setAuthUser(updatedUser);
+      reset(updatedUser);
+      setAvatarFile(null);
+      setSavedMessage("Profile changes saved.");
+    } catch (error) {
+      setSavedMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to save profile changes.",
+      );
+    }
+  };
+
+  /*━━ Upload avatar preview method ━━━━━━ */
   function handleAvatarUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 
@@ -79,7 +125,12 @@ function ProfilePage() {
       return;
     }
 
-    updateField("avatar", URL.createObjectURL(file));
+    setAvatarFile(file);
+    setValue("avatar", URL.createObjectURL(file), {
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+    setSavedMessage("");
   }
 
   return (
@@ -94,38 +145,45 @@ function ProfilePage() {
         </p>
       </header>
 
-      <form onSubmit={handleSave}>
+      <form onSubmit={handleSubmit(handleSave)}>
         <Card className="border-border/70 bg-card/80 shadow-sm backdrop-blur-xl">
           <CardHeader className="border-b border-border/60">
             <div className="flex flex-col gap-5 md:flex-row md:items-center">
               <div className="relative size-28 shrink-0">
-                <img
-                  alt={`${profile.name} avatar`}
-                  className="size-28 rounded-full border-4 border-accent object-cover shadow-sm"
-                  src={profile.avatar}
-                />
+                <div className="size-28 rounded-full border-4 border-accent overflow-hidden shadow-sm flex items-center justify-center bg-accent text-accent-content text-3xl font-semibold">
+                  {profileAvatar ? (
+                    <img
+                      src={profileAvatar}
+                      alt={`${profileName} avatar`}
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <span>{initials}</span>
+                  )}
+                </div>
+
                 <label className="absolute bottom-1 right-1 flex size-9 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform active:scale-95">
                   <Camera className="size-4" aria-hidden="true" />
                   <span className="sr-only">Upload profile avatar</span>
                   <Input
+                    type="file"
                     accept="image/jpeg,image/png"
                     className="sr-only"
                     onChange={handleAvatarUpload}
-                    type="file"
                   />
                 </label>
               </div>
 
               <div className="min-w-0">
                 <CardTitle className="text-2xl font-semibold leading-8 text-foreground">
-                  {profile.name}
+                  {profileName}
                 </CardTitle>
                 <CardDescription className="mt-1 text-sm leading-5">
-                  {profile.email}
+                  {profileEmail}
                 </CardDescription>
                 <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
                   <ShieldCheck className="size-4" aria-hidden="true" />
-                  {profile.userType}
+                  {formatRole(profileRole)}
                 </span>
               </div>
             </div>
@@ -147,7 +205,7 @@ function ProfilePage() {
                 <Input
                   className="h-11 rounded-xl bg-muted"
                   readOnly
-                  value={profile.id}
+                  value={profileUid}
                 />
               </ProfileField>
 
@@ -155,16 +213,18 @@ function ProfilePage() {
                 <Input
                   className="h-11 rounded-xl bg-muted"
                   readOnly
-                  value={profile.userType}
+                  value={formatRole(profileRole)}
                 />
               </ProfileField>
 
               <ProfileField label="Name">
                 <Input
                   className="h-11 rounded-xl bg-background"
-                  onChange={(event) => updateField("name", event.target.value)}
-                  required
-                  value={profile.name}
+                  {...nameField}
+                  onChange={(event) => {
+                    nameField.onChange(event);
+                    setSavedMessage("");
+                  }}
                 />
               </ProfileField>
 
@@ -178,7 +238,7 @@ function ProfilePage() {
                     className="h-11 rounded-xl bg-muted pl-10"
                     readOnly
                     type="email"
-                    value={profile.email}
+                    value={profileEmail}
                   />
                 </div>
               </ProfileField>
@@ -190,19 +250,31 @@ function ProfilePage() {
                     aria-hidden="true"
                   />
                   <Input
-                    className="h-11 rounded-xl bg-background pl-10"
-                    onChange={(event) => updateField("phone", event.target.value)}
+                    aria-invalid={Boolean(errors.phone)}
+                    className={cn(
+                      "h-11 rounded-xl bg-background pl-10",
+                      errors.phone && "border-destructive focus:border-destructive",
+                    )}
                     type="tel"
-                    value={profile.phone}
+                    {...phoneField}
+                    onChange={(event) => {
+                      phoneField.onChange(event);
+                      setSavedMessage("");
+                    }}
                   />
                 </div>
+                {errors.phone ? (
+                  <p className="text-sm leading-5 text-destructive">
+                    {errors.phone.message}
+                  </p>
+                ) : null}
               </ProfileField>
 
-              <ProfileField label="Created At">
+              <ProfileField label="Member Since">
                 <Input
                   className="h-11 rounded-xl bg-muted"
                   readOnly
-                  value={profile.createdAt}
+                  value={moment(authUser?.created_at).format("YYYY-MM-DD")}
                 />
               </ProfileField>
             </div>
@@ -211,9 +283,13 @@ function ProfilePage() {
               <p className="text-sm leading-5 text-muted-foreground">
                 {savedMessage || "Save changes after updating editable fields."}
               </p>
-              <Button className="h-11 gap-2 rounded-xl px-6" type="submit">
+              <Button
+                className="h-11 gap-2 rounded-xl px-6"
+                disabled={isSubmitting}
+                type="submit"
+              >
                 <Save className="size-4" aria-hidden="true" />
-                <span>Save Updated Data</span>
+                <span>{isSubmitting ? "Saving..." : "Save Updated Data"}</span>
               </Button>
             </div>
           </CardContent>
@@ -223,6 +299,21 @@ function ProfilePage() {
   );
 }
 
+type ProfileFormValues = UserType;
+
+/*━━ Format user role method ━━━━━━ */
+function formatRole(role: UserType["user_role"]) {
+  if (!role) {
+    return "General";
+  }
+
+  return role
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+/*━━ Profile field component ━━━━━━ */
 function ProfileField({
   children,
   className,
