@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useForm, type SubmitHandler, type UseFormRegisterReturn } from "react-hook-form";
 import {
   CalendarDays,
   Eye,
@@ -10,13 +11,49 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/auth-context";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
 });
 
 function SignupPage() {
+  const navigate = useNavigate();
+  const { signInWithGoogle, signUpWithEmail } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const {
+    formState: { isSubmitting },
+    handleSubmit,
+    register,
+    watch,
+  } = useForm<SignupFormValues>();
+  const password = watch("password");
+
+  const handleSignup: SubmitHandler<SignupFormValues> = async ({
+    email,
+    password,
+  }) => {
+    setErrorMessage("");
+
+    try {
+      await signUpWithEmail(email, password);
+      navigate({ to: "/dashboard" });
+    } catch (error) {
+      setErrorMessage(getAuthErrorMessage(error));
+    }
+  };
+
+  async function handleGoogleSignup() {
+    setErrorMessage("");
+
+    try {
+      await signInWithGoogle();
+      navigate({ to: "/dashboard" });
+    } catch (error) {
+      setErrorMessage(getAuthErrorMessage(error));
+    }
+  }
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-10 text-foreground">
@@ -36,15 +73,15 @@ function SignupPage() {
         <section className="rounded-xl border border-border bg-card/85 p-8 text-card-foreground shadow-sm backdrop-blur-xl transition-shadow duration-300 focus-within:shadow-lg hover:shadow-md">
           <form
             className="flex flex-col gap-4"
-            onSubmit={(event) => event.preventDefault()}
+            onSubmit={handleSubmit(handleSignup)}
           >
             <SignupField
               autoComplete="email"
               icon={<Mail className="size-5" aria-hidden="true" />}
               id="email"
               label="Email Address"
-              name="email"
               placeholder="name@university.edu"
+              registration={register("email", { required: true })}
               type="email"
             />
 
@@ -53,8 +90,11 @@ function SignupPage() {
               icon={<Lock className="size-5" aria-hidden="true" />}
               id="password"
               label="Password"
-              name="password"
               placeholder="Min. 8 characters"
+              registration={register("password", {
+                minLength: 8,
+                required: true,
+              })}
               type={showPassword ? "text" : "password"}
               endControl={
                 <button
@@ -78,16 +118,27 @@ function SignupPage() {
               icon={<ShieldCheck className="size-5" aria-hidden="true" />}
               id="confirm-password"
               label="Confirm Password"
-              name="confirm-password"
               placeholder="Repeat your password"
+              registration={register("confirmPassword", {
+                required: true,
+                validate: (value) =>
+                  value === password || "Passwords do not match.",
+              })}
               type="password"
             />
 
+            {errorMessage ? (
+              <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm leading-5 text-destructive">
+                {errorMessage}
+              </p>
+            ) : null}
+
             <Button
               className="mt-2 h-10 w-full rounded-lg font-bold shadow-sm active:scale-[0.98]"
+              disabled={isSubmitting}
               type="submit"
             >
-              Create Account
+              {isSubmitting ? "Creating account..." : "Create Account"}
             </Button>
 
             <div className="my-1 flex items-center gap-4">
@@ -100,6 +151,8 @@ function SignupPage() {
 
             <Button
               className="h-10 w-full gap-2 rounded-lg active:scale-[0.98]"
+              disabled={isSubmitting}
+              onClick={handleGoogleSignup}
               type="button"
               variant="outline"
             >
@@ -124,14 +177,15 @@ function SignupPage() {
           </Link>
         </p>
       </div>
-
-      <footer className="pointer-events-none fixed inset-x-0 bottom-0 px-4 py-4 text-center text-sm leading-5 text-muted-foreground opacity-70">
-        Copyright 2024 Digital Event Scheduler System. University Infrastructure
-        Division.
-      </footer>
     </main>
   );
 }
+
+type SignupFormValues = {
+  confirmPassword: string;
+  email: string;
+  password: string;
+};
 
 type SignupFieldProps = {
   autoComplete: string;
@@ -140,8 +194,8 @@ type SignupFieldProps = {
   id: string;
   inputClassName?: string;
   label: string;
-  name: string;
   placeholder: string;
+  registration: UseFormRegisterReturn;
   type: string;
 };
 
@@ -152,8 +206,8 @@ function SignupField({
   id,
   inputClassName = "",
   label,
-  name,
   placeholder,
+  registration,
   type,
 }: SignupFieldProps) {
   return (
@@ -172,13 +226,20 @@ function SignupField({
           autoComplete={autoComplete}
           className={`h-10 w-full rounded-lg border border-input bg-background py-2 pl-11 pr-4 text-base leading-6 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50 ${inputClassName}`}
           id={id}
-          name={name}
           placeholder={placeholder}
-          required
           type={type}
+          {...registration}
         />
         {endControl}
       </div>
     </div>
   );
+}
+
+function getAuthErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Unable to create your account. Please try again.";
 }

@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, CalendarCheck } from "lucide-react";
+import { useState } from "react";
+import { useForm, type SubmitHandler } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/auth-context";
 
 export const Route = createFileRoute("/signin")({
   component: SigninPage,
@@ -9,6 +12,38 @@ export const Route = createFileRoute("/signin")({
 
 function SigninPage() {
   const navigate = useNavigate();
+  const { signInWithEmail, signInWithGoogle } = useAuth();
+  const [errorMessage, setErrorMessage] = useState("");
+  const {
+    formState: { isSubmitting },
+    handleSubmit,
+    register,
+  } = useForm<SigninFormValues>();
+
+  const handleEmailSignIn: SubmitHandler<SigninFormValues> = async ({
+    email,
+    password,
+  }) => {
+    setErrorMessage("");
+
+    try {
+      await signInWithEmail(email, password);
+      navigate({ to: "/dashboard" });
+    } catch (error) {
+      setErrorMessage(getAuthErrorMessage(error));
+    }
+  };
+
+  async function handleGoogleSignIn() {
+    setErrorMessage("");
+
+    try {
+      await signInWithGoogle();
+      navigate({ to: "/dashboard" });
+    } catch (error) {
+      setErrorMessage(getAuthErrorMessage(error));
+    }
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10 text-foreground">
@@ -29,10 +64,7 @@ function SigninPage() {
 
           <form
             className="space-y-6"
-            onSubmit={(event) => {
-              event.preventDefault();
-              navigate({ to: "/dashboard" });
-            }}
+            onSubmit={handleSubmit(handleEmailSignIn)}
           >
             <div className="group space-y-1">
               <label
@@ -44,10 +76,9 @@ function SigninPage() {
               <input
                 className="h-10 w-full rounded-lg border border-input bg-background px-4 text-base leading-6 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
                 id="email"
-                name="email"
                 placeholder="name@university.edu"
-                required
                 type="email"
+                {...register("email", { required: true })}
               />
             </div>
 
@@ -69,19 +100,25 @@ function SigninPage() {
               <input
                 className="h-10 w-full rounded-lg border border-input bg-background px-4 text-base leading-6 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
                 id="password"
-                name="password"
                 placeholder="********"
-                required
                 type="password"
+                {...register("password", { required: true })}
               />
             </div>
 
             <div className="space-y-4 pt-2">
+              {errorMessage ? (
+                <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm leading-5 text-destructive">
+                  {errorMessage}
+                </p>
+              ) : null}
+
               <Button
                 className="h-10 w-full gap-2 rounded-lg shadow-md hover:shadow-lg active:scale-[0.98]"
+                disabled={isSubmitting}
                 type="submit"
               >
-                <span>Sign In</span>
+                <span>{isSubmitting ? "Signing in..." : "Sign In"}</span>
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
 
@@ -95,6 +132,8 @@ function SigninPage() {
 
               <Button
                 className="h-10 w-full gap-2 rounded-lg active:scale-[0.98]"
+                disabled={isSubmitting}
+                onClick={handleGoogleSignIn}
                 type="button"
                 variant="outline"
               >
@@ -124,4 +163,17 @@ function SigninPage() {
       </div>
     </main>
   );
+}
+
+type SigninFormValues = {
+  email: string;
+  password: string;
+};
+
+function getAuthErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Unable to sign in. Please try again.";
 }

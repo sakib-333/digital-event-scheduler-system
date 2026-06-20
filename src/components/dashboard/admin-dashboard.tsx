@@ -225,10 +225,10 @@ export function DashboardPlaceholderPage({
 
 function DashboardSidebar() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { signout } = useAuth();
 
-  function handleLogout() {
-    setUser(null);
+  async function handleLogout() {
+    await signout();
     navigate({ to: "/signin" });
   }
 
