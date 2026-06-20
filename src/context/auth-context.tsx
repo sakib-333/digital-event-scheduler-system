@@ -14,10 +14,13 @@ import {
     signInWithEmailAndPassword,
     signInWithPopup,
     signOut as firebaseSignOut,
+    type User,
     type UserCredential,
 } from "firebase/auth";
 
+import manageUsers from "@/api/manage-users";
 import { auth } from "@/firebase.config";
+import type { UserType } from "@/types/user";
 
 export type AuthContextType = {
     isLoading: boolean;
@@ -51,20 +54,29 @@ export function AuthProvider({
         return unsubscribe;
     }, []);
 
-    function signInWithEmail(email: string, password: string) {
-        return signInWithEmailAndPassword(auth, email, password);
+    async function signInWithEmail(email: string, password: string) {
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        await ensureSupabaseUser(credential.user);
+
+        return credential;
     }
 
     function signIn(email: string, password: string) {
         return signInWithEmail(email, password);
     }
 
-    function signInWithGoogle() {
-        return signInWithPopup(auth, googleProvider);
+    async function signInWithGoogle() {
+        const credential = await signInWithPopup(auth, googleProvider);
+        await ensureSupabaseUser(credential.user);
+
+        return credential;
     }
 
-    function signUpWithEmail(email: string, password: string) {
-        return createUserWithEmailAndPassword(auth, email, password);
+    async function signUpWithEmail(email: string, password: string) {
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        await ensureSupabaseUser(credential.user);
+
+        return credential;
     }
 
     async function signout() {
@@ -116,4 +128,24 @@ export function useAuth() {
     }
 
     return auth;
+}
+
+async function ensureSupabaseUser(firebaseUser: User) {
+    await manageUsers.ensureUserExists(mapFirebaseUserToSupabaseUser(firebaseUser));
+}
+
+function mapFirebaseUserToSupabaseUser(firebaseUser: User): UserType {
+    const email = firebaseUser.email;
+
+    if (!email) {
+        throw new Error("Authenticated user does not have an email address.");
+    }
+
+    return {
+        avatar: firebaseUser.photoURL,
+        email,
+        name: firebaseUser.displayName || email.split("@")[0],
+        phone: firebaseUser.phoneNumber,
+        uid: firebaseUser.uid,
+    };
 }
