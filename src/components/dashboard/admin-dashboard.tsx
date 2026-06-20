@@ -25,11 +25,26 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { getNameInitials, userTypeMap } from "@/utils";
 
+type UserRole = "admin" | "moderator" | "general";
+
+type DashboardUser = {
+  user_role?: UserRole | string | null;
+  name?: string | null;
+  avatar?: string | null;
+};
 
 type NavItem = {
   icon: LucideIcon;
   label: string;
   to: string;
+
+  /**
+   * Roles that can see this route/nav item.
+   *
+   * Example:
+   * allowedRoles: ["admin", "moderator"]
+   */
+  allowedRoles: UserRole[];
 };
 
 type StatCard = {
@@ -55,18 +70,115 @@ type CategoryMetric = {
   widthClassName: string;
 };
 
+/*━━Roles━━━━ */
+
+const ALL_ROLES: UserRole[] = ["admin", "moderator", "general"];
+
+function normalizeUserRole(role?: string | null): UserRole {
+  if (role === "admin" || role === "moderator" || role === "general") {
+    return role;
+  }
+
+  return "general";
+}
+
+/**
+ * Returns nav items based on the current user's role.
+ *
+ * Rules:
+ * - Admin can see all routes.
+ * - Moderator can see all routes except Manage Users.
+ * - General can see all routes except Manage Users and Manage Events.
+ */
+export function getNavItemsByRole(
+  user?: DashboardUser | null,
+  items: NavItem[] = navItems,
+) {
+  const role = normalizeUserRole(user?.user_role);
+
+  return items.filter((item) => item.allowedRoles.includes(role));
+}
+
+/*━━Navitems━━━━ */
+
 const primaryNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Overview", to: "/dashboard" },
-  { icon: CalendarDays, label: "My Events", to: "/my-events" },
-  { icon: CalendarCheck, label: "Manage Events", to: "/manage-events" },
-  { icon: Users, label: "Manage Users", to: "/manage-users" },
-  { icon: BarChart3, label: "Analytics", to: "/analytics" },
+  {
+    icon: LayoutDashboard,
+    label: "Overview",
+    to: "/dashboard",
+    allowedRoles: ALL_ROLES,
+  },
+  {
+    icon: CalendarDays,
+    label: "My Events",
+    to: "/my-events",
+    allowedRoles: ALL_ROLES,
+  },
+  {
+    icon: CalendarCheck,
+    label: "Manage Events",
+    to: "/manage-events",
+    allowedRoles: ["admin", "moderator"],
+  },
+  {
+    icon: Users,
+    label: "Manage Users",
+    to: "/manage-users",
+    allowedRoles: ["admin"],
+  },
+  {
+    icon: BarChart3,
+    label: "Analytics",
+    to: "/analytics",
+    allowedRoles: ["admin", "moderator"],
+  },
 ];
 
 const secondaryNavItems: NavItem[] = [
-  { icon: User, label: "Profile", to: "/profile" },
-  { icon: Settings, label: "Settings", to: "/settings" },
+  {
+    icon: User,
+    label: "Profile",
+    to: "/profile",
+    allowedRoles: ALL_ROLES,
+  },
+  {
+    icon: Settings,
+    label: "Settings",
+    to: "/settings",
+    allowedRoles: ALL_ROLES,
+  },
 ];
+
+const mobileNavItems: NavItem[] = [
+  {
+    icon: LayoutDashboard,
+    label: "Overview",
+    to: "/dashboard",
+    allowedRoles: ALL_ROLES,
+  },
+  {
+    icon: CalendarCheck,
+    label: "Events",
+    to: "/manage-events",
+    allowedRoles: ["admin", "moderator"],
+  },
+  {
+    icon: BarChart3,
+    label: "Analytics",
+    to: "/analytics",
+    allowedRoles: ["admin", "moderator"],
+  },
+  {
+    icon: User,
+    label: "Profile",
+    to: "/profile",
+    allowedRoles: ALL_ROLES,
+  },
+];
+
+const navItems = [...primaryNavItems, ...secondaryNavItems];
+
+/*━━Dashboard Data━━━━ */
 
 const stats: StatCard[] = [
   {
@@ -157,14 +269,7 @@ const categoryMetrics: CategoryMetric[] = [
   },
 ];
 
-const mobileNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Overview", to: "/dashboard" },
-  { icon: CalendarCheck, label: "Events", to: "/manage-events" },
-  { icon: BarChart3, label: "Analytics", to: "/analytics" },
-  { icon: User, label: "Profile", to: "/profile" },
-];
-
-const navItems = [...primaryNavItems, ...secondaryNavItems];
+/*━━Dashboard Shell━━━━ */
 
 export function DashboardShell() {
   return (
@@ -184,6 +289,8 @@ export function DashboardShell() {
   );
 }
 
+/*━━Dashboard Overview━━━━ */
+
 export function DashboardOverview({
   currentUserName,
 }: {
@@ -193,7 +300,8 @@ export function DashboardOverview({
     <>
       {currentUserName ? (
         <p className="mb-4 text-sm font-medium leading-5 text-muted-foreground">
-          Welcome back, <span className="text-foreground">{currentUserName}</span>
+          Welcome back,{" "}
+          <span className="text-foreground">{currentUserName}</span>
         </p>
       ) : null}
 
@@ -233,9 +341,15 @@ export function DashboardPlaceholderPage({
   );
 }
 
+/*━━Sidebar━━━━ */
+
 function DashboardSidebar() {
   const navigate = useNavigate();
   const { signout } = useAuth();
+  const user = useAuthStore((state) => state.user);
+
+  const allowedPrimaryNavItems = getNavItemsByRole(user, primaryNavItems);
+  const allowedSecondaryNavItems = getNavItemsByRole(user, secondaryNavItems);
 
   async function handleLogout() {
     await signout();
@@ -254,13 +368,13 @@ function DashboardSidebar() {
       </div>
 
       <nav className="flex flex-1 flex-col gap-1">
-        {primaryNavItems.map((item) => (
+        {allowedPrimaryNavItems.map((item) => (
           <SidebarLink key={item.label} item={item} />
         ))}
 
         <div className="my-4 border-t border-border/50" />
 
-        {secondaryNavItems.map((item) => (
+        {allowedSecondaryNavItems.map((item) => (
           <SidebarLink key={item.label} item={item} />
         ))}
       </nav>
@@ -301,13 +415,18 @@ function SidebarLink({ item }: { item: NavItem }) {
   );
 }
 
+/*━━Header━━━━ */
+
 function DashboardHeader() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
-  const user = useAuthStore((state) => state.user)
+
+  const user = useAuthStore((state) => state.user);
+  const allowedNavItems = getNavItemsByRole(user, navItems);
+
   const activeTitle =
-    navItems.find((item) => item.to === pathname)?.label ?? "Overview";
+    allowedNavItems.find((item) => item.to === pathname)?.label ?? "Overview";
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/60 bg-background/70 px-6 backdrop-blur-md">
@@ -353,6 +472,8 @@ function DashboardHeader() {
   );
 }
 
+/*━━Stats━━━━ */
+
 function StatsGrid() {
   return (
     <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
@@ -381,13 +502,17 @@ function StatSummaryCard({ stat }: { stat: StatCard }) {
           {stat.meta}
         </span>
       </div>
-      <p className="text-sm leading-5 text-muted-foreground">{stat.label}</p>
+      <p className="text-sm leading-5 text-muted-foreground">
+        {stat.label}
+      </p>
       <h3 className="mt-1 text-3xl font-semibold leading-10 text-foreground">
         {stat.value}
       </h3>
     </DashboardPanel>
   );
 }
+
+/*━━Pending Events━━━━ */
 
 function PendingEventsTable() {
   return (
@@ -434,7 +559,10 @@ function PendingEventsTable() {
       </div>
 
       <div className="mt-auto flex justify-center border-t border-border/40 bg-card px-4 py-3">
-        <nav className="flex items-center gap-1" aria-label="Pending events pages">
+        <nav
+          className="flex items-center gap-1"
+          aria-label="Pending events pages"
+        >
           <IconButton label="Previous page">
             <ChevronLeft className="size-5" aria-hidden="true" />
           </IconButton>
@@ -474,7 +602,10 @@ function PendingEventRow({ event }: { event: PendingEvent }) {
       </td>
       <td className="px-6 py-4">
         <div className="flex items-center justify-end gap-2">
-          <IconButton className="text-primary hover:bg-primary/10" label="Approve">
+          <IconButton
+            className="text-primary hover:bg-primary/10"
+            label="Approve"
+          >
             <CheckCircle2 className="size-5" aria-hidden="true" />
           </IconButton>
           <IconButton
@@ -494,6 +625,8 @@ function PendingEventRow({ event }: { event: PendingEvent }) {
     </tr>
   );
 }
+
+/*━━Analytics━━━━ */
 
 function DashboardAnalytics() {
   return (
@@ -526,31 +659,46 @@ function CategoryProgress({ metric }: { metric: CategoryMetric }) {
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className={cn("h-full rounded-full", metric.progressClassName, metric.widthClassName)}
+          className={cn(
+            "h-full rounded-full",
+            metric.progressClassName,
+            metric.widthClassName,
+          )}
         />
       </div>
     </div>
   );
 }
 
+/*━━Mobile Nav━━━━ */
+
 function MobileDashboardNav() {
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+
+  const allowedMobileNavItems = getNavItemsByRole(user, mobileNavItems);
+  const canManageEvents = normalizeUserRole(user?.user_role) !== "general";
+
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 flex h-16 items-center justify-around border-t border-border/60 bg-background/90 px-2 backdrop-blur-lg md:hidden">
-      {mobileNavItems.slice(0, 2).map((item) => (
+      {allowedMobileNavItems.slice(0, 2).map((item) => (
         <MobileNavLink key={item.label} item={item} />
       ))}
 
-      <div className="-mt-8">
-        <button
-          className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-90"
-          type="button"
-        >
-          <Plus className="size-8" aria-hidden="true" />
-          <span className="sr-only">Create event</span>
-        </button>
-      </div>
+      {canManageEvents ? (
+        <div className="-mt-8">
+          <button
+            className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-90"
+            onClick={() => navigate({ to: "/manage-events" })}
+            type="button"
+          >
+            <Plus className="size-8" aria-hidden="true" />
+            <span className="sr-only">Create event</span>
+          </button>
+        </div>
+      ) : null}
 
-      {mobileNavItems.slice(2).map((item) => (
+      {allowedMobileNavItems.slice(2).map((item) => (
         <MobileNavLink key={item.label} item={item} />
       ))}
     </nav>
@@ -572,10 +720,14 @@ function MobileNavLink({ item }: { item: NavItem }) {
       to={item.to}
     >
       <Icon className="size-5" aria-hidden="true" />
-      <span className="text-[10px] font-semibold leading-4">{item.label}</span>
+      <span className="text-[10px] font-semibold leading-4">
+        {item.label}
+      </span>
     </Link>
   );
 }
+
+/*━━Reusable Components━━━━ */
 
 function DashboardPanel({ className, ...props }: ComponentPropsWithoutRef<"div">) {
   return (

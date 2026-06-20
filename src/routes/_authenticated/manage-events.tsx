@@ -22,8 +22,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { requireRouteRoles } from "@/utils/route-permissions";
 
 export const Route = createFileRoute("/_authenticated/manage-events")({
+  beforeLoad: async ({ context }) => {
+    await requireRouteRoles(context.auth, ["admin", "moderator"]);
+  },
   component: ManageEventsPage,
 });
 

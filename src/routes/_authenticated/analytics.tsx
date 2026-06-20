@@ -25,8 +25,12 @@ import {
 } from "recharts";
 
 import { cn } from "@/lib/utils";
+import { requireRouteRoles } from "@/utils/route-permissions";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
+  beforeLoad: async ({ context }) => {
+      await requireRouteRoles(context.auth, ["admin", "moderator"]);
+    },
   component: AnalyticsPage,
 });
 

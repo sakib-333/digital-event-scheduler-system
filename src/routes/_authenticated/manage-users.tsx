@@ -13,8 +13,12 @@ import { cn } from "@/lib/utils";
 import { useManageUsersStore } from "@/stores/manage-users-store";
 import type { UserType } from "@/types/user";
 import { formatJoinedDate, getNameInitials, isNewThisWeek } from "@/utils";
+import { requireRouteRoles } from "@/utils/route-permissions";
 
 export const Route = createFileRoute("/_authenticated/manage-users")({
+  beforeLoad: async ({ context }) => {
+      await requireRouteRoles(context.auth, ["admin", "moderator"]);
+    },
   component: ManageUsersPage,
 });
 
