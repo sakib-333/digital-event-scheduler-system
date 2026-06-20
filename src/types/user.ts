@@ -4,6 +4,6 @@ export interface UserType {
     email: string;
     phone?: string | null;
     avatar?: string | null;
-    user_role?: "admin" | "morderator" | "general";
+    user_role?: "admin" | "moderator" | "general";
     created_at?: string
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Search, ShieldCheck, UserCog, UserPlus, Users } from "lucide-react";
 
@@ -10,101 +10,52 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useManageUsersStore } from "@/stores/manage-users-store";
+import type { UserType } from "@/types/user";
+import { formatJoinedDate, getNameInitials, isNewThisWeek } from "@/utils";
 
 export const Route = createFileRoute("/_authenticated/manage-users")({
   component: ManageUsersPage,
 });
 
-type UserRole = "Moderator" | "General User";
-type RoleFilter = "All Roles" | UserRole;
+type UserRole = NonNullable<UserType["user_role"]>;
+type RoleFilter = "all" | UserRole;
 
-type ManagedUser = {
-  department: string;
-  email: string;
-  id: number;
-  joinedDate: string;
-  name: string;
-  newThisWeek: boolean;
-  role: UserRole;
-};
-
-const initialUsers: ManagedUser[] = [
-  {
-    department: "Computer Science",
-    email: "amina.rahman@university.edu",
-    id: 1,
-    joinedDate: "Jan 12, 2024",
-    name: "Amina Rahman",
-    newThisWeek: false,
-    role: "Moderator",
-  },
-  {
-    department: "Student Affairs",
-    email: "omar.farid@university.edu",
-    id: 2,
-    joinedDate: "Feb 03, 2024",
-    name: "Omar Farid",
-    newThisWeek: false,
-    role: "Moderator",
-  },
-  {
-    department: "Engineering",
-    email: "nadia.khan@university.edu",
-    id: 3,
-    joinedDate: "Mar 18, 2024",
-    name: "Nadia Khan",
-    newThisWeek: false,
-    role: "General User",
-  },
-  {
-    department: "Business School",
-    email: "rayhan.alam@university.edu",
-    id: 4,
-    joinedDate: "Jun 16, 2026",
-    name: "Rayhan Alam",
-    newThisWeek: true,
-    role: "General User",
-  },
-  {
-    department: "Registrar Office",
-    email: "sadia.islam@university.edu",
-    id: 5,
-    joinedDate: "Jun 17, 2026",
-    name: "Sadia Islam",
-    newThisWeek: true,
-    role: "Moderator",
-  },
-];
-
-const roleOptions: UserRole[] = ["Moderator", "General User"];
-const roleFilterOptions: RoleFilter[] = ["All Roles", ...roleOptions];
+const roleOptions: UserRole[] = ["moderator", "general"];
+const roleFilterOptions: RoleFilter[] = ["all", "admin", ...roleOptions];
 
 function ManageUsersPage() {
-  const [users, setUsers] = useState(initialUsers);
+  const error = useManageUsersStore((state) => state.error);
+  const getAllUsers = useManageUsersStore((state) => state.getAllUsers);
+  const isLoading = useManageUsersStore((state) => state.isLoading);
+  const isUpdatingRole = useManageUsersStore((state) => state.isUpdatingRole);
+  const storeUsers = useManageUsersStore((state) => state.users);
+  const updatingUserId = useManageUsersStore((state) => state.updatingUserId);
+  const userUserRole = useManageUsersStore((state) => state.userUserRole);
   const [query, setQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState<RoleFilter>("All Roles");
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
+
+  useEffect(() => {
+    getAllUsers();
+  }, [getAllUsers]);
 
   const filteredUsers = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    return users.filter((user) => {
+    return storeUsers.filter((user) => {
       const matchesSearch =
         !normalizedQuery ||
         user.name.toLowerCase().includes(normalizedQuery) ||
-        user.email.toLowerCase().includes(normalizedQuery) ||
-        user.department.toLowerCase().includes(normalizedQuery);
-      const matchesRole = roleFilter === "All Roles" || user.role === roleFilter;
+        user.email.toLowerCase().includes(normalizedQuery);
+      const matchesRole =
+        roleFilter === "all" || getUserRole(user) === roleFilter;
 
       return matchesSearch && matchesRole;
     });
-  }, [query, roleFilter, users]);
+  }, [query, roleFilter, storeUsers]);
 
-  function updateUserRole(userId: number, role: UserRole) {
-    setUsers((currentUsers) =>
-      currentUsers.map((user) =>
-        user.id === userId ? { ...user, role } : user,
-      ),
-    );
+  function updateUserRole(userId: string, role: UserRole) {
+    userUserRole(userId, role);
   }
 
   return (
@@ -119,7 +70,7 @@ function ManageUsersPage() {
         </p>
       </header>
 
-      <UserStats users={users} />
+      <UserStats users={storeUsers} />
 
       <section className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur-xl">
         <div className="flex flex-col items-center gap-4 lg:flex-row">
@@ -132,7 +83,7 @@ function ManageUsersPage() {
             <input
               className="h-10 w-full rounded-xl border border-border/60 bg-muted pl-10 pr-4 text-sm leading-5 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search users by name, email, or department..."
+              placeholder="Search users by name or email..."
               type="search"
               value={query}
             />
@@ -143,15 +94,20 @@ function ManageUsersPage() {
       </section>
 
       <UsersTable
+        error={error}
+        isLoading={isLoading}
+        isUpdatingRole={isUpdatingRole}
         users={filteredUsers}
         onRoleChange={updateUserRole}
-        totalUsers={users.length}
+        totalUsers={storeUsers.length}
+        updatingUserId={updatingUserId}
       />
     </div>
   );
 }
 
-function UserStats({ users }: { users: ManagedUser[] }) {
+function UserStats({ users }: { users: UserType[] }) {
+  console.log(users)
   const cards = [
     {
       icon: Users,
@@ -163,21 +119,23 @@ function UserStats({ users }: { users: ManagedUser[] }) {
       icon: ShieldCheck,
       iconClassName: "bg-chart-4/10 text-chart-4",
       label: "Moderators",
-      value: users.filter((user) => user.role === "Moderator").length.toString(),
+      value: users
+        .filter((user) => getUserRole(user) === "moderator")
+        .length.toString(),
     },
     {
       icon: UserCog,
       iconClassName: "bg-secondary text-secondary-foreground",
       label: "General Users",
       value: users
-        .filter((user) => user.role === "General User")
+        .filter((user) => getUserRole(user) === "general")
         .length.toString(),
     },
     {
       icon: UserPlus,
       iconClassName: "bg-chart-3/10 text-chart-3",
       label: "New This Week",
-      value: users.filter((user) => user.newThisWeek).length.toString(),
+      value: users.filter((user) => isNewThisWeek(user.created_at)).length.toString(),
     },
   ];
 
@@ -240,7 +198,7 @@ function RoleFilterSelect({
         >
           {roleFilterOptions.map((role) => (
             <SelectItem key={role} value={role}>
-              {role}
+              {role === "all" ? "All Roles" : getRoleLabel(role)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -250,13 +208,21 @@ function RoleFilterSelect({
 }
 
 function UsersTable({
+  error,
+  isLoading,
+  isUpdatingRole,
   onRoleChange,
   totalUsers,
+  updatingUserId,
   users,
 }: {
-  onRoleChange: (userId: number, role: UserRole) => void;
+  error: string | null;
+  isLoading: boolean;
+  isUpdatingRole: boolean;
+  onRoleChange: (userId: string, role: UserRole) => void;
   totalUsers: number;
-  users: ManagedUser[];
+  updatingUserId: string | null;
+  users: UserType[];
 }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-sm backdrop-blur-xl">
@@ -278,20 +244,21 @@ function UsersTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
-            {users.length > 0 ? (
+            {isLoading ? (
+              <TableMessage message="Loading users..." />
+            ) : error ? (
+              <TableMessage message={error} />
+            ) : users.length > 0 ? (
               users.map((user) => (
                 <UserRow
-                  key={user.id}
+                  isUpdating={isUpdatingRole && updatingUserId === user.uid}
+                  key={user.uid}
                   onRoleChange={onRoleChange}
                   user={user}
                 />
               ))
             ) : (
-              <tr>
-                <td className="px-6 py-10 text-center text-sm text-muted-foreground" colSpan={4}>
-                  No users match the current search and filter.
-                </td>
-              </tr>
+              <TableMessage message="No users match the current search and filter." />
             )}
           </tbody>
         </table>
@@ -308,18 +275,30 @@ function UsersTable({
 }
 
 function UserRow({
+  isUpdating,
   onRoleChange,
   user,
 }: {
-  onRoleChange: (userId: number, role: UserRole) => void;
-  user: ManagedUser;
+  isUpdating: boolean;
+  onRoleChange: (userId: string, role: UserRole) => void;
+  user: UserType;
 }) {
+  const role = getUserRole(user);
+
   return (
     <tr className="transition-colors hover:bg-muted/40">
       <td className="px-6 py-4">
         <div className="flex items-center gap-4">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-            {getInitials(user.name)}
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary overflow-hidden">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={`${user.name} avatar`}
+                className="size-full object-cover"
+              />
+            ) : (
+              getNameInitials(user?.name ?? "")
+            )}
           </div>
           <div className="flex flex-col">
             <span className="text-base font-semibold leading-6 text-foreground">
@@ -328,29 +307,26 @@ function UserRow({
             <span className="text-xs leading-4 text-muted-foreground">
               {user.email}
             </span>
-            <span className="text-xs leading-4 text-muted-foreground">
-              {user.department}
-            </span>
           </div>
         </div>
       </td>
       <td className="px-6 py-4">
-        <RoleBadge role={user.role} />
+        <RoleBadge role={role} />
       </td>
       <td className="px-6 py-4 text-sm leading-5 text-foreground">
-        {user.joinedDate}
+        {formatJoinedDate(user.created_at)}
       </td>
       <td className="px-6 py-4">
         <div className="flex justify-end">
           <Select
-            value={user.role}
-            onValueChange={(nextRole) =>
-              onRoleChange(user.id, nextRole as UserRole)
-            }
+            disabled={isUpdating}
+            value={role}
+            onValueChange={(nextRole) => onRoleChange(user.uid, nextRole as UserRole)}
           >
             <SelectTrigger
               aria-label={`Change role for ${user.name}`}
               className="h-10 min-w-40 rounded-xl border-border/60 bg-muted px-4 text-sm leading-5 text-foreground shadow-none"
+              disabled={role === "admin"}
             >
               <SelectValue />
             </SelectTrigger>
@@ -359,8 +335,8 @@ function UserRow({
               className="border border-border bg-popover text-popover-foreground"
             >
               {roleOptions.map((role) => (
-                <SelectItem key={role} value={role}>
-                  {role}
+                <SelectItem key={role} value={role} disabled={role === "admin"}>
+                  {getRoleLabel(role)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -376,20 +352,36 @@ function RoleBadge({ role }: { role: UserRole }) {
     <span
       className={cn(
         "rounded-full px-2 py-1 text-xs font-bold uppercase leading-4",
-        role === "Moderator" && "bg-chart-4/10 text-chart-4",
-        role === "General User" && "bg-secondary text-secondary-foreground",
+        role === "admin" && "bg-primary/10 text-primary",
+        role === "moderator" && "bg-chart-4/10 text-chart-4",
+        role === "general" && "bg-secondary text-secondary-foreground",
       )}
     >
-      {role}
+      {getRoleLabel(role)}
     </span>
   );
 }
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+function TableMessage({ message }: { message: string }) {
+  return (
+    <tr>
+      <td className="px-6 py-10 text-center text-sm text-muted-foreground" colSpan={4}>
+        {message}
+      </td>
+    </tr>
+  );
+}
+
+function getUserRole(user: UserType): UserRole {
+  return user.user_role ?? "general";
+}
+
+function getRoleLabel(role: UserRole) {
+  const labels: Record<UserRole, string> = {
+    admin: "Admin",
+    general: "General User",
+    moderator: "Moderator",
+  };
+
+  return labels[role];
 }
