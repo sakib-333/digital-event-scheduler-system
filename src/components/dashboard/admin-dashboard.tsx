@@ -22,9 +22,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth-store";
+import { getNameInitials, userTypeMap } from "@/utils";
 
-const avatarUrl =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAfuUlvg_Rp6fFXCpgX2NqRr-3OjD0vGTUH8zyoyIGmqVzopS_JxCYscC2FFo_9CCoUBMmLGwlep2jGM44dQ66RbixJsQRDeqxhAvMPN0k6kSSue8yEvMIX18NaPJ_wAEULxSFI9QtW1y8grRad7gXJBpVy06oTQ5SdtTkByIZgWGTgzhgdclgFKD7Bk3jcZSd9mmp_1917YX35O59zdDM-o9RQn159W0w6Kdue1Ouh0l8004A93iEx3aMrusoNX1HdVl0xJTPen-o";
 
 type NavItem = {
   icon: LucideIcon;
@@ -184,9 +184,19 @@ export function DashboardShell() {
   );
 }
 
-export function DashboardOverview() {
+export function DashboardOverview({
+  currentUserName,
+}: {
+  currentUserName?: string;
+}) {
   return (
     <>
+      {currentUserName ? (
+        <p className="mb-4 text-sm font-medium leading-5 text-muted-foreground">
+          Welcome back, <span className="text-foreground">{currentUserName}</span>
+        </p>
+      ) : null}
+
       <StatsGrid />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -295,6 +305,7 @@ function DashboardHeader() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
+  const user = useAuthStore((state) => state.user)
   const activeTitle =
     navItems.find((item) => item.to === pathname)?.label ?? "Overview";
 
@@ -319,17 +330,23 @@ function DashboardHeader() {
         <div className="flex items-center gap-2">
           <div className="hidden text-right sm:block">
             <p className="text-sm font-semibold leading-5 text-foreground">
-              Dr. Sarah Jenkins
+              {user?.name}
             </p>
             <p className="text-xs leading-4 text-muted-foreground">
-              System Administrator
+              {user?.user_role ? userTypeMap[user?.user_role] : ""}
             </p>
           </div>
-          <img
-            alt="User Avatar"
-            className="size-10 rounded-full border-2 border-accent object-cover"
-            src={avatarUrl}
-          />
+          <div className="size-10 rounded-full border-2 border-accent overflow-hidden flex items-center justify-center bg-accent text-accent-content font-semibold">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt="User Avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span>{getNameInitials(user?.name ?? "")}</span>
+            )}
+          </div>
         </div>
       </div>
     </header>

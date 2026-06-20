@@ -20,8 +20,13 @@ import {
 
 import manageUsers from "@/api/manage-users";
 import { auth } from "@/firebase.config";
+import { useAuthStore } from "@/stores/auth-store";
 import type { UserType } from "@/types/user";
+import LoadingSpinner from "@/components/loading-spinner";
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Auth Context Types
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 export type AuthContextType = {
     isLoading: boolean;
     signIn: (email: string, password: string) => Promise<UserCredential>;
@@ -29,34 +34,66 @@ export type AuthContextType = {
     signInWithGoogle: () => Promise<UserCredential>;
     signUpWithEmail: (email: string, password: string) => Promise<UserCredential>;
     signout: () => Promise<void>;
-    waitForAuth: () => Promise<any>;
-    user: any;
-    setUser: Dispatch<SetStateAction<any>>;
+    waitForAuth: () => Promise<UserType | null>;
+    user: UserType | null;
+    setUser: Dispatch<SetStateAction<UserType | null>>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 const googleProvider = new GoogleAuthProvider();
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Auth Provider
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 export function AuthProvider({
     children,
 }: {
     children: ReactNode;
 }) {
-    const [user, setUser] = useState<any>(null);
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Global Auth State
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const {
+        clearUser,
+        setUser: setStoreUser,
+        user,
+    } = useAuthStore();
     const [isLoading, setIsLoading] = useState(true);
 
+    const setUser: Dispatch<SetStateAction<UserType | null>> = (nextUser) => {
+        setStoreUser(
+            typeof nextUser === "function"
+                ? nextUser(useAuthStore.getState().user)
+                : nextUser,
+        );
+    };
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Firebase Session Listener
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-            setIsLoading(false);
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            try {
+                if (currentUser) {
+                    await syncSupabaseUser(currentUser);
+                    return;
+                }
+
+                clearUser();
+            } finally {
+                setIsLoading(false);
+            }
         });
 
         return unsubscribe;
-    }, []);
+    }, [clearUser]);
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Authentication Actions
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     async function signInWithEmail(email: string, password: string) {
         const credential = await signInWithEmailAndPassword(auth, email, password);
-        await ensureSupabaseUser(credential.user);
+        await syncSupabaseUser(credential.user);
 
         return credential;
     }
@@ -67,34 +104,49 @@ export function AuthProvider({
 
     async function signInWithGoogle() {
         const credential = await signInWithPopup(auth, googleProvider);
-        await ensureSupabaseUser(credential.user);
+        await syncSupabaseUser(credential.user);
 
         return credential;
     }
 
     async function signUpWithEmail(email: string, password: string) {
         const credential = await createUserWithEmailAndPassword(auth, email, password);
-        await ensureSupabaseUser(credential.user);
+        await syncSupabaseUser(credential.user);
 
         return credential;
     }
 
     async function signout() {
         await firebaseSignOut(auth);
-        setUser(null);
+        clearUser();
     }
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Route Guard Auth Resolver
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     function waitForAuth() {
         if (!isLoading) {
-            return Promise.resolve(auth.currentUser);
+            return Promise.resolve(useAuthStore.getState().user);
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise<UserType | null>((resolve, reject) => {
             const unsubscribe = onAuthStateChanged(
                 auth,
-                (currentUser) => {
-                    unsubscribe();
-                    resolve(currentUser);
+                async (currentUser) => {
+                    try {
+                        unsubscribe();
+
+                        if (!currentUser) {
+                            clearUser();
+                            resolve(null);
+                            return;
+                        }
+
+                        const supabaseUser = await syncSupabaseUser(currentUser);
+                        resolve(supabaseUser);
+                    } catch (error) {
+                        reject(error);
+                    }
                 },
                 reject,
             );
@@ -115,11 +167,18 @@ export function AuthProvider({
                 setUser,
             }}
         >
-            {children}
+            {isLoading ?
+                <LoadingSpinner />
+                :
+                children
+            }
         </AuthContext.Provider>
     );
 }
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Auth Hook
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 export function useAuth() {
     const auth = useContext(AuthContext);
 
@@ -130,10 +189,22 @@ export function useAuth() {
     return auth;
 }
 
-async function ensureSupabaseUser(firebaseUser: User) {
-    await manageUsers.ensureUserExists(mapFirebaseUserToSupabaseUser(firebaseUser));
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Supabase User Sync
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function syncSupabaseUser(firebaseUser: User) {
+    const supabaseUser = await manageUsers.ensureUserExists(
+        mapFirebaseUserToSupabaseUser(firebaseUser),
+    );
+
+    useAuthStore.getState().setUser(supabaseUser);
+
+    return supabaseUser;
 }
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Firebase To Supabase User Mapper
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function mapFirebaseUserToSupabaseUser(firebaseUser: User): UserType {
     const email = firebaseUser.email;
 
