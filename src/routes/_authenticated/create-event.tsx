@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import type { EventType } from "@/types/event";
 
 // ─── Route Definition ───
 export const Route = createFileRoute("/_authenticated/create-event")({
@@ -38,36 +39,28 @@ const EVENT_CATEGORIES: { label: string; value: EventCategory }[] = [
   { label: "Others", value: "others" },
 ];
 
-type EventFormValues = {
-  bannerImage: FileList | null;
-  capacity: number;
+type EventFormValues = Omit<
+  EventType,
+  "id" | "created_at" | "created_by" | "banner_image" | "category"
+> & {
+  banner_image: FileList | null;
   category: EventCategory | "";
-  description: string;
-  endDate: string;
-  endTime: string;
-  eventType: "online" | "offline";
-  location: string;
-  meetingLink: string;
-  organizerName: string;
-  startDate: string;
-  startTime: string;
-  title: string;
 };
 
 const defaultEventValues: EventFormValues = {
   title: "",
   description: "",
   category: "",
-  eventType: "offline",
+  event_type: "offline",
   location: "",
-  meetingLink: "",
-  startDate: "",
-  endDate: "",
-  startTime: "",
-  endTime: "",
+  meeting_link: "",
+  start_date: "",
+  end_date: "",
+  start_time: "",
+  end_time: "",
   capacity: 0,
-  bannerImage: null,
-  organizerName: "",
+  banner_image: null,
+  organizer_name: "",
 };
 
 function CreateEventPage() {
@@ -82,8 +75,8 @@ function CreateEventPage() {
     defaultValues: defaultEventValues,
   });
 
-  const eventType = useWatch({ control, name: "eventType" });
-  const isOnline = eventType === "online";
+  const event_type = useWatch({ control, name: "event_type" });
+  const isOnline = event_type === "online";
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -100,7 +93,7 @@ function CreateEventPage() {
 
   const clearImage = () => {
     setImagePreview(null);
-    setValue("bannerImage", null);
+    setValue("banner_image", null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -150,7 +143,7 @@ function CreateEventPage() {
           ) : (
             <label
               className="flex h-44 w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border/60 bg-muted/40 transition-colors hover:border-primary/60 hover:bg-primary/5"
-              htmlFor="bannerImage"
+              htmlFor="banner_image"
             >
               <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <ImagePlus className="size-6" aria-hidden="true" />
@@ -169,12 +162,12 @@ function CreateEventPage() {
           <input
             accept="image/png,image/jpeg,image/webp"
             className="sr-only"
-            id="bannerImage"
+            id="banner_image"
             type="file"
-            {...register("bannerImage")}
+            {...register("banner_image")}
             onChange={handleImageChange}
             ref={(el) => {
-              register("bannerImage").ref(el);
+              register("banner_image").ref(el);
               fileInputRef.current = el;
             }}
           />
@@ -218,7 +211,7 @@ function CreateEventPage() {
             </span>
             <select
               className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm leading-5 text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-ring/50"
-              {...register("eventType", { required: true })}
+              {...register("event_type", { required: true })}
             >
               <option value="offline">Offline</option>
               <option value="online">Online</option>
@@ -230,7 +223,7 @@ function CreateEventPage() {
             <div className="space-y-2 md:col-span-2">
               <label
                 className="flex items-center gap-1.5 text-sm font-semibold leading-5 text-muted-foreground"
-                htmlFor="meetingLink"
+                htmlFor="meeting_link"
               >
                 <Link2 className="size-4 text-primary" aria-hidden="true" />
                 Meeting Link
@@ -238,16 +231,16 @@ function CreateEventPage() {
               </label>
               <input
                 className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm leading-5 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
-                id="meetingLink"
+                id="meeting_link"
                 placeholder="https://zoom.us/j/... or Google Meet link"
                 type="url"
-                {...register("meetingLink", {
+                {...register("meeting_link", {
                   required: isOnline ? "Meeting link is required for online events." : false,
                 })}
               />
-              {errors.meetingLink && (
+              {errors.meeting_link && (
                 <p className="text-xs text-destructive">
-                  {errors.meetingLink.message}
+                  {errors.meeting_link.message}
                 </p>
               )}
             </div>
@@ -275,25 +268,25 @@ function CreateEventPage() {
 
           <EventField
             label="Start Date"
-            registration={register("startDate", { required: true })}
+            registration={register("start_date", { required: true })}
             type="date"
           />
 
           <EventField
             label="End Date"
-            registration={register("endDate", { required: true })}
+            registration={register("end_date", { required: true })}
             type="date"
           />
 
           <EventField
             label="Start Time"
-            registration={register("startTime", { required: true })}
+            registration={register("start_time", { required: true })}
             type="time"
           />
 
           <EventField
             label="End Time"
-            registration={register("endTime", { required: true })}
+            registration={register("end_time", { required: true })}
             type="time"
           />
 
@@ -309,7 +302,7 @@ function CreateEventPage() {
 
           <EventField
             label="Organizer Name"
-            registration={register("organizerName", { required: true })}
+            registration={register("organizer_name", { required: true })}
           />
         </div>
 
