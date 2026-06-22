@@ -1,103 +1,84 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   CalendarDays,
   Clock,
   MapPin,
   Search,
-  SlidersHorizontal,
   Users,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
+import { useManageEventsStore } from "@/stores/manage-events-store";
+import type { EventType } from "@/types/event";
 
 export const Route = createFileRoute("/_authenticated/my-events")({
   component: MyEventsPage,
 });
 
-type EventStatus = "Registered" | "Organizer" | "Waitlisted";
+// ─────────────────────────────────────────────────────
+// Event Category Type Definition
+// ─────────────────────────────────────────────────────
+type EventCategory =
+  | "exam"
+  | "contest"
+  | "game"
+  | "feast"
+  | "tour"
+  | "concert"
+  | "others";
 
-type EventCard = {
-  attendees: string;
-  category: string;
-  date: string;
-  imageAlt: string;
-  imageUrl: string;
-  location: string;
-  status: EventStatus;
-  time: string;
-  title: string;
-};
-
-const events: EventCard[] = [
-  {
-    attendees: "128 attending",
-    category: "Workshop",
-    date: "Oct 24, 2024",
-    imageAlt:
-      "Modern university auditorium prepared for a high-tech conference.",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDpPxxD60fHdSvub11rZyYB-yiMJnkRusPQfGD1xpK9ZsH_t3OW42gBJNg7ho_nsBtLcGIZGfSGIBGVzdQT0yzzxhs-UXFM3Stud3L4UDCAgzIUar4afdffLBUWavKUyJne9NvQlejHaYE974zTrHqGr-6yYB9fj1JQEsO8kZWBjTYa0HwZaWgvHWSzJQnaTT1_xXdnINCvZNJ_Pb8joAOMe3vM3nYp_JXTQChh6F6HpUTN1cvk0RzuXFnFMGaglLQOdeKRXs_hRJI",
-    location: "Main Hall, Engineering Block",
-    status: "Registered",
-    time: "10:00 AM - 12:30 PM",
-    title: "AI Ethics in Modern Research",
-  },
-  {
-    attendees: "45 attending",
-    category: "Social",
-    date: "Oct 28, 2024",
-    imageAlt:
-      "Bright university co-working space with students collaborating.",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCgFrx0NW_5VJCZZHPLDt2XWa5TDHaYKa4CJvxxE5WwcnMJ0OOQeMunyvnkhekFxw71xs7JuuiBO_hy-AN1QXFMR89EXR-NvlPS74CJ9vNwXyLcg9LA9baVrHngdNV6aQTEixxiD3TsGLDWM-04uJroF2zQPo7v10-vWZFVGoPd8cPQ37RGYStMDHiDInZZcdzY0lEGYlzsIHoKtW3vH9os-A2MuOebWoUG8LeiJICFaSQJBu4X7hWNk2ZEO1V6ygk9iuAG72Acv20",
-    location: "Faculty Lounge, Level 4",
-    status: "Organizer",
-    time: "05:00 PM - 07:00 PM",
-    title: "Graduate Networking Mixer",
-  },
-  {
-    attendees: "200 attending",
-    category: "Lecture",
-    date: "Nov 02, 2024",
-    imageAlt:
-      "Minimal university laboratory with glass equipment and digital displays.",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuC57jzOjMPJxzMjSZAmpo-pUb95-QhLUwidKFl2Vwk4yvXQM-boiuLjI9N54aLNPgLFRmMqT-T3iUve2mus7CyYINgdAo1yca8D9Wwt8pSfszpHsNsU7fAZqFE4RWMn-MqvxJEu0Iv60pH0Pc2a0eX3C94busmIxczfKAcw1SYTwTmTuQbihX82VNAgfdBldoxChnOsm6CXLKsuY-jh7QuCtQkKgoXEC61NUrRneLnI18w_LRPyVvMF4k3ll1h2axr5y0U3aDPFPS8",
-    location: "Physics Lab 302",
-    status: "Waitlisted",
-    time: "09:00 AM - 11:00 AM",
-    title: "Quantum Computing Foundations",
-  },
+// ─────────────────────────────────────────────────────
+// Event Categories Constant
+// Used for filtering and category selection
+// ─────────────────────────────────────────────────────
+const EVENT_CATEGORIES: { label: string; value: EventCategory }[] = [
+  { label: "Exam", value: "exam" },
+  { label: "Contest", value: "contest" },
+  { label: "Game", value: "game" },
+  { label: "Feast", value: "feast" },
+  { label: "Tour", value: "tour" },
+  { label: "Concert", value: "concert" },
+  { label: "Others", value: "others" },
 ];
 
-function MyEventsPage() {
-  return (
-    <div className="space-y-6">
-      <header className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-        <div>
-          <h1 className="text-3xl font-semibold leading-10 text-foreground">
-            My Events
-          </h1>
-          <p className="mt-1 max-w-2xl text-base leading-6 text-muted-foreground">
-            Manage and track your upcoming university schedules and registered
-            activities.
-          </p>
-        </div>
-      </header>
+// ─────────────────────────────────────────────────────
+// Event Status Type Definition
+// ─────────────────────────────────────────────────────
+type EventStatus = "Registered" | "Organizer" | "Waitlisted";
 
-      <EventControls />
+// ─────────────────────────────────────────────────────
+// Utility: Get status badge className based on status type
+// ─────────────────────────────────────────────────────
+function getStatusClassName(status: EventStatus) {
+  if (status === "Registered") {
+    return "bg-primary text-primary-foreground";
+  }
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {events.map((event) => (
-          <MyEventCard event={event} key={event.title} />
-        ))}
-      </div>
-    </div>
-  );
+  if (status === "Organizer") {
+    return "bg-chart-4 text-primary-foreground";
+  }
+
+  return "bg-muted text-muted-foreground";
 }
 
-function EventControls() {
+// ─────────────────────────────────────────────────────
+// Event Controls Component
+// Handles search and category filtering
+// ─────────────────────────────────────────────────────
+function EventControls({
+  selectedCategory,
+  searchQuery,
+  onCategoryChange,
+  onSearchChange,
+}: {
+  selectedCategory: EventCategory | "all";
+  searchQuery: string;
+  onCategoryChange: (category: EventCategory | "all") => void;
+  onSearchChange: (query: string) => void;
+}) {
   return (
     <section className="flex flex-col items-center gap-4 rounded-xl border border-border/60 bg-card p-4 shadow-sm lg:flex-row">
       <label className="relative w-full flex-1">
@@ -110,60 +91,65 @@ function EventControls() {
           className="h-10 w-full rounded-lg border border-transparent bg-muted pl-12 pr-4 text-base leading-6 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
           placeholder="Search events by title, organizer, or location..."
           type="search"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
         />
       </label>
 
       <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
         <select
           className="h-10 rounded-lg border border-transparent bg-muted px-4 text-sm font-medium leading-5 text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-ring/50"
-          defaultValue="All Categories"
+          value={selectedCategory}
+          onChange={(e) =>
+            onCategoryChange(e.target.value as EventCategory | "all")
+          }
         >
-          <option>All Categories</option>
-          <option>Workshops</option>
-          <option>Lectures</option>
-          <option>Social</option>
-          <option>Academic</option>
+          <option value="all">All Categories</option>
+          {EVENT_CATEGORIES.map(({ label, value }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
         </select>
-
-        <Button
-          className="h-10 justify-center gap-2 rounded-lg bg-muted px-4 text-foreground hover:bg-secondary"
-          type="button"
-          variant="secondary"
-        >
-          <CalendarDays className="size-4" aria-hidden="true" />
-          <span>Date Range</span>
-        </Button>
-
-        <Button
-          className="h-10 justify-center gap-2 rounded-lg px-4"
-          type="button"
-          variant="secondary"
-        >
-          <SlidersHorizontal className="size-4" aria-hidden="true" />
-          <span>Filters</span>
-        </Button>
       </div>
     </section>
   );
 }
 
-function MyEventCard({ event }: { event: EventCard }) {
+function MyEventCard({ event }: { event: EventType }) {
+  // ─────────────────────────────────────────────────────
+  // Format event date and time for display
+  // ─────────────────────────────────────────────────────
+  const eventDate = event.start_date
+    ? new Date(event.start_date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "TBD";
+
+  const eventTime = event.start_time
+    ? event.start_time.substring(0, 5)
+    : "TBD";
+
+  const eventStatus: EventStatus = event.created_by ? "Organizer" : "Registered";
+
   return (
     <article className="group overflow-hidden rounded-xl border border-border/70 bg-card/80 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       <div className="relative h-40">
         <img
-          alt={event.imageAlt}
+          alt={event.title}
           className="h-full w-full object-cover"
-          src={event.imageUrl}
+          src={event.banner_image || "https://via.placeholder.com/400x200"}
         />
         <div className="absolute right-4 top-4">
           <span
             className={cn(
               "rounded-lg px-2 py-1 text-xs font-semibold leading-4 backdrop-blur-sm",
-              getStatusClassName(event.status),
+              getStatusClassName(eventStatus),
             )}
           >
-            {event.status}
+            {eventStatus}
           </span>
         </div>
       </div>
@@ -171,11 +157,11 @@ function MyEventCard({ event }: { event: EventCard }) {
       <div className="p-6">
         <div className="mb-2 flex items-start justify-between gap-4">
           <span className="text-xs font-semibold uppercase leading-4 text-primary">
-            {event.category}
+            {event.category || "Event"}
           </span>
           <span className="flex shrink-0 items-center gap-1 text-sm leading-5 text-muted-foreground">
             <Users className="size-4" aria-hidden="true" />
-            {event.attendees}
+            {event.capacity || 0} spots
           </span>
         </div>
 
@@ -184,9 +170,9 @@ function MyEventCard({ event }: { event: EventCard }) {
         </h2>
 
         <div className="mb-6 space-y-1">
-          <EventMeta icon={CalendarDays}>{event.date}</EventMeta>
-          <EventMeta icon={Clock}>{event.time}</EventMeta>
-          <EventMeta icon={MapPin}>{event.location}</EventMeta>
+          <EventMeta icon={CalendarDays}>{eventDate}</EventMeta>
+          <EventMeta icon={Clock}>{eventTime}</EventMeta>
+          <EventMeta icon={MapPin}>{event.location || "Location TBD"}</EventMeta>
         </div>
 
         <div className="border-t border-border/60 pt-4">
@@ -206,6 +192,9 @@ function EventMeta({
   children: React.ReactNode;
   icon: typeof CalendarDays;
 }) {
+  // ─────────────────────────────────────────────────────
+  // Display event metadata with icon and text
+  // ─────────────────────────────────────────────────────
   return (
     <div className="flex items-center gap-2 text-sm leading-5 text-muted-foreground">
       <Icon className="size-4 text-primary" aria-hidden="true" />
@@ -214,14 +203,108 @@ function EventMeta({
   );
 }
 
-function getStatusClassName(status: EventStatus) {
-  if (status === "Registered") {
-    return "bg-primary text-primary-foreground";
+// ─────────────────────────────────────────────────────
+// Main Events Page Component
+// ─────────────────────────────────────────────────────
+function MyEventsPage() {
+  // ─────────────────────────────────────────────────────
+  // Get current user from auth context
+  // ─────────────────────────────────────────────────────
+  const { user } = useAuth();
+
+  // ─────────────────────────────────────────────────────
+  // Get events and loading state from store
+  // ─────────────────────────────────────────────────────
+  const { events, isLoading, getEventsByUserId } = useManageEventsStore();
+
+  // ─────────────────────────────────────────────────────
+  // Filter State: Track user's search and category selection
+  // ─────────────────────────────────────────────────────
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<
+    EventCategory | "all"
+  >("all");
+
+  // ─────────────────────────────────────────────────────
+  // Fetch user's events on component mount
+  // ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (user?.uid) {
+      getEventsByUserId(user.uid);
+    }
+  }, [user?.uid, getEventsByUserId]);
+
+  // ─────────────────────────────────────────────────────
+  // Filter Events Based on Search Query and Category
+  // Performs case-insensitive search on title, organizer, and location
+  // ─────────────────────────────────────────────────────
+  const filteredEvents = events.filter((event) => {
+    // ─── Category Filter ───
+    const categoryMatch =
+      selectedCategory === "all" || event.category === selectedCategory;
+
+    // ─── Search Filter ───
+    // Search across title, organizer name, and location
+    const searchLower = searchQuery.toLowerCase();
+    const searchMatch =
+      event.title.toLowerCase().includes(searchLower) ||
+      event.organizer_name.toLowerCase().includes(searchLower) ||
+      event.location.toLowerCase().includes(searchLower);
+
+    return categoryMatch && searchMatch;
+  });
+
+  // ─────────────────────────────────────────────────────
+  // Display loading spinner while fetching events
+  // ─────────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-muted-foreground">Loading your events...</p>
+        </div>
+      </div>
+    );
   }
 
-  if (status === "Organizer") {
-    return "bg-chart-4 text-primary-foreground";
-  }
+  return (
+    <div className="space-y-6">
+      <header className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+        <div>
+          <h1 className="text-3xl font-semibold leading-10 text-foreground">
+            My Events
+          </h1>
+          <p className="mt-1 max-w-2xl text-base leading-6 text-muted-foreground">
+            Manage and track your upcoming university schedules and registered
+            activities. Total: {filteredEvents.length} event
+            {filteredEvents.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+      </header>
 
-  return "bg-muted text-muted-foreground";
+      <EventControls
+        selectedCategory={selectedCategory}
+        searchQuery={searchQuery}
+        onCategoryChange={setSelectedCategory}
+        onSearchChange={setSearchQuery}
+      />
+
+      {filteredEvents.length === 0 ? (
+        <div className="rounded-lg border border-border/60 bg-card p-12 text-center">
+          <p className="text-lg text-muted-foreground">
+            {events.length === 0
+              ? "No events found. Create your first event to get started!"
+              : "No events match your filters. Try adjusting your search or category."}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredEvents.map((event) => (
+            <MyEventCard event={event} key={event.id} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

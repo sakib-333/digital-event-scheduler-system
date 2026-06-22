@@ -1,6 +1,10 @@
 import { supabase } from "@/supabase.config";
 import type { EventType } from "@/types/event";
 
+// ─────────────────────────────────────────────────────
+// Manage Events API Class
+// Handles all database operations for events
+// ─────────────────────────────────────────────────────
 class ManageEvents {
     // ─── Create a new event ───
     async createEvent(event: Omit<EventType, "id" | "created_at">) {
@@ -80,6 +84,8 @@ class ManageEvents {
     }
 
     // ─── Get events by creator user ID ───
+    // Fetches all events created by a specific user
+    // sorted by creation date in descending order
     async getEventsByUserId(userId: string) {
         const { data, error } = await supabase
             .from("events")
@@ -95,5 +101,8 @@ class ManageEvents {
     }
 }
 
+// ─────────────────────────────────────────────────────
+// Export singleton instance
+// ─────────────────────────────────────────────────────
 const manageEvents = new ManageEvents();
 export default manageEvents;
