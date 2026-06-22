@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import manageEvents from "@/api/manage-events";
 import type { EventType } from "@/types/event";

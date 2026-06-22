@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 import manageUsers from "@/api/manage-users";
 import type { UserType } from "@/types/user";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 type ManageUsersStore = {
     users: UserType[];

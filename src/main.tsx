@@ -6,7 +6,7 @@ import { ThemeProvider } from './components/theme-provider'
 import { AuthProvider, useAuth } from './context/auth-context'
 import { router } from './router'
 
-import { ToastContainer } from 'react-toastify';
+import { Toaster } from "sonner"
 
 function AppRouter() {
     const auth = useAuth()
@@ -25,7 +25,7 @@ if (!rootElement.innerHTML) {
                 <AppRouter />
             </AuthProvider>
 
-            <ToastContainer position='top-center' autoClose={3000} />
+            <Toaster position="top-center" duration={3000} richColors />
         </ThemeProvider>
     )
 }
