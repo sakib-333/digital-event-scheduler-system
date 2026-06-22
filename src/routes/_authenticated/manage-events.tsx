@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Check,
   CheckCircle2,
@@ -32,7 +32,14 @@ export const Route = createFileRoute("/_authenticated/manage-events")({
 });
 
 type EventStatus = "Approved" | "Pending" | "Cancelled";
-type EventCategory = "Symposium" | "Workshop" | "Social";
+type EventCategory =
+  | "exam"
+  | "contest"
+  | "game"
+  | "feast"
+  | "tour"
+  | "concert"
+  | "others";
 
 type ManagedEvent = {
   category: EventCategory;
@@ -48,40 +55,40 @@ type ManagedEvent = {
 
 const managedEvents: ManagedEvent[] = [
   {
-    category: "Symposium",
+    category: "exam",
     date: "Oct 24, 2024",
     department: "Physics Dept.",
-    imageAlt: "Science symposium banner with futuristic laboratory visuals.",
+    imageAlt: "Students sitting an exam in a large hall.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAmmfqY8QFVY0ibV-L4ghAoljl5lqg5aSpolBycnBN3uAXB_WC2IuWv3HkIaE2HtGv-jIH0Ud5z7-8Cz9EH-LFiPsMf947vTznJtLJSokZjpWf4XZulLVH5TRjUi6J9e-9UvvMl2rqSedEY_oud96lvfsFQmVFH3ky8ldoexfKHe8lzdtiScBR9aoSVoPgosOkmfww1XFOzf0pAiORGzUvrL7czt-X5yo8axPjMpsO2kE_fuS-OoD0bWocEteqHF7u8_JI9HaOt3PE",
     organizer: "Dr. Sarah Jenkins",
     status: "Approved",
     time: "10:00 AM - 4:00 PM",
-    title: "Annual Science Symposium 2024",
+    title: "Mid-Term Examination 2024",
   },
   {
-    category: "Workshop",
+    category: "contest",
     date: "Nov 02, 2024",
     department: "Design Collective",
-    imageAlt: "Design workshop setup with laptop and stationery.",
+    imageAlt: "Design contest banner with creative artwork.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDXyxJ9BuDFs2mFssbATcrv-I30WHL_LrUXZ8MnWAxsSgyzRjmJHVhXPiKrzkzOs6zOsx5nNHHZ4MS5z5nIJs9tB-FnYQa6ZNa7JgNrFDTpK0rIIw3kUn0OskjZxZq0vhJ80QFiWYGaQMW3EIsSUDoiOg-JYG9Fh3w-7gOVFP2awVUOLFXCImIra1J6KE7-zY191Kzq0O_tmhsWsgoplFbCVvhx2nBfkmo1oYsshGpRVYBT_pgLT5PZgS2p5Osth-FasC9pwJLSBxs",
     organizer: "Alex Rivera",
     status: "Pending",
     time: "02:00 PM - 5:00 PM",
-    title: "UI/UX Design Masterclass",
+    title: "UI/UX Design Contest",
   },
   {
-    category: "Social",
+    category: "feast",
     date: "Oct 28, 2024",
     department: "General Affairs",
-    imageAlt: "Networking event in a modern university atrium.",
+    imageAlt: "Festive banquet table with food and decorations.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCaViOj-UNor6aUfVVbWFd-hbcqDTjt3nlldgphnANGOCEPrfl-6RZQ2siE32SRHFg88x1tFoB0qY-eCrPE3GVsUB_774oaGvqJ9YMq_U4MXycs2-LhSw3b02_qVwEYp3t1C_xtJjeSLEBeDgWsUju4Rjt73oV6oeZyi3qB2Y2OTANX5Z3rtBY8X1SbPtfOu7Lv6-RaHDG-skz5lMsygubRhT5ZZ91mtU5g87YzHuGME5QnSlazD37TR_NsEfkOOHxQZjriq5wELf0",
     organizer: "Student Union",
     status: "Cancelled",
     time: "6:30 PM - 9:00 PM",
-    title: "Graduate Mixer Night",
+    title: "Annual Graduation Feast",
   },
 ];
 
@@ -89,10 +96,12 @@ function ManageEventsPage() {
   return (
     <div className="space-y-6">
       <header className="flex flex-col justify-end gap-4 md:flex-row md:items-center">
-        <Button className="h-11 gap-2 rounded-xl px-6 shadow-sm" type="button">
-          <PlusCircle className="size-5" aria-hidden="true" />
-          <span>Create New Event</span>
-        </Button>
+        <Link to="/create-event">
+          <Button className="h-11 gap-2 rounded-xl px-6 shadow-sm" type="button">
+            <PlusCircle className="size-5" aria-hidden="true" />
+            <span>Create New Event</span>
+          </Button>
+        </Link>
       </header>
 
       <ManageEventsFilters />
@@ -121,7 +130,16 @@ function ManageEventsFilters() {
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap lg:w-auto">
           <FilterSelect
             label="Category"
-            options={["All Categories", "Lecture", "Workshop", "Symposium", "Social"]}
+            options={[
+              "All Categories",
+              "exam",
+              "contest",
+              "game",
+              "feast",
+              "tour",
+              "concert",
+              "others",
+            ]}
           />
           <FilterSelect
             label="Status"
@@ -415,15 +433,23 @@ function ManageEventsPagination() {
 }
 
 function getCategoryClassName(category: EventCategory) {
-  if (category === "Symposium") {
-    return "bg-primary/10 text-primary";
+  switch (category) {
+    case "exam":
+      return "bg-primary/10 text-primary";
+    case "contest":
+      return "bg-chart-4/10 text-chart-4";
+    case "game":
+      return "bg-chart-2/10 text-chart-2";
+    case "feast":
+      return "bg-chart-5/10 text-chart-5";
+    case "tour":
+      return "bg-chart-3/10 text-chart-3";
+    case "concert":
+      return "bg-purple-500/10 text-purple-500";
+    case "others":
+    default:
+      return "bg-secondary text-secondary-foreground";
   }
-
-  if (category === "Workshop") {
-    return "bg-chart-4/10 text-chart-4";
-  }
-
-  return "bg-secondary text-secondary-foreground";
 }
 
 function getStatusClassName(status: EventStatus) {
