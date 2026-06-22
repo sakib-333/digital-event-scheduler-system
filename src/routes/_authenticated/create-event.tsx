@@ -1,5 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { CalendarPlus, ImagePlus, Link2, X } from "lucide-react";
 import { useRef, useState } from "react";
 import {
@@ -8,11 +7,15 @@ import {
   type SubmitHandler,
   type UseFormRegisterReturn,
 } from "react-hook-form";
+import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth-store";
+import { useManageEventsStore } from "@/stores/manage-events-store";
 import type { EventType } from "@/types/event";
+import { uploadImage } from "@/utils";
 
 // ─── Route Definition ───
 export const Route = createFileRoute("/_authenticated/create-event")({
@@ -97,9 +100,50 @@ function CreateEventPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const navigate = useNavigate();
+  const authUser = useAuthStore((state) => state.user);
+  const createEvent = useManageEventsStore((state) => state.createEvent);
+
+
   // ─── Form Submission ───
-  const handleCreateEvent: SubmitHandler<EventFormValues> = (data) => {
-    console.log(data);
+  const handleCreateEvent: SubmitHandler<EventFormValues> = async (data) => {
+    if (!authUser) {
+      toast.error("You must be signed in to create an event.");
+      return;
+    }
+
+    let bannerImageUrl: string | null = null;
+    try {
+      if (data.banner_image && data.banner_image.length > 0) {
+        bannerImageUrl = await uploadImage(data.banner_image[0]);
+      }
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      toast.error("Failed to upload banner image.");
+      return;
+    }
+
+    const eventPayload = {
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      event_type: data.event_type,
+      location: data.event_type === "online" ? "" : (data.location || ""),
+      meeting_link: data.event_type === "online" ? (data.meeting_link || null) : null,
+      start_date: data.start_date,
+      end_date: data.end_date,
+      start_time: data.start_time,
+      end_time: data.end_time,
+      capacity: Number(data.capacity),
+      banner_image: bannerImageUrl,
+      organizer_name: data.organizer_name,
+      created_by: authUser.uid,
+    };
+
+    const success = await createEvent(eventPayload);
+    if (success) {
+      navigate({ to: "/manage-events" });
+    }
   };
 
   return (
