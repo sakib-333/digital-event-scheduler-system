@@ -26,5 +26,6 @@ export type EventType = {
 
     organizer_name: string;
     created_by: string;
+    status: EventStatus;
 
 };

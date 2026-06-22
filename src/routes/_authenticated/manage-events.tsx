@@ -1,18 +1,31 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  CalendarDays,
   Check,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   CircleX,
-  Edit,
-  Filter,
   PlusCircle,
-  RotateCcw,
   Search,
+  ShieldCheck,
   Trash2,
+  XCircle,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -21,7 +34,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { useManageEventsStore } from "@/stores/manage-events-store";
+import type { EventType } from "@/types/event";
 import { requireRouteRoles } from "@/utils/route-permissions";
 
 export const Route = createFileRoute("/_authenticated/manage-events")({
@@ -31,68 +47,87 @@ export const Route = createFileRoute("/_authenticated/manage-events")({
   component: ManageEventsPage,
 });
 
-type EventStatus = "Approved" | "Pending" | "Cancelled";
-type EventCategory =
-  | "exam"
-  | "contest"
-  | "game"
-  | "feast"
-  | "tour"
-  | "concert"
-  | "others";
-
-type ManagedEvent = {
-  category: EventCategory;
-  date: string;
-  department: string;
-  imageAlt: string;
-  imageUrl: string;
-  organizer: string;
-  status: EventStatus;
-  time: string;
-  title: string;
-};
-
-const managedEvents: ManagedEvent[] = [
-  {
-    category: "exam",
-    date: "Oct 24, 2024",
-    department: "Physics Dept.",
-    imageAlt: "Students sitting an exam in a large hall.",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAmmfqY8QFVY0ibV-L4ghAoljl5lqg5aSpolBycnBN3uAXB_WC2IuWv3HkIaE2HtGv-jIH0Ud5z7-8Cz9EH-LFiPsMf947vTznJtLJSokZjpWf4XZulLVH5TRjUi6J9e-9UvvMl2rqSedEY_oud96lvfsFQmVFH3ky8ldoexfKHe8lzdtiScBR9aoSVoPgosOkmfww1XFOzf0pAiORGzUvrL7czt-X5yo8axPjMpsO2kE_fuS-OoD0bWocEteqHF7u8_JI9HaOt3PE",
-    organizer: "Dr. Sarah Jenkins",
-    status: "Approved",
-    time: "10:00 AM - 4:00 PM",
-    title: "Mid-Term Examination 2024",
-  },
-  {
-    category: "contest",
-    date: "Nov 02, 2024",
-    department: "Design Collective",
-    imageAlt: "Design contest banner with creative artwork.",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDXyxJ9BuDFs2mFssbATcrv-I30WHL_LrUXZ8MnWAxsSgyzRjmJHVhXPiKrzkzOs6zOsx5nNHHZ4MS5z5nIJs9tB-FnYQa6ZNa7JgNrFDTpK0rIIw3kUn0OskjZxZq0vhJ80QFiWYGaQMW3EIsSUDoiOg-JYG9Fh3w-7gOVFP2awVUOLFXCImIra1J6KE7-zY191Kzq0O_tmhsWsgoplFbCVvhx2nBfkmo1oYsshGpRVYBT_pgLT5PZgS2p5Osth-FasC9pwJLSBxs",
-    organizer: "Alex Rivera",
-    status: "Pending",
-    time: "02:00 PM - 5:00 PM",
-    title: "UI/UX Design Contest",
-  },
-  {
-    category: "feast",
-    date: "Oct 28, 2024",
-    department: "General Affairs",
-    imageAlt: "Festive banquet table with food and decorations.",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCaViOj-UNor6aUfVVbWFd-hbcqDTjt3nlldgphnANGOCEPrfl-6RZQ2siE32SRHFg88x1tFoB0qY-eCrPE3GVsUB_774oaGvqJ9YMq_U4MXycs2-LhSw3b02_qVwEYp3t1C_xtJjeSLEBeDgWsUju4Rjt73oV6oeZyi3qB2Y2OTANX5Z3rtBY8X1SbPtfOu7Lv6-RaHDG-skz5lMsygubRhT5ZZ91mtU5g87YzHuGME5QnSlazD37TR_NsEfkOOHxQZjriq5wELf0",
-    organizer: "Student Union",
-    status: "Cancelled",
-    time: "6:30 PM - 9:00 PM",
-    title: "Annual Graduation Feast",
-  },
-];
-
+/**
+ * Main Page Component for managing events.
+ * Connects to `useManageEventsStore` to load and mutate event statuses.
+ */
 function ManageEventsPage() {
+  const { events, isLoading, getAllEvents, updateEvent, deleteEvent } =
+    useManageEventsStore();
+
+  // ─── Filter States ───
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedStatus, setSelectedStatus] = useState("All Status");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Fetch all events on mount
+  useEffect(() => {
+    getAllEvents();
+  }, [getAllEvents]);
+
+  // Reset pagination when filters change to avoid empty pages
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, selectedStatus]);
+
+  // ─── Mutator Actions ───
+  const handleApprove = async (id: string) => {
+    await updateEvent(id, { status: "approved" });
+  };
+
+  const handleCancel = async (id: string) => {
+    await updateEvent(id, { status: "canceled" });
+  };
+
+  const handleDelete = async (id: string) => {
+    // Confirmation is handled by the AlertDialog; call the store directly.
+    await deleteEvent(id);
+  };
+
+  // ─── Client-Side Filtering ───
+  const filteredEvents = events.filter((event) => {
+    // 1. Search Query Filter (Title, ID, or Organizer)
+    const query = searchQuery.toLowerCase().trim();
+    if (query) {
+      const matchTitle = event.title?.toLowerCase().includes(query);
+      const matchId = event.id?.toLowerCase().includes(query);
+      const matchOrganizer = event.organizer_name?.toLowerCase().includes(query);
+      if (!matchTitle && !matchId && !matchOrganizer) {
+        return false;
+      }
+    }
+
+    // 2. Category Filter
+    if (selectedCategory && selectedCategory !== "All Categories") {
+      if (event.category?.toLowerCase() !== selectedCategory.toLowerCase()) {
+        return false;
+      }
+    }
+
+    // 3. Status Filter
+    if (selectedStatus && selectedStatus !== "All Status") {
+      if (event.status?.toLowerCase() !== selectedStatus.toLowerCase()) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  // ─── Client-Side Pagination ───
+  const ITEMS_PER_PAGE = 5;
+  const totalPages = Math.ceil(filteredEvents.length / ITEMS_PER_PAGE) || 1;
+  const activePage = Math.min(currentPage, totalPages);
+
+  const paginatedEvents = filteredEvents.slice(
+    (activePage - 1) * ITEMS_PER_PAGE,
+    activePage * ITEMS_PER_PAGE,
+  );
+
+  const startIndex = (activePage - 1) * ITEMS_PER_PAGE + 1;
+  const endIndex = Math.min(activePage * ITEMS_PER_PAGE, filteredEvents.length);
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col justify-end gap-4 md:flex-row md:items-center">
@@ -104,13 +139,52 @@ function ManageEventsPage() {
         </Link>
       </header>
 
-      <ManageEventsFilters />
-      <ManageEventsTable />
+      {/* Filter controls */}
+      <ManageEventsFilters
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        selectedStatus={selectedStatus}
+        onStatusChange={setSelectedStatus}
+      />
+
+      {/* Data Table */}
+      <ManageEventsTable
+        events={paginatedEvents}
+        isLoading={isLoading}
+        onApprove={handleApprove}
+        onCancel={handleCancel}
+        onDelete={handleDelete}
+        currentPage={activePage}
+        totalPages={totalPages}
+        totalResults={filteredEvents.length}
+        startIndex={startIndex}
+        endIndex={endIndex}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }
 
-function ManageEventsFilters() {
+/**
+ * Filter header section allowing search and dropdown filtering.
+ */
+function ManageEventsFilters({
+  searchQuery,
+  onSearchChange,
+  selectedCategory,
+  onCategoryChange,
+  selectedStatus,
+  onStatusChange,
+}: {
+  searchQuery: string;
+  onSearchChange: (val: string) => void;
+  selectedCategory: string;
+  onCategoryChange: (val: string) => void;
+  selectedStatus: string;
+  onStatusChange: (val: string) => void;
+}) {
   return (
     <section className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur-xl">
       <div className="flex flex-col items-center gap-4 lg:flex-row">
@@ -124,12 +198,16 @@ function ManageEventsFilters() {
             className="h-10 w-full rounded-xl border border-border/60 bg-muted pl-10 pr-4 text-sm leading-5 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
             placeholder="Search events by name, ID, or organizer..."
             type="search"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
           />
         </label>
 
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap lg:w-auto">
           <FilterSelect
             label="Category"
+            value={selectedCategory}
+            onValueChange={onCategoryChange}
             options={[
               "All Categories",
               "exam",
@@ -143,23 +221,30 @@ function ManageEventsFilters() {
           />
           <FilterSelect
             label="Status"
-            options={["All Status", "Pending", "Approved", "Cancelled"]}
+            value={selectedStatus}
+            onValueChange={onStatusChange}
+            options={["All Status", "Pending", "Approved", "Canceled"]}
           />
-          <Button
-            className="h-10 rounded-xl border-border/60 bg-muted px-3 text-muted-foreground hover:bg-secondary hover:text-foreground"
-            type="button"
-            variant="outline"
-          >
-            <Filter className="size-5" aria-hidden="true" />
-            <span className="sr-only">More filters</span>
-          </Button>
         </div>
       </div>
     </section>
   );
 }
 
-function FilterSelect({ label, options }: { label: string; options: string[] }) {
+/**
+ * Dropdown filter selector component.
+ */
+function FilterSelect({
+  label,
+  value,
+  onValueChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onValueChange: (val: string) => void;
+  options: string[];
+}) {
   return (
     <div className="flex items-center gap-2">
       <span
@@ -168,7 +253,7 @@ function FilterSelect({ label, options }: { label: string; options: string[] }) 
       >
         {label}
       </span>
-      <Select defaultValue={options[0]}>
+      <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger
           aria-labelledby={`${label}-filter-label`}
           className="h-10 min-w-40 rounded-xl border-border/60 bg-muted px-4 text-sm leading-5 text-foreground shadow-none"
@@ -181,7 +266,15 @@ function FilterSelect({ label, options }: { label: string; options: string[] }) 
         >
           {options.map((option) => (
             <SelectItem key={option} value={option}>
-              {option}
+              {option === "exam" ||
+                option === "contest" ||
+                option === "game" ||
+                option === "feast" ||
+                option === "tour" ||
+                option === "concert" ||
+                option === "others"
+                ? option.charAt(0).toUpperCase() + option.slice(1)
+                : option}
             </SelectItem>
           ))}
         </SelectContent>
@@ -190,7 +283,34 @@ function FilterSelect({ label, options }: { label: string; options: string[] }) 
   );
 }
 
-function ManageEventsTable() {
+/**
+ * Event grid table displaying the loaded records.
+ */
+function ManageEventsTable({
+  events,
+  isLoading,
+  onApprove,
+  onCancel,
+  onDelete,
+  currentPage,
+  totalPages,
+  totalResults,
+  startIndex,
+  endIndex,
+  onPageChange,
+}: {
+  events: EventType[];
+  isLoading: boolean;
+  onApprove: (id: string) => Promise<void>;
+  onCancel: (id: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+  currentPage: number;
+  totalPages: number;
+  totalResults: number;
+  startIndex: number;
+  endIndex: number;
+  onPageChange: (page: number) => void;
+}) {
   return (
     <section className="overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-sm backdrop-blur-xl">
       <div className="overflow-x-auto">
@@ -200,7 +320,8 @@ function ManageEventsTable() {
               {[
                 "Event Name",
                 "Organizer",
-                "Date & Time",
+                "Start Date & Time",
+                "End Date & Time",
                 "Category",
                 "Status",
                 "Actions",
@@ -218,29 +339,89 @@ function ManageEventsTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
-            {managedEvents.map((event) => (
-              <ManagedEventRow event={event} key={event.title} />
-            ))}
+            {isLoading ? (
+              <tr>
+                <td className="px-6 py-12 text-center" colSpan={7}>
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Spinner className="size-8 text-primary" />
+                    <span className="text-sm text-muted-foreground">Loading events...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : events.length === 0 ? (
+              <tr>
+                <td className="px-6 py-12 text-center text-sm text-muted-foreground" colSpan={7}>
+                  No events found.
+                </td>
+              </tr>
+            ) : (
+              events.map((event) => (
+                <ManagedEventRow
+                  event={event}
+                  key={event.id}
+                  onApprove={onApprove}
+                  onCancel={onCancel}
+                  onDelete={onDelete}
+                />
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      <ManageEventsPagination />
+      <ManageEventsPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalResults={totalResults}
+        startIndex={startIndex}
+        endIndex={endIndex}
+        onPageChange={onPageChange}
+      />
     </section>
   );
 }
 
-function ManagedEventRow({ event }: { event: ManagedEvent }) {
+/**
+ * Individual event row representation.
+ */
+function ManagedEventRow({
+  event,
+  onApprove,
+  onCancel,
+  onDelete,
+}: {
+  event: EventType;
+  onApprove: (id: string) => Promise<void>;
+  onCancel: (id: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+}) {
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Wraps async mutator actions to handle load indicators properly.
+  // Called only after the user confirms the AlertDialog.
+  const handleAction = async (action: () => Promise<void>) => {
+    setIsUpdating(true);
+    try {
+      await action();
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
-    <tr className="transition-colors hover:bg-muted/40">
+    <tr className={cn("transition-colors hover:bg-muted/40", isUpdating && "opacity-60")}>
       <td className="px-6 py-4">
         <div className="flex items-center gap-4">
-          <div className="size-12 shrink-0 overflow-hidden rounded-lg border border-border/60 bg-muted">
-            <img
-              alt={event.imageAlt}
-              className="h-full w-full object-cover"
-              src={event.imageUrl}
-            />
+          <div className="size-12 shrink-0 overflow-hidden rounded-lg border border-border/60 bg-muted flex items-center justify-center">
+            {event.banner_image ? (
+              <img
+                alt={event.title}
+                className="h-full w-full object-cover"
+                src={event.banner_image}
+              />
+            ) : (
+              <CalendarDays className="size-5 text-muted-foreground" aria-hidden="true" />
+            )}
           </div>
           <span className="text-base font-semibold leading-6 text-foreground">
             {event.title}
@@ -248,20 +429,23 @@ function ManagedEventRow({ event }: { event: ManagedEvent }) {
         </div>
       </td>
       <td className="px-6 py-4">
+        <span className="text-sm leading-5 text-foreground">
+          {event.organizer_name}
+        </span>
+      </td>
+      <td className="px-6 py-4">
         <div className="flex flex-col">
-          <span className="text-sm leading-5 text-foreground">
-            {event.organizer}
-          </span>
+          <span className="text-sm leading-5 text-foreground">{formatDate(event.start_date)}</span>
           <span className="text-xs leading-4 text-muted-foreground">
-            {event.department}
+            {formatTime(event.start_time)}
           </span>
         </div>
       </td>
       <td className="px-6 py-4">
         <div className="flex flex-col">
-          <span className="text-sm leading-5 text-foreground">{event.date}</span>
+          <span className="text-sm leading-5 text-foreground">{formatDate(event.end_date)}</span>
           <span className="text-xs leading-4 text-muted-foreground">
-            {event.time}
+            {formatTime(event.end_time)}
           </span>
         </div>
       </td>
@@ -276,63 +460,160 @@ function ManagedEventRow({ event }: { event: ManagedEvent }) {
         </span>
       </td>
       <td className="px-6 py-4">
-        <EventStatusBadge status={event.status} />
+        <EventStatusBadge status={event.status || "pending"} />
       </td>
       <td className="px-6 py-4">
         <div className="flex items-center justify-end gap-2">
-          {event.status === "Approved" ? (
-            <>
-              <ActionButton label="Edit" tone="primary">
-                <Edit className="size-5" aria-hidden="true" />
-              </ActionButton>
-              <ActionButton label="Delete" tone="destructive">
+
+          {/* ── Approve Confirmation Dialog ─────────────────────────────── */}
+          {/* Visible only if the event has not already been approved */}
+          {event.status?.toLowerCase() !== "approved" && (
+            <AlertDialog>
+              <AlertDialogTrigger>
+                <ActionButton
+                  label="Approve"
+                  tone="success"
+                  disabled={isUpdating}
+                >
+                  <Check className="size-5" aria-hidden="true" />
+                </ActionButton>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  {/* Icon shown in the media slot */}
+                  <AlertDialogMedia className="bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                    <ShieldCheck />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>Approve Event</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to approve{" "}
+                    <strong className="text-foreground">{event.title}</strong>? This
+                    will mark the event as approved and make it visible to attendees.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isUpdating}>
+                    Cancel
+                  </AlertDialogCancel>
+                  {/* Confirm button triggers the actual store update */}
+                  <AlertDialogAction
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    disabled={isUpdating}
+                    onClick={() => handleAction(() => onApprove(event.id))}
+                  >
+                    {isUpdating ? "Approving..." : "Yes, Approve"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+
+          {/* ── Cancel Confirmation Dialog ──────────────────────────────── */}
+          {/* Visible only if the event has not already been canceled */}
+          {event.status?.toLowerCase() !== "canceled" &&
+            event.status?.toLowerCase() !== "cancelled" && (
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  <ActionButton
+                    label="Cancel"
+                    tone="warning"
+                    disabled={isUpdating}
+                  >
+                    <CircleX className="size-5" aria-hidden="true" />
+                  </ActionButton>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogMedia className="bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                      <XCircle />
+                    </AlertDialogMedia>
+                    <AlertDialogTitle>Cancel Event</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to cancel{" "}
+                      <strong className="text-foreground">{event.title}</strong>? The
+                      event will be marked as cancelled and attendees will be notified.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isUpdating}>
+                      Go Back
+                    </AlertDialogCancel>
+                    {/* Confirm button triggers the store status update */}
+                    <AlertDialogAction
+                      className="bg-amber-500 hover:bg-amber-600 text-white"
+                      disabled={isUpdating}
+                      onClick={() => handleAction(() => onCancel(event.id))}
+                    >
+                      {isUpdating ? "Cancelling..." : "Yes, Cancel"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+
+          {/* ── Delete Confirmation Dialog ──────────────────────────────── */}
+          {/* Always visible; permanently removes the event */}
+          <AlertDialog>
+            <AlertDialogTrigger>
+              <ActionButton
+                label="Delete"
+                tone="destructive"
+                disabled={isUpdating}
+              >
                 <Trash2 className="size-5" aria-hidden="true" />
               </ActionButton>
-            </>
-          ) : null}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogMedia className="bg-destructive/10 text-destructive">
+                  <Trash2 />
+                </AlertDialogMedia>
+                <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to permanently delete{" "}
+                  <strong className="text-foreground">{event.title}</strong>? This
+                  action <strong>cannot be undone</strong> and all associated data
+                  will be lost.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isUpdating}>
+                  Keep Event
+                </AlertDialogCancel>
+                {/* Confirm button triggers the permanent store deletion */}
+                <AlertDialogAction
+                  variant="destructive"
+                  disabled={isUpdating}
+                  onClick={() => handleAction(() => onDelete(event.id))}
+                >
+                  {isUpdating ? "Deleting..." : "Yes, Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
-          {event.status === "Pending" ? (
-            <>
-              <ActionButton label="Approve" tone="primary">
-                <Check className="size-5" aria-hidden="true" />
-              </ActionButton>
-              <ActionButton label="Reject" tone="destructive">
-                <CircleX className="size-5" aria-hidden="true" />
-              </ActionButton>
-              <ActionButton label="Edit" tone="muted">
-                <Edit className="size-5" aria-hidden="true" />
-              </ActionButton>
-            </>
-          ) : null}
-
-          {event.status === "Cancelled" ? (
-            <>
-              <ActionButton label="Restore" tone="muted">
-                <RotateCcw className="size-5" aria-hidden="true" />
-              </ActionButton>
-              <ActionButton label="Delete" tone="destructive">
-                <Trash2 className="size-5" aria-hidden="true" />
-              </ActionButton>
-            </>
-          ) : null}
         </div>
       </td>
     </tr>
   );
 }
 
-function EventStatusBadge({ status }: { status: EventStatus }) {
+/**
+ * Status indicator badge with icon.
+ */
+function EventStatusBadge({ status }: { status: string }) {
+  const normalized = status.toLowerCase();
   const Icon =
-    status === "Approved"
+    normalized === "approved"
       ? CheckCircle2
-      : status === "Pending"
+      : normalized === "pending"
         ? ClockStatusIcon
         : CircleX;
 
   return (
     <div className={cn("flex items-center gap-1", getStatusClassName(status))}>
       <Icon className="size-4" aria-hidden="true" />
-      <span className="text-xs font-semibold leading-4">{status}</span>
+      <span className="text-xs font-semibold leading-4">{getStatusLabel(status)}</span>
     </div>
   );
 }
@@ -341,7 +622,7 @@ function ClockStatusIcon({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-block size-4 rounded-full border-2 border-current",
+        "inline-block size-4 rounded-full border-2 border-current animate-pulse",
         className,
       )}
       aria-hidden="true"
@@ -349,25 +630,36 @@ function ClockStatusIcon({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Flexible, custom-styled Action Button supporting multiple tones.
+ */
 function ActionButton({
   children,
   label,
   tone,
+  onClick,
+  disabled,
 }: {
   children: React.ReactNode;
   label: string;
-  tone: "primary" | "destructive" | "muted";
+  tone: "primary" | "destructive" | "muted" | "success" | "warning";
+  onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       className={cn(
-        "rounded-lg p-2 transition-colors",
+        "rounded-lg p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
         tone === "primary" && "text-primary hover:bg-primary/10",
+        tone === "success" && "text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30",
+        tone === "warning" && "text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30",
         tone === "destructive" && "text-destructive hover:bg-destructive/10",
         tone === "muted" && "text-muted-foreground hover:bg-muted",
       )}
       title={label}
       type="button"
+      onClick={onClick}
+      disabled={disabled}
     >
       {children}
       <span className="sr-only">{label}</span>
@@ -375,54 +667,68 @@ function ActionButton({
   );
 }
 
-function ManageEventsPagination() {
+/**
+ * Standard table pagination controls.
+ */
+function ManageEventsPagination({
+  currentPage,
+  totalPages,
+  totalResults,
+  startIndex,
+  endIndex,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  totalResults: number;
+  startIndex: number;
+  endIndex: number;
+  onPageChange: (page: number) => void;
+}) {
   return (
     <div className="flex flex-col items-center justify-between gap-4 border-t border-border/60 bg-muted/30 px-6 py-4 sm:flex-row">
       <p className="text-xs font-semibold leading-4 text-muted-foreground">
-        Showing <span className="text-foreground">1</span> to{" "}
-        <span className="text-foreground">3</span> of{" "}
-        <span className="text-foreground">42</span> results
+        Showing <span className="text-foreground">{totalResults > 0 ? startIndex : 0}</span> to{" "}
+        <span className="text-foreground">{endIndex}</span> of{" "}
+        <span className="text-foreground">{totalResults}</span> results
       </p>
 
       <div className="flex items-center gap-2">
         <Button
           className="h-9 gap-1 rounded-lg border-border/60 px-3"
-          disabled
+          disabled={currentPage <= 1}
           type="button"
           variant="outline"
+          onClick={() => onPageChange(currentPage - 1)}
         >
           <ChevronLeft className="size-4" aria-hidden="true" />
           <span>Previous</span>
         </Button>
 
         <div className="hidden items-center gap-1 sm:flex">
-          {[1, 2, 3].map((page) => (
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               className={cn(
                 "flex size-9 items-center justify-center rounded-lg text-sm font-semibold transition-colors",
-                page === 1
+                page === currentPage
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-muted",
               )}
               key={page}
               type="button"
+              onClick={() => onPageChange(page)}
             >
               {page}
             </button>
           ))}
-          <span className="px-2 text-muted-foreground">...</span>
-          <button
-            className="flex size-9 items-center justify-center rounded-lg text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted"
-            type="button"
-          >
-            14
-          </button>
         </div>
 
         <Button
           className="h-9 gap-1 rounded-lg border-border/60 px-3"
+          disabled={currentPage >= totalPages}
           type="button"
           variant="outline"
+          onClick={() => onPageChange(currentPage + 1)}
         >
           <span>Next</span>
           <ChevronRight className="size-4" aria-hidden="true" />
@@ -432,8 +738,11 @@ function ManageEventsPagination() {
   );
 }
 
-function getCategoryClassName(category: EventCategory) {
-  switch (category) {
+/**
+ * Styling helpers.
+ */
+function getCategoryClassName(category: string) {
+  switch (category.toLowerCase()) {
     case "exam":
       return "bg-primary/10 text-primary";
     case "contest":
@@ -452,14 +761,64 @@ function getCategoryClassName(category: EventCategory) {
   }
 }
 
-function getStatusClassName(status: EventStatus) {
-  if (status === "Approved") {
-    return "text-primary";
+function getStatusClassName(status: string) {
+  const normalized = status.toLowerCase();
+  if (normalized === "approved") {
+    return "text-emerald-600 dark:text-emerald-400";
   }
 
-  if (status === "Pending") {
-    return "text-chart-4";
+  if (normalized === "pending") {
+    return "text-amber-500 dark:text-amber-400";
   }
 
   return "text-destructive";
+}
+
+/**
+ * Helper to format date strings to a readable format (e.g., Oct 24, 2024).
+ */
+const formatDate = (dateStr: string) => {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+};
+
+/**
+ * Helper to format time strings (HH:mm:ss or HH:mm) to AM/PM format.
+ */
+const formatTime = (timeStr: string) => {
+  try {
+    const [hours, minutes] = timeStr.split(":");
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? "PM" : "AM";
+    const displayHours = h % 12 || 12;
+    return `${displayHours}:${minutes} ${ampm}`;
+  } catch {
+    return timeStr;
+  }
+};
+
+/**
+ * Helper to get clean status labels for display.
+ */
+const getStatusLabel = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "approved":
+      return "Approved";
+    case "pending":
+      return "Pending";
+    case "canceled":
+    case "cancelled":
+      return "Cancelled";
+    default:
+      return status;
+  }
 }
