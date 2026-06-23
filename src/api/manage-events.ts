@@ -83,6 +83,21 @@ class ManageEvents {
         return data;
     }
 
+    // ─── Get approved events ───
+    async getApprovedEvents() {
+        const { data, error } = await supabase
+            .from("events")
+            .select("*")
+            .eq("status", "approved")
+            .order("created_at", { ascending: false });
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        return data;
+    }
+
     // ─── Get events by creator user ID ───
     // Fetches all events created by a specific user
     // sorted by creation date in descending order

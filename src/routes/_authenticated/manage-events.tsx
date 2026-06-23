@@ -253,7 +253,14 @@ function FilterSelect({
       >
         {label}
       </span>
-      <Select value={value} onValueChange={onValueChange}>
+      <Select
+        value={value}
+        onValueChange={(val) => {
+          if (val !== null) {
+            onValueChange(val)
+          }
+        }}
+      >
         <SelectTrigger
           aria-labelledby={`${label}-filter-label`}
           className="h-10 min-w-40 rounded-xl border-border/60 bg-muted px-4 text-sm leading-5 text-foreground shadow-none"

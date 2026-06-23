@@ -17,6 +17,7 @@ type ManageEventsStore = {
     error: string | null;
 
     getAllEvents: () => Promise<void>;
+    getApprovedEvents: () => Promise<void>;
     getEventsByUserId: (userId: string) => Promise<void>;
     createEvent: (event: Omit<EventType, "id" | "created_at">) => Promise<boolean>;
     updateEvent: (
@@ -53,6 +54,23 @@ export const useManageEventsStore = create<ManageEventsStore>((set) => ({
                 isLoading: false,
             });
             toast.error("Failed to load events.");
+        }
+    },
+
+    // ─── Fetch Approved Events ───
+    // Loads only events with approved status
+    getApprovedEvents: async () => {
+        set({ isLoading: true, error: null });
+
+        try {
+            const events = await manageEvents.getApprovedEvents();
+            set({ events, isLoading: false });
+        } catch (error) {
+            set({
+                error: error instanceof Error ? error.message : "Failed to load approved events.",
+                isLoading: false,
+            });
+            toast.error("Failed to load approved events.");
         }
     },
 
