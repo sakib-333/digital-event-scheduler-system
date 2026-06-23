@@ -4,6 +4,7 @@ import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-route
 import {
   BarChart3,
   Bell,
+  Calendar,
   CalendarCheck,
   CalendarDays,
   CheckCircle2,
@@ -106,6 +107,12 @@ const primaryNavItems: NavItem[] = [
     icon: LayoutDashboard,
     label: "Overview",
     to: "/dashboard",
+    allowedRoles: ALL_ROLES,
+  },
+  {
+    icon: Calendar,
+    label: "Events",
+    to: "/events",
     allowedRoles: ALL_ROLES,
   },
   {

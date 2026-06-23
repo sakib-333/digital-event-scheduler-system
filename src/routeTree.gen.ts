@@ -19,6 +19,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedMyEventsRouteImport } from './routes/_authenticated/my-events'
 import { Route as AuthenticatedManageUsersRouteImport } from './routes/_authenticated/manage-users'
 import { Route as AuthenticatedManageEventsRouteImport } from './routes/_authenticated/manage-events'
+import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCreateEventRouteImport } from './routes/_authenticated/create-event'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
@@ -74,6 +75,11 @@ const AuthenticatedManageEventsRoute =
     path: '/manage-events',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedEventsRoute = AuthenticatedEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/create-event': typeof AuthenticatedCreateEventRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/events': typeof AuthenticatedEventsRoute
   '/manage-events': typeof AuthenticatedManageEventsRoute
   '/manage-users': typeof AuthenticatedManageUsersRoute
   '/my-events': typeof AuthenticatedMyEventsRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/create-event': typeof AuthenticatedCreateEventRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/events': typeof AuthenticatedEventsRoute
   '/manage-events': typeof AuthenticatedManageEventsRoute
   '/manage-users': typeof AuthenticatedManageUsersRoute
   '/my-events': typeof AuthenticatedMyEventsRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/create-event': typeof AuthenticatedCreateEventRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/events': typeof AuthenticatedEventsRoute
   '/_authenticated/manage-events': typeof AuthenticatedManageEventsRoute
   '/_authenticated/manage-users': typeof AuthenticatedManageUsersRoute
   '/_authenticated/my-events': typeof AuthenticatedMyEventsRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/create-event'
     | '/dashboard'
+    | '/events'
     | '/manage-events'
     | '/manage-users'
     | '/my-events'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/create-event'
     | '/dashboard'
+    | '/events'
     | '/manage-events'
     | '/manage-users'
     | '/my-events'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/_authenticated/analytics'
     | '/_authenticated/create-event'
     | '/_authenticated/dashboard'
+    | '/_authenticated/events'
     | '/_authenticated/manage-events'
     | '/_authenticated/manage-users'
     | '/_authenticated/my-events'
@@ -261,6 +273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedManageEventsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/events': {
+      id: '/_authenticated/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof AuthenticatedEventsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -289,6 +308,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedCreateEventRoute: typeof AuthenticatedCreateEventRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
   AuthenticatedManageEventsRoute: typeof AuthenticatedManageEventsRoute
   AuthenticatedManageUsersRoute: typeof AuthenticatedManageUsersRoute
   AuthenticatedMyEventsRoute: typeof AuthenticatedMyEventsRoute
@@ -300,6 +320,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedCreateEventRoute: AuthenticatedCreateEventRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEventsRoute: AuthenticatedEventsRoute,
   AuthenticatedManageEventsRoute: AuthenticatedManageEventsRoute,
   AuthenticatedManageUsersRoute: AuthenticatedManageUsersRoute,
   AuthenticatedMyEventsRoute: AuthenticatedMyEventsRoute,
