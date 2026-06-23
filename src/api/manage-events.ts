@@ -73,21 +73,28 @@ class ManageEvents {
     async getAllEvents() {
         const { data, error } = await supabase
             .from("events")
-            .select("*")
+            .select("*, event_participants(id)")
             .order("created_at", { ascending: false });
 
         if (error) {
             throw new Error(error.message);
         }
 
-        return data;
+        const events = (data ?? []) as Array<
+            EventType & { event_participants?: { id: string }[] }
+        >;
+
+        return events.map((event) => ({
+            ...event,
+            attendee_count: event.event_participants?.length ?? 0,
+        })) as EventType[];
     }
 
     // ─── Get approved events ───
     async getApprovedEvents() {
         const { data, error } = await supabase
             .from("events")
-            .select("*")
+            .select("*, event_participants(id)")
             .eq("status", "approved")
             .order("created_at", { ascending: false });
 
@@ -95,7 +102,14 @@ class ManageEvents {
             throw new Error(error.message);
         }
 
-        return data;
+        const events = (data ?? []) as Array<
+            EventType & { event_participants?: { id: string }[] }
+        >;
+
+        return events.map((event) => ({
+            ...event,
+            attendee_count: event.event_participants?.length ?? 0,
+        })) as EventType[];
     }
 
     // ─── Get events by creator user ID ───
@@ -104,7 +118,7 @@ class ManageEvents {
     async getEventsByUserId(userId: string) {
         const { data, error } = await supabase
             .from("events")
-            .select("*")
+            .select("*, event_participants(id)")
             .eq("created_by", userId)
             .order("created_at", { ascending: false });
 
@@ -112,7 +126,14 @@ class ManageEvents {
             throw new Error(error.message);
         }
 
-        return data;
+        const events = (data ?? []) as Array<
+            EventType & { event_participants?: { id: string }[] }
+        >;
+
+        return events.map((event) => ({
+            ...event,
+            attendee_count: event.event_participants?.length ?? 0,
+        })) as EventType[];
     }
 }
 

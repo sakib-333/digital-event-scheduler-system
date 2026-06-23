@@ -1,18 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import {
-  CalendarDays,
-  Clock,
-  MapPin,
-  Search,
-  Users,
-} from "lucide-react";
+import { Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { EventCard } from "@/components/event-card";
 import { useAuth } from "@/context/auth-context";
 import { useManageEventsStore } from "@/stores/manage-events-store";
-import type { EventType } from "@/types/event";
 
 export const Route = createFileRoute("/_authenticated/my-events")({
   component: MyEventsPage,
@@ -47,23 +40,6 @@ const EVENT_CATEGORIES: { label: string; value: EventCategory }[] = [
 // ─────────────────────────────────────────────────────
 // Event Status Type Definition
 // ─────────────────────────────────────────────────────
-type EventStatus = "Registered" | "Organizer" | "Waitlisted";
-
-// ─────────────────────────────────────────────────────
-// Utility: Get status badge className based on status type
-// ─────────────────────────────────────────────────────
-function getStatusClassName(status: EventStatus) {
-  if (status === "Registered") {
-    return "bg-primary text-primary-foreground";
-  }
-
-  if (status === "Organizer") {
-    return "bg-chart-4 text-primary-foreground";
-  }
-
-  return "bg-muted text-muted-foreground";
-}
-
 // ─────────────────────────────────────────────────────
 // Event Controls Component
 // Handles search and category filtering
@@ -116,92 +92,6 @@ function EventControls({
   );
 }
 
-function MyEventCard({ event }: { event: EventType }) {
-  // ─────────────────────────────────────────────────────
-  // Format event date and time for display
-  // ─────────────────────────────────────────────────────
-  const eventDate = event.start_date
-    ? new Date(event.start_date).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : "TBD";
-
-  const eventTime = event.start_time
-    ? event.start_time.substring(0, 5)
-    : "TBD";
-
-  const eventStatus: EventStatus = event.created_by ? "Organizer" : "Registered";
-
-  return (
-    <article className="group overflow-hidden rounded-xl border border-border/70 bg-card/80 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-      <div className="relative h-40">
-        <img
-          alt={event.title}
-          className="h-full w-full object-cover"
-          src={event.banner_image || "https://via.placeholder.com/400x200"}
-        />
-        <div className="absolute right-4 top-4">
-          <span
-            className={cn(
-              "rounded-lg px-2 py-1 text-xs font-semibold leading-4 backdrop-blur-sm",
-              getStatusClassName(eventStatus),
-            )}
-          >
-            {eventStatus}
-          </span>
-        </div>
-      </div>
-
-      <div className="p-6">
-        <div className="mb-2 flex items-start justify-between gap-4">
-          <span className="text-xs font-semibold uppercase leading-4 text-primary">
-            {event.category || "Event"}
-          </span>
-          <span className="flex shrink-0 items-center gap-1 text-sm leading-5 text-muted-foreground">
-            <Users className="size-4" aria-hidden="true" />
-            {event.capacity || 0} spots
-          </span>
-        </div>
-
-        <h2 className="mb-4 truncate text-xl font-semibold leading-7 text-foreground">
-          {event.title}
-        </h2>
-
-        <div className="mb-6 space-y-1">
-          <EventMeta icon={CalendarDays}>{eventDate}</EventMeta>
-          <EventMeta icon={Clock}>{eventTime}</EventMeta>
-          <EventMeta icon={MapPin}>{event.location || "Location TBD"}</EventMeta>
-        </div>
-
-        <div className="border-t border-border/60 pt-4">
-          <Button className="h-10 w-full rounded-lg" type="button">
-            View Details
-          </Button>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function EventMeta({
-  children,
-  icon: Icon,
-}: {
-  children: React.ReactNode;
-  icon: typeof CalendarDays;
-}) {
-  // ─────────────────────────────────────────────────────
-  // Display event metadata with icon and text
-  // ─────────────────────────────────────────────────────
-  return (
-    <div className="flex items-center gap-2 text-sm leading-5 text-muted-foreground">
-      <Icon className="size-4 text-primary" aria-hidden="true" />
-      <span>{children}</span>
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────────────
 // Main Events Page Component
@@ -301,7 +191,15 @@ function MyEventsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredEvents.map((event) => (
-            <MyEventCard event={event} key={event.id} />
+            <EventCard
+              event={event}
+              key={event.id}
+              action={
+                <Button className="h-10 rounded-lg" type="button">
+                  View Details
+                </Button>
+              }
+            />
           ))}
         </div>
       )}

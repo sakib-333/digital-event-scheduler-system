@@ -644,19 +644,18 @@ function ActionButton({
   children,
   label,
   tone,
-  onClick,
   disabled,
 }: {
   children: React.ReactNode;
   label: string;
   tone: "primary" | "destructive" | "muted" | "success" | "warning";
-  onClick?: () => void;
   disabled?: boolean;
 }) {
   return (
-    <button
+    <span
       className={cn(
-        "rounded-lg p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+        "inline-flex items-center justify-center rounded-lg p-2 transition-colors",
+        disabled && "opacity-50 cursor-not-allowed",
         tone === "primary" && "text-primary hover:bg-primary/10",
         tone === "success" && "text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30",
         tone === "warning" && "text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30",
@@ -664,13 +663,11 @@ function ActionButton({
         tone === "muted" && "text-muted-foreground hover:bg-muted",
       )}
       title={label}
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
+      aria-hidden={disabled ? "true" : undefined}
     >
       {children}
       <span className="sr-only">{label}</span>
-    </button>
+    </span>
   );
 }
 
