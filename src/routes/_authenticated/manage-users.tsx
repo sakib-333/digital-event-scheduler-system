@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useManageUsersStore } from "@/stores/manage-users-store";
 import type { UserType } from "@/types/user";
-import { formatJoinedDate, getNameInitials, isNewThisWeek } from "@/utils";
+import { formatDate, getNameInitials, isNewThisWeek } from "@/utils";
 import { requireRouteRoles } from "@/utils/route-permissions";
 
 export const Route = createFileRoute("/_authenticated/manage-users")({
@@ -318,7 +318,7 @@ function UserRow({
         <RoleBadge role={role} />
       </td>
       <td className="px-6 py-4 text-sm leading-5 text-foreground">
-        {formatJoinedDate(user.created_at)}
+        {formatDate(user.created_at)}
       </td>
       <td className="px-6 py-4">
         <div className="flex justify-end">

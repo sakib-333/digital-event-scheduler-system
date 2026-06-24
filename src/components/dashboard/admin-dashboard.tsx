@@ -432,8 +432,15 @@ function DashboardHeader() {
   const user = useAuthStore((state) => state.user);
   const allowedNavItems = getNavItemsByRole(user, navItems);
 
-  const activeTitle =
+  let activeTitle =
     allowedNavItems.find((item) => item.to === pathname)?.label ?? "Overview";
+
+  // Map dynamic event detail routes to a fixed header title.
+  // Matches both `/event/:id` and `/_authenticated/event/:id`.
+  const eventDetailRegex = /^\/(?:_authenticated\/)?event\/[^/]+$/;
+  if (eventDetailRegex.test(pathname)) {
+    activeTitle = "Event Details";
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/60 bg-background/70 px-6 backdrop-blur-md">

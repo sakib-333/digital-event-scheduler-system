@@ -60,12 +60,28 @@ export const isValidBDPhoneNumber = (phone: string): boolean => {
 };
 
 /*━━ Format date ━━━━━━ */
-export const formatJoinedDate = (createdAt: string | undefined) => {
+export const formatDate = (createdAt: string | undefined) => {
     if (!createdAt) {
         return "Unknown";
     }
 
     return moment(createdAt).format("YYYY-MM-DD");
+}
+
+/*━━ Format time (12-hour) ━━━━━━ */
+export const formatTime = (timeString: string | undefined) => {
+    if (!timeString) return "TBD";
+
+    // Accepts formats like HH:mm:ss or HH:mm. Use strict parsing first.
+    const m = moment(timeString, ["HH:mm:ss", "HH:mm"], true);
+    if (!m.isValid()) {
+        // Fallback to lax parsing in case other formats are provided
+        const alt = moment(timeString);
+        if (!alt.isValid()) return "TBD";
+        return alt.format("h:mm A");
+    }
+
+    return m.format("h:mm A");
 }
 
 /*━━ Check new in this week ━━━━━━ */
