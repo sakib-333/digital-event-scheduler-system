@@ -1,4 +1,3 @@
-import type { ReactNode } from "react"
 import { CalendarDays, Clock, MapPin, Users } from "lucide-react"
 import fallbackBanner from "/images/event-fallback-image.jpg"
 
@@ -13,22 +12,16 @@ import {
 } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import type { EventType } from "@/types/event"
+import { Link } from "@tanstack/react-router"
+import moment from "moment"
 
 type EventCardProps = {
   event: EventType
   badge?: string
-  action?: ReactNode
   className?: string
 }
 
-export function EventCard({ event, badge, action, className }: EventCardProps) {
-  const eventDate = event.start_date
-    ? new Date(event.start_date).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : "TBD"
+export function EventCard({ event, badge, className }: EventCardProps) {
 
   const eventTime = event.start_time ? event.start_time.substring(0, 5) : "TBD"
   const statusLabel = badge ||
@@ -65,7 +58,7 @@ export function EventCard({ event, badge, action, className }: EventCardProps) {
         <div className="grid gap-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <CalendarDays className="size-4 text-primary" aria-hidden="true" />
-            {eventDate}
+            {moment(event.start_date).format("MMM D, YYYY") || "Date TBD"}
           </div>
           <div className="flex items-center gap-2">
             <Clock className="size-4 text-primary" aria-hidden="true" />
@@ -85,7 +78,15 @@ export function EventCard({ event, badge, action, className }: EventCardProps) {
             {event.attendee_count ?? 0} attendee{(event.attendee_count ?? 0) !== 1 ? "s" : ""}
           </span>
         </div>
-        {action ? <CardAction>{action}</CardAction> : null}
+        <CardAction>
+          <Link
+            to="/event/$eventId"
+            params={{ eventId: event.id }}
+            className="h-10 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+          >
+            View Details
+          </Link>
+        </CardAction>
       </CardFooter>
     </Card>
   )

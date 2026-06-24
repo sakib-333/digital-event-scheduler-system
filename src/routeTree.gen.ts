@@ -23,6 +23,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedEventManageEventsRouteImport } from './routes/_authenticated/event/manage-events'
 import { Route as AuthenticatedEventCreateEventRouteImport } from './routes/_authenticated/event/create-event'
+import { Route as AuthenticatedEventEventIdRouteImport } from './routes/_authenticated/event/$eventId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -96,6 +97,12 @@ const AuthenticatedEventCreateEventRoute =
     path: '/event/create-event',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedEventEventIdRoute =
+  AuthenticatedEventEventIdRouteImport.update({
+    id: '/event/$eventId',
+    path: '/event/$eventId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/my-events': typeof AuthenticatedMyEventsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/event/$eventId': typeof AuthenticatedEventEventIdRoute
   '/event/create-event': typeof AuthenticatedEventCreateEventRoute
   '/event/manage-events': typeof AuthenticatedEventManageEventsRoute
 }
@@ -124,6 +132,7 @@ export interface FileRoutesByTo {
   '/my-events': typeof AuthenticatedMyEventsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/event/$eventId': typeof AuthenticatedEventEventIdRoute
   '/event/create-event': typeof AuthenticatedEventCreateEventRoute
   '/event/manage-events': typeof AuthenticatedEventManageEventsRoute
 }
@@ -141,6 +150,7 @@ export interface FileRoutesById {
   '/_authenticated/my-events': typeof AuthenticatedMyEventsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/event/$eventId': typeof AuthenticatedEventEventIdRoute
   '/_authenticated/event/create-event': typeof AuthenticatedEventCreateEventRoute
   '/_authenticated/event/manage-events': typeof AuthenticatedEventManageEventsRoute
 }
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/my-events'
     | '/profile'
     | '/settings'
+    | '/event/$eventId'
     | '/event/create-event'
     | '/event/manage-events'
   fileRoutesByTo: FileRoutesByTo
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/my-events'
     | '/profile'
     | '/settings'
+    | '/event/$eventId'
     | '/event/create-event'
     | '/event/manage-events'
   id:
@@ -189,6 +201,7 @@ export interface FileRouteTypes {
     | '/_authenticated/my-events'
     | '/_authenticated/profile'
     | '/_authenticated/settings'
+    | '/_authenticated/event/$eventId'
     | '/_authenticated/event/create-event'
     | '/_authenticated/event/manage-events'
   fileRoutesById: FileRoutesById
@@ -301,6 +314,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEventCreateEventRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/event/$eventId': {
+      id: '/_authenticated/event/$eventId'
+      path: '/event/$eventId'
+      fullPath: '/event/$eventId'
+      preLoaderRoute: typeof AuthenticatedEventEventIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -312,6 +332,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMyEventsRoute: typeof AuthenticatedMyEventsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedEventEventIdRoute: typeof AuthenticatedEventEventIdRoute
   AuthenticatedEventCreateEventRoute: typeof AuthenticatedEventCreateEventRoute
   AuthenticatedEventManageEventsRoute: typeof AuthenticatedEventManageEventsRoute
 }
@@ -324,6 +345,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMyEventsRoute: AuthenticatedMyEventsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedEventEventIdRoute: AuthenticatedEventEventIdRoute,
   AuthenticatedEventCreateEventRoute: AuthenticatedEventCreateEventRoute,
   AuthenticatedEventManageEventsRoute: AuthenticatedEventManageEventsRoute,
 }

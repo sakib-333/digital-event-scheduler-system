@@ -2,7 +2,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
 import { EventCard } from '@/components/event-card'
 import { useManageEventsStore } from '@/stores/manage-events-store'
 
@@ -127,11 +126,6 @@ function ApprovedEventsPage() {
             <EventCard
               event={event}
               key={event.id}
-              action={
-                <Button className="h-10 rounded-lg" type="button">
-                  View Details
-                </Button>
-              }
             />
           ))}
         </div>
