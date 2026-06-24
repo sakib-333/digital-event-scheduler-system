@@ -40,7 +40,7 @@ import { useManageEventsStore } from "@/stores/manage-events-store";
 import type { EventType } from "@/types/event";
 import { requireRouteRoles } from "@/utils/route-permissions";
 
-export const Route = createFileRoute("/_authenticated/manage-events")({
+export const Route = createFileRoute("/_authenticated/event/manage-events")({
   beforeLoad: async ({ context }) => {
     await requireRouteRoles(context.auth, ["admin", "moderator"]);
   },
@@ -131,7 +131,7 @@ function ManageEventsPage() {
   return (
     <div className="space-y-6">
       <header className="flex flex-col justify-end gap-4 md:flex-row md:items-center">
-        <Link to="/create-event">
+        <Link to="/event/create-event">
           <Button className="h-11 gap-2 rounded-xl px-6 shadow-sm" type="button">
             <PlusCircle className="size-5" aria-hidden="true" />
             <span>Create New Event</span>

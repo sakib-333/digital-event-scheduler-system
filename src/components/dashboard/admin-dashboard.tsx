@@ -124,7 +124,7 @@ const primaryNavItems: NavItem[] = [
   {
     icon: CalendarCheck,
     label: "Manage Events",
-    to: "/manage-events",
+    to: "/event/manage-events",
     allowedRoles: ["admin", "moderator"],
   },
   {
@@ -696,7 +696,7 @@ function MobileDashboardNav() {
         <div className="-mt-8">
           <button
             className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-90"
-            onClick={() => navigate({ to: "/manage-events" })}
+            onClick={() => navigate({ to: "/event/manage-events" })}
             type="button"
           >
             <Plus className="size-8" aria-hidden="true" />

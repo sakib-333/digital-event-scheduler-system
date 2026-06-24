@@ -18,7 +18,7 @@ import type { EventType } from "@/types/event";
 import { uploadImage } from "@/utils";
 
 // ─── Route Definition ───
-export const Route = createFileRoute("/_authenticated/create-event")({
+export const Route = createFileRoute("/_authenticated/event/create-event")({
   component: CreateEventPage,
 });
 
@@ -142,7 +142,7 @@ function CreateEventPage() {
 
     const success = await createEvent(eventPayload);
     if (success) {
-      navigate({ to: "/manage-events" });
+      navigate({ to: "/event/manage-events" });
     }
   };
 

@@ -18,11 +18,11 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedMyEventsRouteImport } from './routes/_authenticated/my-events'
 import { Route as AuthenticatedManageUsersRouteImport } from './routes/_authenticated/manage-users'
-import { Route as AuthenticatedManageEventsRouteImport } from './routes/_authenticated/manage-events'
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedCreateEventRouteImport } from './routes/_authenticated/create-event'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
+import { Route as AuthenticatedEventManageEventsRouteImport } from './routes/_authenticated/event/manage-events'
+import { Route as AuthenticatedEventCreateEventRouteImport } from './routes/_authenticated/event/create-event'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -69,12 +69,6 @@ const AuthenticatedManageUsersRoute =
     path: '/manage-users',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedManageEventsRoute =
-  AuthenticatedManageEventsRouteImport.update({
-    id: '/manage-events',
-    path: '/manage-events',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedEventsRoute = AuthenticatedEventsRouteImport.update({
   id: '/events',
   path: '/events',
@@ -85,17 +79,23 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedCreateEventRoute =
-  AuthenticatedCreateEventRouteImport.update({
-    id: '/create-event',
-    path: '/create-event',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEventManageEventsRoute =
+  AuthenticatedEventManageEventsRouteImport.update({
+    id: '/event/manage-events',
+    path: '/event/manage-events',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEventCreateEventRoute =
+  AuthenticatedEventCreateEventRouteImport.update({
+    id: '/event/create-event',
+    path: '/event/create-event',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,14 +103,14 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/create-event': typeof AuthenticatedCreateEventRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
-  '/manage-events': typeof AuthenticatedManageEventsRoute
   '/manage-users': typeof AuthenticatedManageUsersRoute
   '/my-events': typeof AuthenticatedMyEventsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/event/create-event': typeof AuthenticatedEventCreateEventRoute
+  '/event/manage-events': typeof AuthenticatedEventManageEventsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,14 +118,14 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/create-event': typeof AuthenticatedCreateEventRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
-  '/manage-events': typeof AuthenticatedManageEventsRoute
   '/manage-users': typeof AuthenticatedManageUsersRoute
   '/my-events': typeof AuthenticatedMyEventsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/event/create-event': typeof AuthenticatedEventCreateEventRoute
+  '/event/manage-events': typeof AuthenticatedEventManageEventsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -135,14 +135,14 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
-  '/_authenticated/create-event': typeof AuthenticatedCreateEventRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
-  '/_authenticated/manage-events': typeof AuthenticatedManageEventsRoute
   '/_authenticated/manage-users': typeof AuthenticatedManageUsersRoute
   '/_authenticated/my-events': typeof AuthenticatedMyEventsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/event/create-event': typeof AuthenticatedEventCreateEventRoute
+  '/_authenticated/event/manage-events': typeof AuthenticatedEventManageEventsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -152,14 +152,14 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/analytics'
-    | '/create-event'
     | '/dashboard'
     | '/events'
-    | '/manage-events'
     | '/manage-users'
     | '/my-events'
     | '/profile'
     | '/settings'
+    | '/event/create-event'
+    | '/event/manage-events'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -167,14 +167,14 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/analytics'
-    | '/create-event'
     | '/dashboard'
     | '/events'
-    | '/manage-events'
     | '/manage-users'
     | '/my-events'
     | '/profile'
     | '/settings'
+    | '/event/create-event'
+    | '/event/manage-events'
   id:
     | '__root__'
     | '/'
@@ -183,14 +183,14 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/_authenticated/analytics'
-    | '/_authenticated/create-event'
     | '/_authenticated/dashboard'
     | '/_authenticated/events'
-    | '/_authenticated/manage-events'
     | '/_authenticated/manage-users'
     | '/_authenticated/my-events'
     | '/_authenticated/profile'
     | '/_authenticated/settings'
+    | '/_authenticated/event/create-event'
+    | '/_authenticated/event/manage-events'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -266,13 +266,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedManageUsersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/manage-events': {
-      id: '/_authenticated/manage-events'
-      path: '/manage-events'
-      fullPath: '/manage-events'
-      preLoaderRoute: typeof AuthenticatedManageEventsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/events': {
       id: '/_authenticated/events'
       path: '/events'
@@ -287,13 +280,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/create-event': {
-      id: '/_authenticated/create-event'
-      path: '/create-event'
-      fullPath: '/create-event'
-      preLoaderRoute: typeof AuthenticatedCreateEventRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/analytics': {
       id: '/_authenticated/analytics'
       path: '/analytics'
@@ -301,31 +287,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/event/manage-events': {
+      id: '/_authenticated/event/manage-events'
+      path: '/event/manage-events'
+      fullPath: '/event/manage-events'
+      preLoaderRoute: typeof AuthenticatedEventManageEventsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/event/create-event': {
+      id: '/_authenticated/event/create-event'
+      path: '/event/create-event'
+      fullPath: '/event/create-event'
+      preLoaderRoute: typeof AuthenticatedEventCreateEventRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
-  AuthenticatedCreateEventRoute: typeof AuthenticatedCreateEventRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
-  AuthenticatedManageEventsRoute: typeof AuthenticatedManageEventsRoute
   AuthenticatedManageUsersRoute: typeof AuthenticatedManageUsersRoute
   AuthenticatedMyEventsRoute: typeof AuthenticatedMyEventsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedEventCreateEventRoute: typeof AuthenticatedEventCreateEventRoute
+  AuthenticatedEventManageEventsRoute: typeof AuthenticatedEventManageEventsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
-  AuthenticatedCreateEventRoute: AuthenticatedCreateEventRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
-  AuthenticatedManageEventsRoute: AuthenticatedManageEventsRoute,
   AuthenticatedManageUsersRoute: AuthenticatedManageUsersRoute,
   AuthenticatedMyEventsRoute: AuthenticatedMyEventsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedEventCreateEventRoute: AuthenticatedEventCreateEventRoute,
+  AuthenticatedEventManageEventsRoute: AuthenticatedEventManageEventsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
