@@ -1,4 +1,5 @@
 import moment from "moment";
+import { useEffect } from "react";
 
 /*━━ User role label map ━━━━━━ */
 export const userTypeMap = {
@@ -95,4 +96,11 @@ export const isNewThisWeek = (createdAt: string | undefined) => {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     return createdDate >= sevenDaysAgo;
+}
+
+/*━━ Set page title ━━━━━━ */
+export const usePageTitle = (title: string) => {
+    useEffect(() => {
+        document.title = "DESS" + " | " + title;
+    }, [title])
 }

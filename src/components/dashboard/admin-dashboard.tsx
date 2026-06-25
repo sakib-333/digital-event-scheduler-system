@@ -18,6 +18,7 @@ import {
   Settings,
   User,
   Users,
+  Clock
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,12 @@ const primaryNavItems: NavItem[] = [
     icon: Calendar,
     label: "Events",
     to: "/events",
+    allowedRoles: ALL_ROLES,
+  },
+  {
+    icon: Clock,
+    label: "Calendar",
+    to: "/calendar",
     allowedRoles: ALL_ROLES,
   },
   {

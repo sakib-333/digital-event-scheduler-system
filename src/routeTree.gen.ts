@@ -20,6 +20,7 @@ import { Route as AuthenticatedMyEventsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedManageUsersRouteImport } from './routes/_authenticated/manage-users'
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedEventManageEventsRouteImport } from './routes/_authenticated/event/manage-events'
 import { Route as AuthenticatedEventCreateEventRouteImport } from './routes/_authenticated/event/create-event'
@@ -81,6 +82,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/calendar': typeof AuthenticatedCalendarRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
   '/manage-users': typeof AuthenticatedManageUsersRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/calendar': typeof AuthenticatedCalendarRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
   '/manage-users': typeof AuthenticatedManageUsersRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
+  '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
   '/_authenticated/manage-users': typeof AuthenticatedManageUsersRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/analytics'
+    | '/calendar'
     | '/dashboard'
     | '/events'
     | '/manage-users'
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/analytics'
+    | '/calendar'
     | '/dashboard'
     | '/events'
     | '/manage-users'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/_authenticated/analytics'
+    | '/_authenticated/calendar'
     | '/_authenticated/dashboard'
     | '/_authenticated/events'
     | '/_authenticated/manage-users'
@@ -306,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/calendar': {
+      id: '/_authenticated/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof AuthenticatedCalendarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/analytics': {
       id: '/_authenticated/analytics'
       path: '/analytics'
@@ -346,6 +365,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
+  AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
   AuthenticatedManageUsersRoute: typeof AuthenticatedManageUsersRoute
@@ -360,6 +380,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
+  AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
   AuthenticatedManageUsersRoute: AuthenticatedManageUsersRoute,
