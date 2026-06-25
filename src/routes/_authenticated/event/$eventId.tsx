@@ -1,7 +1,7 @@
 
 /* eslint-disable react-refresh/only-export-components */
-import { ArrowLeft, CalendarDays, Check, Clock, Edit2, MapPin, Users, Link2 } from "lucide-react"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { ArrowLeft, CalendarDays, Check, Clock, Edit2, MapPin, Trash2, Users, Link2 } from "lucide-react"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useAuth } from "@/context/auth-context"
 import { useManageEventsStore } from "@/stores/manage-events-store"
 import { Button } from "@/components/ui/button"
@@ -47,14 +47,26 @@ function RouteComponent() {
 
   const ctaButton = event ? (
     isOwner ? (
-      <button
-        type="button"
-        className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-background/90 px-4 py-3 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary"
-        aria-label="Edit event"
-      >
-        <Edit2 className="size-4" aria-hidden="true" />
-        Edit event
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <Link to="/event/edit-event/$eventId" params={{ eventId }}>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-background/90 px-4 py-3 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary"
+            aria-label="Edit event"
+          >
+            <Edit2 className="size-4" aria-hidden="true" />
+            Edit event
+          </button>
+        </Link>
+        <button
+          type="button"
+          className="inline-flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive transition hover:border-destructive/70 hover:bg-destructive/20"
+          aria-label="Delete event"
+        >
+          <Trash2 className="size-4" aria-hidden="true" />
+          Delete event
+        </button>
+      </div>
     ) : hasJoined ? (
       <Button className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold"
         variant="secondary"

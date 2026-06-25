@@ -1,11 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { PlusCircle, Search } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/event-card";
 import { useAuth } from "@/context/auth-context";
 import { useManageEventsStore } from "@/stores/manage-events-store";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/my-events")({
   component: MyEventsPage,
@@ -171,6 +171,12 @@ function MyEventsPage() {
             {filteredEvents.length !== 1 ? "s" : ""}
           </p>
         </div>
+        <Link to="/event/create-event">
+          <Button className="h-11 gap-2 rounded-xl px-6 shadow-sm" type="button">
+            <PlusCircle className="size-5" aria-hidden="true" />
+            <span>Create New Event</span>
+          </Button>
+        </Link>
       </header>
 
       <EventControls
@@ -194,11 +200,6 @@ function MyEventsPage() {
             <EventCard
               event={event}
               key={event.id}
-              action={
-                <Button className="h-10 rounded-lg" type="button">
-                  View Details
-                </Button>
-              }
             />
           ))}
         </div>

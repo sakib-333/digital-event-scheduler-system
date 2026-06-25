@@ -24,6 +24,7 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedEventManageEventsRouteImport } from './routes/_authenticated/event/manage-events'
 import { Route as AuthenticatedEventCreateEventRouteImport } from './routes/_authenticated/event/create-event'
 import { Route as AuthenticatedEventEventIdRouteImport } from './routes/_authenticated/event/$eventId'
+import { Route as AuthenticatedEventEditEventEventIdRouteImport } from './routes/_authenticated/event/edit-event/$eventId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -103,6 +104,12 @@ const AuthenticatedEventEventIdRoute =
     path: '/event/$eventId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedEventEditEventEventIdRoute =
+  AuthenticatedEventEditEventEventIdRouteImport.update({
+    id: '/event/edit-event/$eventId',
+    path: '/event/edit-event/$eventId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/event/$eventId': typeof AuthenticatedEventEventIdRoute
   '/event/create-event': typeof AuthenticatedEventCreateEventRoute
   '/event/manage-events': typeof AuthenticatedEventManageEventsRoute
+  '/event/edit-event/$eventId': typeof AuthenticatedEventEditEventEventIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -135,6 +143,7 @@ export interface FileRoutesByTo {
   '/event/$eventId': typeof AuthenticatedEventEventIdRoute
   '/event/create-event': typeof AuthenticatedEventCreateEventRoute
   '/event/manage-events': typeof AuthenticatedEventManageEventsRoute
+  '/event/edit-event/$eventId': typeof AuthenticatedEventEditEventEventIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -153,6 +162,7 @@ export interface FileRoutesById {
   '/_authenticated/event/$eventId': typeof AuthenticatedEventEventIdRoute
   '/_authenticated/event/create-event': typeof AuthenticatedEventCreateEventRoute
   '/_authenticated/event/manage-events': typeof AuthenticatedEventManageEventsRoute
+  '/_authenticated/event/edit-event/$eventId': typeof AuthenticatedEventEditEventEventIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/event/$eventId'
     | '/event/create-event'
     | '/event/manage-events'
+    | '/event/edit-event/$eventId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/event/$eventId'
     | '/event/create-event'
     | '/event/manage-events'
+    | '/event/edit-event/$eventId'
   id:
     | '__root__'
     | '/'
@@ -204,6 +216,7 @@ export interface FileRouteTypes {
     | '/_authenticated/event/$eventId'
     | '/_authenticated/event/create-event'
     | '/_authenticated/event/manage-events'
+    | '/_authenticated/event/edit-event/$eventId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -321,6 +334,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEventEventIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/event/edit-event/$eventId': {
+      id: '/_authenticated/event/edit-event/$eventId'
+      path: '/event/edit-event/$eventId'
+      fullPath: '/event/edit-event/$eventId'
+      preLoaderRoute: typeof AuthenticatedEventEditEventEventIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -335,6 +355,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEventEventIdRoute: typeof AuthenticatedEventEventIdRoute
   AuthenticatedEventCreateEventRoute: typeof AuthenticatedEventCreateEventRoute
   AuthenticatedEventManageEventsRoute: typeof AuthenticatedEventManageEventsRoute
+  AuthenticatedEventEditEventEventIdRoute: typeof AuthenticatedEventEditEventEventIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -348,6 +369,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEventEventIdRoute: AuthenticatedEventEventIdRoute,
   AuthenticatedEventCreateEventRoute: AuthenticatedEventCreateEventRoute,
   AuthenticatedEventManageEventsRoute: AuthenticatedEventManageEventsRoute,
+  AuthenticatedEventEditEventEventIdRoute:
+    AuthenticatedEventEditEventEventIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
