@@ -53,7 +53,6 @@ type StatCard = {
   icon: LucideIcon;
   iconClassName: string;
   label: string;
-  meta: string;
   metaClassName?: string;
   value: string;
 };
@@ -199,7 +198,6 @@ const stats: StatCard[] = [
     icon: CalendarCheck,
     iconClassName: "bg-primary/10 text-primary",
     label: "Total Events",
-    meta: "+12%",
     metaClassName: "bg-chart-3/10 text-chart-3",
     value: "1,284",
   },
@@ -207,7 +205,6 @@ const stats: StatCard[] = [
     icon: CalendarDays,
     iconClassName: "bg-chart-4/10 text-chart-4",
     label: "Pending Approval",
-    meta: "Active",
     metaClassName: "text-chart-4",
     value: "42",
   },
@@ -215,14 +212,12 @@ const stats: StatCard[] = [
     icon: CheckCircle2,
     iconClassName: "bg-chart-3/10 text-chart-3",
     label: "Approved",
-    meta: "Monthly",
     value: "856",
   },
   {
     icon: CircleX,
     iconClassName: "bg-destructive/10 text-destructive",
     label: "Cancelled",
-    meta: "-3%",
     metaClassName: "text-destructive",
     value: "18",
   },
@@ -230,7 +225,6 @@ const stats: StatCard[] = [
     icon: Users,
     iconClassName: "bg-secondary text-secondary-foreground",
     label: "Total Users",
-    meta: "Total",
     value: "4,912",
   },
 ];
@@ -513,14 +507,6 @@ function StatSummaryCard({ stat }: { stat: StatCard }) {
       <div className="mb-4 flex items-center justify-between">
         <span className={cn("rounded-lg p-2", stat.iconClassName)}>
           <Icon className="size-5" aria-hidden="true" />
-        </span>
-        <span
-          className={cn(
-            "rounded-full px-2 py-0.5 text-xs font-semibold leading-4 text-muted-foreground",
-            stat.metaClassName,
-          )}
-        >
-          {stat.meta}
         </span>
       </div>
       <p className="text-sm leading-5 text-muted-foreground">
