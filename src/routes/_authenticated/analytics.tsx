@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Activity,
   CalendarCheck,
   CircleCheck,
   CircleX,
-  TrendingUp,
 } from "lucide-react";
 import {
   Area,
@@ -42,37 +40,6 @@ const attendanceData = [
   { category: "Social", actual: 360, capacity: 440 },
   { category: "Academic", actual: 510, capacity: 600 },
   { category: "Symposium", actual: 280, capacity: 320 },
-];
-
-const venueUtilization = [
-  {
-    name: "Main Auditorium",
-    utilization: "92%",
-    events: 28,
-    trend: "+8%",
-    widthClassName: "w-[92%]",
-  },
-  {
-    name: "Engineering Hall",
-    utilization: "84%",
-    events: 22,
-    trend: "+5%",
-    widthClassName: "w-[84%]",
-  },
-  {
-    name: "Faculty Lounge",
-    utilization: "76%",
-    events: 18,
-    trend: "+3%",
-    widthClassName: "w-[76%]",
-  },
-  {
-    name: "Physics Lab 302",
-    utilization: "68%",
-    events: 14,
-    trend: "-2%",
-    widthClassName: "w-[68%]",
-  },
 ];
 
 const chartColors = [
@@ -296,11 +263,6 @@ function AnalyticsPage() {
           </ResponsiveContainer>
         </ChartPanel>
       </div>
-
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_0.8fr]">
-        <VenueUtilizationTable />
-        <OperationalInsights />
-      </section>
     </div>
   );
 }
@@ -332,102 +294,6 @@ function ChartPanel({
         </p>
       </div>
       {children}
-    </section>
-  );
-}
-
-function VenueUtilizationTable() {
-  return (
-    <section className="overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-sm backdrop-blur-xl">
-      <div className="border-b border-border/60 p-6">
-        <h2 className="text-xl font-semibold leading-7 text-foreground">
-          Venue Utilization
-        </h2>
-        <p className="mt-1 text-sm leading-5 text-muted-foreground">
-          High-demand spaces and monthly usage movement.
-        </p>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left">
-          <thead>
-            <tr className="bg-muted/60">
-              {["Venue", "Events", "Utilization", "Trend"].map((heading) => (
-                <th
-                  className="px-6 py-4 text-sm font-medium leading-5 text-muted-foreground"
-                  key={heading}
-                >
-                  {heading}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/50">
-            {venueUtilization.map((venue) => (
-              <tr className="transition-colors hover:bg-muted/40" key={venue.name}>
-                <td className="px-6 py-4 text-sm font-semibold leading-5 text-foreground">
-                  {venue.name}
-                </td>
-                <td className="px-6 py-4 text-sm leading-5 text-foreground">
-                  {venue.events}
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-28 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={cn(
-                          "h-full rounded-full bg-primary",
-                          venue.widthClassName,
-                        )}
-                      />
-                    </div>
-                    <span className="text-sm leading-5 text-muted-foreground">
-                      {venue.utilization}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm font-semibold leading-5 text-primary">
-                  {venue.trend}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  );
-}
-
-function OperationalInsights() {
-  return (
-    <section className="rounded-2xl border border-border/70 bg-card/80 p-6 shadow-sm backdrop-blur-xl">
-      <div className="mb-5 flex items-start gap-3">
-        <span className="rounded-lg bg-primary/10 p-2 text-primary">
-          <Activity className="size-5" aria-hidden="true" />
-        </span>
-        <div>
-          <h2 className="text-xl font-semibold leading-7 text-foreground">
-            Operational Notes
-          </h2>
-          <p className="mt-1 text-sm leading-5 text-muted-foreground">
-            Practical signals for the scheduling office.
-          </p>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {[
-          "Workshop demand is leading category growth and may need more lab availability.",
-          "Approval throughput remains strong, with pending volume below the monthly target.",
-          "Main Auditorium is near peak utilization; avoid overlapping large academic events.",
-        ].map((item) => (
-          <div className="rounded-xl border border-border/60 bg-muted/40 p-4" key={item}>
-            <div className="flex gap-3">
-              <TrendingUp className="mt-0.5 size-4 shrink-0 text-primary" />
-              <p className="text-sm leading-6 text-muted-foreground">{item}</p>
-            </div>
-          </div>
-        ))}
-      </div>
     </section>
   );
 }
