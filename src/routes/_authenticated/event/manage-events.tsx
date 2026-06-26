@@ -14,18 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -475,129 +464,92 @@ function ManagedEventRow({
           {/* ── Approve Confirmation Dialog ─────────────────────────────── */}
           {/* Visible only if the event has not already been approved */}
           {event.status?.toLowerCase() !== "approved" && (
-            <AlertDialog>
-              <AlertDialogTrigger>
-                <ActionButton
-                  label="Approve"
-                  tone="success"
-                  disabled={isUpdating}
-                >
-                  <Check className="size-5" aria-hidden="true" />
-                </ActionButton>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  {/* Icon shown in the media slot */}
-                  <AlertDialogMedia className="bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                    <ShieldCheck />
-                  </AlertDialogMedia>
-                  <AlertDialogTitle>Approve Event</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to approve{" "}
-                    <strong className="text-foreground">{event.title}</strong>? This
-                    will mark the event as approved and make it visible to attendees.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isUpdating}>
-                    Cancel
-                  </AlertDialogCancel>
-                  {/* Confirm button triggers the actual store update */}
-                  <AlertDialogAction
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                    disabled={isUpdating}
-                    onClick={() => handleAction(() => onApprove(event.id))}
-                  >
-                    {isUpdating ? "Approving..." : "Yes, Approve"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <ConfirmationDialog
+              actionClassName="bg-emerald-600 hover:bg-emerald-700 text-white"
+              actionLabel={isUpdating ? "Approving..." : "Yes, Approve"}
+              cancelLabel="Cancel"
+              description={
+                <>
+                  Are you sure you want to approve{" "}
+                  <strong className="text-foreground">{event.title}</strong>? This
+                  will mark the event as approved and make it visible to attendees.
+                </>
+              }
+              disabled={isUpdating}
+              icon={<ShieldCheck />}
+              mediaClassName="bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
+              title="Approve Event"
+              onConfirm={() => handleAction(() => onApprove(event.id))}
+            >
+              <ActionButton
+                label="Approve"
+                tone="success"
+                disabled={isUpdating}
+              >
+                <Check className="size-5" aria-hidden="true" />
+              </ActionButton>
+            </ConfirmationDialog>
           )}
 
           {/* ── Cancel Confirmation Dialog ──────────────────────────────── */}
           {/* Visible only if the event has not already been canceled */}
           {event.status?.toLowerCase() !== "canceled" &&
             event.status?.toLowerCase() !== "cancelled" && (
-              <AlertDialog>
-                <AlertDialogTrigger>
-                  <ActionButton
-                    label="Cancel"
-                    tone="warning"
-                    disabled={isUpdating}
-                  >
-                    <CircleX className="size-5" aria-hidden="true" />
-                  </ActionButton>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogMedia className="bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
-                      <XCircle />
-                    </AlertDialogMedia>
-                    <AlertDialogTitle>Cancel Event</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to cancel{" "}
-                      <strong className="text-foreground">{event.title}</strong>? The
-                      event will be marked as cancelled and attendees will be notified.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isUpdating}>
-                      Go Back
-                    </AlertDialogCancel>
-                    {/* Confirm button triggers the store status update */}
-                    <AlertDialogAction
-                      className="bg-amber-500 hover:bg-amber-600 text-white"
-                      disabled={isUpdating}
-                      onClick={() => handleAction(() => onCancel(event.id))}
-                    >
-                      {isUpdating ? "Cancelling..." : "Yes, Cancel"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <ConfirmationDialog
+                actionClassName="bg-amber-500 hover:bg-amber-600 text-white"
+                actionLabel={isUpdating ? "Cancelling..." : "Yes, Cancel"}
+                cancelLabel="Go Back"
+                description={
+                  <>
+                    Are you sure you want to cancel{" "}
+                    <strong className="text-foreground">{event.title}</strong>? The
+                    event will be marked as cancelled and attendees will be notified.
+                  </>
+                }
+                disabled={isUpdating}
+                icon={<XCircle />}
+                mediaClassName="bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"
+                title="Cancel Event"
+                onConfirm={() => handleAction(() => onCancel(event.id))}
+              >
+                <ActionButton
+                  label="Cancel"
+                  tone="warning"
+                  disabled={isUpdating}
+                >
+                  <CircleX className="size-5" aria-hidden="true" />
+                </ActionButton>
+              </ConfirmationDialog>
             )}
 
           {/* ── Delete Confirmation Dialog ──────────────────────────────── */}
           {/* Always visible; permanently removes the event */}
-          <AlertDialog>
-            <AlertDialogTrigger>
-              <ActionButton
-                label="Delete"
-                tone="destructive"
-                disabled={isUpdating}
-              >
-                <Trash2 className="size-5" aria-hidden="true" />
-              </ActionButton>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogMedia className="bg-destructive/10 text-destructive">
-                  <Trash2 />
-                </AlertDialogMedia>
-                <AlertDialogTitle>Delete Event</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to permanently delete{" "}
-                  <strong className="text-foreground">{event.title}</strong>? This
-                  action <strong>cannot be undone</strong> and all associated data
-                  will be lost.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel disabled={isUpdating}>
-                  Keep Event
-                </AlertDialogCancel>
-                {/* Confirm button triggers the permanent store deletion */}
-                <AlertDialogAction
-                  variant="destructive"
-                  disabled={isUpdating}
-                  onClick={() => handleAction(() => onDelete(event.id))}
-                >
-                  {isUpdating ? "Deleting..." : "Yes, Delete"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <ConfirmationDialog
+            actionLabel={isUpdating ? "Deleting..." : "Yes, Delete"}
+            cancelLabel="Keep Event"
+            description={
+              <>
+                Are you sure you want to permanently delete{" "}
+                <strong className="text-foreground">{event.title}</strong>? This
+                action <strong>cannot be undone</strong> and all associated data
+                will be lost.
+              </>
+            }
+            disabled={isUpdating}
+            icon={<Trash2 />}
+            mediaClassName="bg-destructive/10 text-destructive"
+            title="Delete Event"
+            variant="destructive"
+            onConfirm={() => handleAction(() => onDelete(event.id))}
+          >
+            <ActionButton
+              label="Delete"
+              tone="destructive"
+              disabled={isUpdating}
+            >
+              <Trash2 className="size-5" aria-hidden="true" />
+            </ActionButton>
+          </ConfirmationDialog>
 
         </div>
       </td>

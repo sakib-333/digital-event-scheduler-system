@@ -6,15 +6,24 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleX,
-  Eye,
+  ShieldCheck,
+  Trash2,
   Users,
+  XCircle,
 } from "lucide-react";
 
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { DashboardPanel, IconButton } from "./dashboard-panel";
+import { DashboardPanel } from "./dashboard-panel";
 import { useManageOverviewStore } from "@/stores/manage-overview-store";
+import { Link } from "@tanstack/react-router";
+import { useAuthStore } from "@/stores/auth-store";
+import { useManageEventsStore } from "@/stores/manage-events-store";
+import { useEffect, useState, type ReactNode } from "react";
+import type { EventType } from "@/types/event";
+import { formatDate } from "@/utils";
 
 type StatCard = {
   icon: LucideIcon;
@@ -24,19 +33,14 @@ type StatCard = {
   value: string;
 };
 
-type PendingEvent = {
-  date: string;
-  location: string;
-  name: string;
-  organizer: string;
-};
-
 type CategoryMetric = {
   label: string;
   progressClassName: string;
   value: string;
   widthClassName: string;
 };
+
+const tableColumns = ["Event Name", "Organizer", "Date", "Status"];
 
 const stats: StatCard[] = [
   {
@@ -119,33 +123,6 @@ function getStats(statsData: ReturnType<typeof useManageOverviewStore.getState>)
   });
 }
 
-const pendingEvents: PendingEvent[] = [
-  {
-    date: "Oct 24, 2024",
-    location: "Main Auditorium",
-    name: "Global AI Summit 2024",
-    organizer: "Dept. of Computer Science",
-  },
-  {
-    date: "Nov 02, 2024",
-    location: "Room 302, West Wing",
-    name: "Graduate Thesis Workshop",
-    organizer: "Academic Affairs",
-  },
-  {
-    date: "Nov 15, 2024",
-    location: "Sky Lounge",
-    name: "Alumni Career Night",
-    organizer: "Career Services",
-  },
-  {
-    date: "Dec 20, 2024",
-    location: "Grand Ballroom",
-    name: "Faculty Gala Dinner",
-    organizer: "Dean's Office",
-  },
-];
-
 const categoryMetrics: CategoryMetric[] = [
   {
     label: "Lecture",
@@ -174,7 +151,7 @@ export function DashboardOverview({
 }) {
   const statsData = useManageOverviewStore((state) => state);
   const dashboardStats = getStats(statsData);
-  
+
   return (
     <>
       {currentUserName ? (
@@ -225,6 +202,49 @@ function StatSummaryCard({ stat }: { stat: StatCard }) {
 }
 
 function PendingEventsTable() {
+  const user = useAuthStore((state) => state.user);
+  const {
+    events,
+    getAllPendingEvents,
+    isLoading,
+    updateEvent,
+    deleteEvent,
+  } = useManageEventsStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const canManageEvents = user?.user_role !== "general";
+  const columns = canManageEvents ? [...tableColumns, "Actions"] : tableColumns;
+  const pendingEvents = events.filter((event) => event.status === "pending");
+  const itemsPerPage = 4;
+  const totalPages = Math.ceil(pendingEvents.length / itemsPerPage) || 1;
+  const activePage = Math.min(currentPage, totalPages);
+  const paginatedEvents = pendingEvents.slice(
+    (activePage - 1) * itemsPerPage,
+    activePage * itemsPerPage,
+  );
+
+  useEffect(() => {
+    getAllPendingEvents();
+  }, [getAllPendingEvents]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [pendingEvents.length]);
+
+  async function handleApprove(id: string) {
+    await updateEvent(id, { status: "approved" });
+    await getAllPendingEvents();
+  }
+
+  async function handleCancel(id: string) {
+    await updateEvent(id, { status: "canceled" });
+    await getAllPendingEvents();
+  }
+
+  async function handleDelete(id: string) {
+    await deleteEvent(id);
+    await getAllPendingEvents();
+  }
+  
   return (
     <DashboardPanel className="flex flex-col overflow-hidden lg:col-span-2">
       <div className="flex items-center justify-between border-b border-border/50 p-6">
@@ -236,34 +256,61 @@ function PendingEventsTable() {
             Review and manage recent submissions
           </p>
         </div>
-        <Button type="button" variant="link">
-          View All
-        </Button>
+        <Link to="/events">
+          <Button type="button" variant="link">
+            View All
+          </Button>
+        </Link>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="bg-muted">
-              {["Event Name", "Organizer", "Date", "Status", "Actions"].map(
-                (heading) => (
-                  <th
-                    className={cn(
-                      "px-6 py-4 text-sm font-medium leading-5 text-muted-foreground",
-                      heading === "Actions" && "text-right",
-                    )}
-                    key={heading}
-                  >
-                    {heading}
-                  </th>
-                ),
-              )}
+              {columns.map((heading) => (
+                <th
+                  className={cn(
+                    "px-6 py-4 text-sm font-medium leading-5 text-muted-foreground",
+                    heading === "Actions" && "text-right",
+                  )}
+                  key={heading}
+                >
+                  {heading}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40">
-            {pendingEvents.map((event) => (
-              <PendingEventRow event={event} key={event.name} />
-            ))}
+            {isLoading ? (
+              <tr>
+                <td
+                  className="px-6 py-10 text-center text-sm text-muted-foreground"
+                  colSpan={columns.length}
+                >
+                  Loading pending events...
+                </td>
+              </tr>
+            ) : paginatedEvents.length === 0 ? (
+              <tr>
+                <td
+                  className="px-6 py-10 text-center text-sm text-muted-foreground"
+                  colSpan={columns.length}
+                >
+                  No pending events found.
+                </td>
+              </tr>
+            ) : (
+              paginatedEvents.map((event) => (
+                <PendingEventRow
+                  canManageEvents={canManageEvents}
+                  event={event}
+                  key={event.id}
+                  onApprove={handleApprove}
+                  onCancel={handleCancel}
+                  onDelete={handleDelete}
+                />
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -273,66 +320,188 @@ function PendingEventsTable() {
           className="flex items-center gap-1"
           aria-label="Pending events pages"
         >
-          <IconButton label="Previous page">
+          <button
+            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+            disabled={activePage <= 1}
+            title="Previous page"
+            type="button"
+            onClick={() => setCurrentPage(activePage - 1)}
+          >
             <ChevronLeft className="size-5" aria-hidden="true" />
-          </IconButton>
+            <span className="sr-only">Previous page</span>
+          </button>
           <span className="px-2 text-sm font-medium leading-5">
-            Page 1 of 5
+            Page {activePage} of {totalPages}
           </span>
-          <IconButton label="Next page">
+          <button
+            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+            disabled={activePage >= totalPages}
+            title="Next page"
+            type="button"
+            onClick={() => setCurrentPage(activePage + 1)}
+          >
             <ChevronRight className="size-5" aria-hidden="true" />
-          </IconButton>
+            <span className="sr-only">Next page</span>
+          </button>
         </nav>
       </div>
     </DashboardPanel>
   );
 }
 
-function PendingEventRow({ event }: { event: PendingEvent }) {
+function PendingEventRow({
+  canManageEvents,
+  event,
+  onApprove,
+  onCancel,
+  onDelete,
+}: {
+  canManageEvents: boolean;
+  event: EventType;
+  onApprove: (id: string) => Promise<void>;
+  onCancel: (id: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+}) {
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  async function handleAction(action: () => Promise<void>) {
+    setIsUpdating(true);
+    try {
+      await action();
+    } finally {
+      setIsUpdating(false);
+    }
+  }
+
   return (
-    <tr className="transition-colors hover:bg-muted/40">
+    <tr className={cn("transition-colors hover:bg-muted/40", isUpdating && "opacity-60")}>
       <td className="px-6 py-4">
         <p className="text-sm font-semibold leading-5 text-foreground">
-          {event.name}
+          {event.title}
         </p>
         <p className="text-xs leading-4 text-muted-foreground">
           {event.location}
         </p>
       </td>
       <td className="px-6 py-4 text-sm leading-5 text-foreground">
-        {event.organizer}
+        {event.organizer_name}
       </td>
       <td className="px-6 py-4 text-sm leading-5 text-foreground">
-        {event.date}
+        {formatDate(event.start_date)}
       </td>
       <td className="px-6 py-4">
         <span className="rounded-full bg-chart-4/10 px-2 py-1 text-xs font-semibold leading-4 text-chart-4">
           PENDING REVIEW
         </span>
       </td>
-      <td className="px-6 py-4">
-        <div className="flex items-center justify-end gap-2">
-          <IconButton
-            className="text-primary hover:bg-primary/10"
-            label="Approve"
-          >
-            <CheckCircle2 className="size-5" aria-hidden="true" />
-          </IconButton>
-          <IconButton
-            className="text-destructive hover:bg-destructive/10"
-            label="Cancel"
-          >
-            <CircleX className="size-5" aria-hidden="true" />
-          </IconButton>
-          <IconButton
-            className="text-muted-foreground hover:bg-muted hover:text-foreground"
-            label="View details"
-          >
-            <Eye className="size-5" aria-hidden="true" />
-          </IconButton>
-        </div>
-      </td>
+      {canManageEvents ? (
+        <td className="px-6 py-4">
+          <div className="flex items-center justify-end gap-2">
+            <ConfirmationDialog
+              actionClassName="bg-emerald-600 text-white hover:bg-emerald-700"
+              actionLabel={isUpdating ? "Approving..." : "Yes, Approve"}
+              cancelLabel="Cancel"
+              description={
+                <>
+                  Are you sure you want to approve{" "}
+                  <strong className="text-foreground">{event.title}</strong>? This
+                  will mark the event as approved.
+                </>
+              }
+              disabled={isUpdating}
+              icon={<ShieldCheck />}
+              mediaClassName="bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
+              title="Approve Event"
+              onConfirm={() => handleAction(() => onApprove(event.id))}
+            >
+              <PendingActionButton
+                className="text-primary hover:bg-primary/10"
+                disabled={isUpdating}
+                label="Approve"
+              >
+                <CheckCircle2 className="size-5" aria-hidden="true" />
+              </PendingActionButton>
+            </ConfirmationDialog>
+            <ConfirmationDialog
+              actionClassName="bg-amber-500 text-white hover:bg-amber-600"
+              actionLabel={isUpdating ? "Cancelling..." : "Yes, Cancel"}
+              cancelLabel="Go Back"
+              description={
+                <>
+                  Are you sure you want to cancel{" "}
+                  <strong className="text-foreground">{event.title}</strong>? This
+                  will mark the event as cancelled.
+                </>
+              }
+              disabled={isUpdating}
+              icon={<XCircle />}
+              mediaClassName="bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"
+              title="Cancel Event"
+              onConfirm={() => handleAction(() => onCancel(event.id))}
+            >
+              <PendingActionButton
+                className="text-destructive hover:bg-destructive/10"
+                disabled={isUpdating}
+                label="Cancel"
+              >
+                <CircleX className="size-5" aria-hidden="true" />
+              </PendingActionButton>
+            </ConfirmationDialog>
+            <ConfirmationDialog
+              actionLabel={isUpdating ? "Deleting..." : "Yes, Delete"}
+              cancelLabel="Keep Event"
+              description={
+                <>
+                  Are you sure you want to permanently delete{" "}
+                  <strong className="text-foreground">{event.title}</strong>? This
+                  action <strong>cannot be undone</strong>.
+                </>
+              }
+              disabled={isUpdating}
+              icon={<Trash2 />}
+              mediaClassName="bg-destructive/10 text-destructive"
+              title="Delete Event"
+              variant="destructive"
+              onConfirm={() => handleAction(() => onDelete(event.id))}
+            >
+              <PendingActionButton
+                className="text-destructive hover:bg-destructive/10"
+                disabled={isUpdating}
+                label="Delete"
+              >
+                <Trash2 className="size-5" aria-hidden="true" />
+              </PendingActionButton>
+            </ConfirmationDialog>
+          </div>
+        </td>
+      ) : null}
     </tr>
+  );
+}
+
+function PendingActionButton({
+  children,
+  className,
+  disabled,
+  label,
+}: {
+  children: ReactNode;
+  className?: string;
+  disabled?: boolean;
+  label: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center justify-center rounded-lg p-1 transition-colors",
+        disabled && "pointer-events-none opacity-50",
+        className,
+      )}
+      title={label}
+    >
+      {children}
+      <span className="sr-only">{label}</span>
+    </span>
   );
 }
 

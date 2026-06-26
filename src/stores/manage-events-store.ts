@@ -17,6 +17,7 @@ type ManageEventsStore = {
     error: string | null;
 
     getAllEvents: () => Promise<void>;
+    getAllPendingEvents: () => Promise<void>;
     getApprovedEvents: () => Promise<void>;
     getEventsByUserId: (userId: string) => Promise<void>;
     createEvent: (event: Omit<EventType, "id" | "created_at">) => Promise<boolean>;
@@ -59,6 +60,24 @@ export const useManageEventsStore = create<ManageEventsStore>((set) => ({
 
     // ─── Fetch Approved Events ───
     // Loads only events with approved status
+    getAllPendingEvents: async () => {
+        set({ isLoading: true, error: null });
+
+        try {
+            const events = await manageEvents.getAllEvents();
+            set({
+                events: events.filter((event) => event.status === "pending"),
+                isLoading: false,
+            });
+        } catch (error) {
+            set({
+                error: error instanceof Error ? error.message : "Failed to load pending events.",
+                isLoading: false,
+            });
+            toast.error("Failed to load pending events.");
+        }
+    },
+
     getApprovedEvents: async () => {
         set({ isLoading: true, error: null });
 
