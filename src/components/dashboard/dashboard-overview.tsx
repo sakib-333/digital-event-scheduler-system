@@ -34,10 +34,11 @@ type StatCard = {
 };
 
 type CategoryMetric = {
+  count: number;
   label: string;
   progressClassName: string;
+  percentage: number;
   value: string;
-  widthClassName: string;
 };
 
 const tableColumns = ["Event Name", "Organizer", "Date", "Status"];
@@ -123,25 +124,13 @@ function getStats(statsData: ReturnType<typeof useManageOverviewStore.getState>)
   });
 }
 
-const categoryMetrics: CategoryMetric[] = [
-  {
-    label: "Lecture",
-    progressClassName: "bg-primary",
-    value: "45%",
-    widthClassName: "w-[45%]",
-  },
-  {
-    label: "Workshop",
-    progressClassName: "bg-secondary",
-    value: "30%",
-    widthClassName: "w-[30%]",
-  },
-  {
-    label: "Social",
-    progressClassName: "bg-chart-4",
-    value: "15%",
-    widthClassName: "w-[15%]",
-  },
+const categoryProgressClassNames = [
+  "bg-primary",
+  "bg-chart-4",
+  "bg-chart-3",
+  "bg-chart-2",
+  "bg-chart-5",
+  "bg-secondary",
 ];
 
 export function DashboardOverview({
@@ -151,6 +140,7 @@ export function DashboardOverview({
 }) {
   const statsData = useManageOverviewStore((state) => state);
   const dashboardStats = getStats(statsData);
+  const categoryMetrics = getCategoryMetrics(statsData.eventsByCategory);
 
   return (
     <>
@@ -165,10 +155,52 @@ export function DashboardOverview({
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <PendingEventsTable />
-        <DashboardAnalytics />
+        <DashboardAnalytics categoryMetrics={categoryMetrics} />
       </div>
     </>
   );
+}
+
+function getCategoryMetrics(
+  eventsByCategory: ReturnType<
+    typeof useManageOverviewStore.getState
+  >["eventsByCategory"],
+): CategoryMetric[] {
+  const groupedCategories = eventsByCategory.reduce<
+    Record<string, { count: number; label: string }>
+  >((acc, item) => {
+    const label = item.category.trim() || "Uncategorized";
+    const key = label.toLowerCase();
+
+    acc[key] = {
+      count: (acc[key]?.count ?? 0) + item.count,
+      label: acc[key]?.label ?? label,
+    };
+
+    return acc;
+  }, {});
+
+  const totalCount = Object.values(groupedCategories).reduce(
+    (sum, item) => sum + item.count,
+    0,
+  );
+
+  return Object.values(groupedCategories)
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+    .map((item, index) => {
+      const percentage = totalCount
+        ? Math.round((item.count / totalCount) * 100)
+        : 0;
+
+      return {
+        count: item.count,
+        label: item.label,
+        percentage,
+        progressClassName:
+          categoryProgressClassNames[index % categoryProgressClassNames.length],
+        value: `${percentage}%`,
+      };
+    });
 }
 
 function StatsGrid({ stats }: { stats: StatCard[] }) {
@@ -505,7 +537,11 @@ function PendingActionButton({
   );
 }
 
-function DashboardAnalytics() {
+function DashboardAnalytics({
+  categoryMetrics,
+}: {
+  categoryMetrics: CategoryMetric[];
+}) {
   return (
     <div className="flex flex-col gap-6">
       <DashboardPanel className="flex min-h-80 flex-col p-6">
@@ -514,9 +550,15 @@ function DashboardAnalytics() {
         </h4>
 
         <div className="flex flex-1 flex-col justify-center gap-4">
-          {categoryMetrics.map((metric) => (
-            <CategoryProgress key={metric.label} metric={metric} />
-          ))}
+          {categoryMetrics.length > 0 ? (
+            categoryMetrics.map((metric) => (
+              <CategoryProgress key={metric.label} metric={metric} />
+            ))
+          ) : (
+            <p className="text-sm leading-5 text-muted-foreground">
+              No category data available.
+            </p>
+          )}
         </div>
       </DashboardPanel>
     </div>
@@ -539,8 +581,8 @@ function CategoryProgress({ metric }: { metric: CategoryMetric }) {
           className={cn(
             "h-full rounded-full",
             metric.progressClassName,
-            metric.widthClassName,
           )}
+          style={{ width: `${Math.min(Math.max(metric.percentage, 0), 100)}%` }}
         />
       </div>
     </div>
