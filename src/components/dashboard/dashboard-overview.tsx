@@ -74,6 +74,51 @@ const stats: StatCard[] = [
   },
 ];
 
+function formatStatValue(value: number) {
+  return new Intl.NumberFormat("en-US").format(value);
+}
+
+function getStats(statsData: ReturnType<typeof useManageOverviewStore.getState>) {
+  return stats.map((stat) => {
+    if (stat.label === "Total Events") {
+      return {
+        ...stat,
+        value: formatStatValue(statsData.totalEvents),
+      };
+    }
+
+    if (stat.label === "Pending Approval") {
+      return {
+        ...stat,
+        value: formatStatValue(statsData.eventStatusCounts.pending),
+      };
+    }
+
+    if (stat.label === "Approved") {
+      return {
+        ...stat,
+        value: formatStatValue(statsData.eventStatusCounts.approved),
+      };
+    }
+
+    if (stat.label === "Cancelled") {
+      return {
+        ...stat,
+        value: formatStatValue(statsData.eventStatusCounts.canceled),
+      };
+    }
+
+    if (stat.label === "Total Users") {
+      return {
+        ...stat,
+        value: formatStatValue(statsData.totalUsers),
+      };
+    }
+
+    return stat;
+  });
+}
+
 const pendingEvents: PendingEvent[] = [
   {
     date: "Oct 24, 2024",
@@ -127,8 +172,8 @@ export function DashboardOverview({
 }: {
   currentUserName?: string;
 }) {
-  const stateData = useManageOverviewStore((state) => state);
-  console.log(stateData)
+  const statsData = useManageOverviewStore((state) => state);
+  const dashboardStats = getStats(statsData);
   
   return (
     <>
@@ -139,7 +184,7 @@ export function DashboardOverview({
         </p>
       ) : null}
 
-      <StatsGrid />
+      <StatsGrid stats={dashboardStats} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <PendingEventsTable />
@@ -149,7 +194,7 @@ export function DashboardOverview({
   );
 }
 
-function StatsGrid() {
+function StatsGrid({ stats }: { stats: StatCard[] }) {
   return (
     <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
       {stats.map((stat) => (
