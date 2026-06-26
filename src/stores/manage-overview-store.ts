@@ -14,6 +14,12 @@ type EventCategoryStat = {
 type EventStatusCounts = Record<EventStatus, number>;
 
 type ManageOverviewStore = {
+    approvalRate: number;
+    approvalRateValue: string;
+    cancelRate: number;
+    cancelRateValue: string;
+    pendingRate: number;
+    pendingRateValue: string;
     totalEvents: number;
     totalUsers: number;
     eventStatusCounts: EventStatusCounts;
@@ -74,7 +80,21 @@ function getEventStatusCounts(events: EventType[]): EventStatusCounts {
     );
 }
 
+function getRate(count: number, total: number) {
+    if (total === 0) {
+        return 0;
+    }
+
+    return Math.round((count / total) * 100);
+}
+
 export const useManageOverviewStore = create<ManageOverviewStore>(() => ({
+    approvalRate: 0,
+    approvalRateValue: "0%",
+    cancelRate: 0,
+    cancelRateValue: "0%",
+    pendingRate: 0,
+    pendingRateValue: "0%",
     totalEvents: 0,
     totalUsers: 0,
     eventStatusCounts: { ...emptyEventStatusCounts },
@@ -91,11 +111,21 @@ async function loadOverviewStats() {
             manageEvents.getAllEvents(),
             manageUsers.getAllUsers(),
         ]);
+        const eventStatusCounts = getEventStatusCounts(events);
+        const approvalRate = getRate(eventStatusCounts.approved, events.length);
+        const cancelRate = getRate(eventStatusCounts.canceled, events.length);
+        const pendingRate = getRate(eventStatusCounts.pending, events.length);
 
         useManageOverviewStore.setState({
+            approvalRate,
+            approvalRateValue: `${approvalRate}%`,
+            cancelRate,
+            cancelRateValue: `${cancelRate}%`,
+            pendingRate,
+            pendingRateValue: `${pendingRate}%`,
             totalEvents: events.length,
             totalUsers: users.length,
-            eventStatusCounts: getEventStatusCounts(events),
+            eventStatusCounts,
             eventsByCategory: getEventsByCategory(events),
             isLoading: false,
         });

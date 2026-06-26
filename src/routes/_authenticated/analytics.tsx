@@ -3,9 +3,8 @@ import {
   Activity,
   CalendarCheck,
   CircleCheck,
-  Clock3,
+  CircleX,
   TrendingUp,
-  Users,
 } from "lucide-react";
 import {
   Area,
@@ -26,11 +25,13 @@ import {
 
 import { cn } from "@/lib/utils";
 import { requireRouteRoles } from "@/utils/route-permissions";
+import { useManageOverviewStore } from "@/stores/manage-overview-store";
+import { usePageTitle } from "@/utils";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
   beforeLoad: async ({ context }) => {
-      await requireRouteRoles(context.auth, ["admin", "moderator"]);
-    },
+    await requireRouteRoles(context.auth, ["admin", "moderator"]);
+  },
   component: AnalyticsPage,
 });
 
@@ -105,6 +106,9 @@ const chartColors = [
 ];
 
 function AnalyticsPage() {
+  usePageTitle("Analytics")
+  const statsData = useManageOverviewStore()
+
   return (
     <div className="space-y-6">
       <header className="max-w-3xl">
@@ -117,7 +121,77 @@ function AnalyticsPage() {
         </p>
       </header>
 
-      <AnalyticsStats />
+      {/* <AnalyticsStats /> */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* Grid-1 */}
+        <section
+          className="rounded-2xl border border-border/70 bg-card/80 p-5 shadow-sm backdrop-blur-xl"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <span className={cn("rounded-lg p-2", 'bg-primary/10 text-primary')}>
+              <CalendarCheck className="size-5" aria-hidden="true" />
+            </span>
+          </div>
+          <p className="text-sm leading-5 text-muted-foreground">
+            Events Tracked
+          </p>
+          <h2 className="mt-1 text-3xl font-semibold leading-10 text-foreground">
+            {statsData.totalEvents || 0}
+          </h2>
+        </section>
+
+        {/* Grid-2 */}
+        <section
+          className="rounded-2xl border border-border/70 bg-card/80 p-5 shadow-sm backdrop-blur-xl"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <span className={cn("rounded-lg p-2", 'bg-chart-3/10 text-chart-3')}>
+              <CircleCheck className="size-5" aria-hidden="true" />
+            </span>
+          </div>
+          <p className="text-sm leading-5 text-muted-foreground">
+            Approval Rate
+          </p>
+          <h2 className="mt-1 text-3xl font-semibold leading-10 text-foreground">
+            {statsData.approvalRate || 0}%
+          </h2>
+        </section>
+
+        {/* Grid-3 */}
+        <section
+          className="rounded-2xl border border-border/70 bg-card/80 p-5 shadow-sm backdrop-blur-xl"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <span className={cn("rounded-lg p-2", 'bg-chart-3/10 text-chart-3')}>
+              <CalendarCheck className="size-5 bg-primary/10 text-primary" aria-hidden="true" />
+            </span>
+          </div>
+          <p className="text-sm leading-5 text-muted-foreground">
+            Pending Rate
+          </p>
+          <h2 className="mt-1 text-3xl font-semibold leading-10 text-foreground">
+            {statsData.pendingRate || 0}%
+          </h2>
+        </section>
+
+        {/* Grid-4 */}
+        <section
+          className="rounded-2xl border border-border/70 bg-card/80 p-5 shadow-sm backdrop-blur-xl"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <span className={cn("rounded-lg p-2", 'bg-chart-3/10 text-chart-3')}>
+              <CircleX className="size-5 bg-destructive/10 text-destructive" aria-hidden="true" />
+            </span>
+          </div>
+          <p className="text-sm leading-5 text-muted-foreground">
+            Cancel Rate
+          </p>
+          <h2 className="mt-1 text-3xl font-semibold leading-10 text-foreground">
+            {statsData.cancelRate || 0}%
+          </h2>
+        </section>
+
+      </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <ChartPanel
@@ -242,62 +316,6 @@ function AnalyticsPage() {
         <VenueUtilizationTable />
         <OperationalInsights />
       </section>
-    </div>
-  );
-}
-
-function AnalyticsStats() {
-  const stats = [
-    {
-      icon: CalendarCheck,
-      iconClassName: "bg-primary/10 text-primary",
-      label: "Events Tracked",
-      value: "1,284",
-    },
-    {
-      icon: CircleCheck,
-      iconClassName: "bg-chart-3/10 text-chart-3",
-      label: "Approval Rate",
-      value: "94.1%",
-    },
-    {
-      icon: Users,
-      iconClassName: "bg-chart-2/10 text-chart-2",
-      label: "Attendance",
-      value: "18.6K",
-    },
-    {
-      icon: Clock3,
-      iconClassName: "bg-chart-4/10 text-chart-4",
-      label: "Avg. Review Time",
-      value: "6.4h",
-    },
-  ];
-
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {stats.map((stat) => {
-        const Icon = stat.icon;
-
-        return (
-          <section
-            className="rounded-2xl border border-border/70 bg-card/80 p-5 shadow-sm backdrop-blur-xl"
-            key={stat.label}
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <span className={cn("rounded-lg p-2", stat.iconClassName)}>
-                <Icon className="size-5" aria-hidden="true" />
-              </span>
-            </div>
-            <p className="text-sm leading-5 text-muted-foreground">
-              {stat.label}
-            </p>
-            <h2 className="mt-1 text-3xl font-semibold leading-10 text-foreground">
-              {stat.value}
-            </h2>
-          </section>
-        );
-      })}
     </div>
   );
 }
