@@ -35,15 +35,6 @@ export const Route = createFileRoute("/_authenticated/analytics")({
   component: AnalyticsPage,
 });
 
-const monthlyEventData = [
-  { month: "Jan", approved: 52, pending: 18, submitted: 74 },
-  { month: "Feb", approved: 61, pending: 22, submitted: 88 },
-  { month: "Mar", approved: 74, pending: 26, submitted: 105 },
-  { month: "Apr", approved: 68, pending: 20, submitted: 96 },
-  { month: "May", approved: 83, pending: 24, submitted: 118 },
-  { month: "Jun", approved: 91, pending: 28, submitted: 132 },
-];
-
 const approvalData = [
   { name: "Approved", value: 856 },
   { name: "Pending", value: 42 },
@@ -121,7 +112,6 @@ function AnalyticsPage() {
         </p>
       </header>
 
-      {/* <AnalyticsStats /> */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {/* Grid-1 */}
         <section
@@ -200,17 +190,17 @@ function AnalyticsPage() {
           title="Event Activity Trend"
         >
           <ResponsiveContainer height={320} width="100%">
-            <AreaChart data={monthlyEventData}>
+            <AreaChart data={statsData.monthlyEventData}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
               <XAxis dataKey="month" stroke="var(--muted-foreground)" />
               <YAxis stroke="var(--muted-foreground)" />
               <Tooltip />
               <Legend />
               <Area
-                dataKey="submitted"
+                dataKey="canceled"
                 fill="var(--primary)"
                 fillOpacity={0.14}
-                name="Submitted"
+                name="Canceled"
                 stroke="var(--primary)"
                 strokeWidth={2}
                 type="monotone"

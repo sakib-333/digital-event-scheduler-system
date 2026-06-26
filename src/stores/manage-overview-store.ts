@@ -13,6 +13,13 @@ type EventCategoryStat = {
 
 type EventStatusCounts = Record<EventStatus, number>;
 
+type MonthlyEventStat = {
+    month: string;
+    approved: number;
+    pending: number;
+    canceled: number;
+};
+
 type ManageOverviewStore = {
     approvalRate: number;
     approvalRateValue: string;
@@ -24,9 +31,25 @@ type ManageOverviewStore = {
     totalUsers: number;
     eventStatusCounts: EventStatusCounts;
     eventsByCategory: EventCategoryStat[];
+    monthlyEventData: MonthlyEventStat[];
     isLoading: boolean;
     error: string | null;
 };
+
+const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+];
 
 const emptyEventStatusCounts: EventStatusCounts = {
     approved: 0,
@@ -88,6 +111,27 @@ function getRate(count: number, total: number) {
     return Math.round((count / total) * 100);
 }
 
+function getMonthlyEventData(events: EventType[]): MonthlyEventStat[] {
+    const monthlyEventData = monthNames.map((month) => ({
+        month,
+        approved: 0,
+        pending: 0,
+        canceled: 0,
+    }));
+
+    events.forEach((event) => {
+        const eventDate = new Date(event.created_at);
+
+        if (Number.isNaN(eventDate.getTime()) || !event.status) {
+            return;
+        }
+
+        monthlyEventData[eventDate.getMonth()][event.status] += 1;
+    });
+
+    return monthlyEventData;
+}
+
 export const useManageOverviewStore = create<ManageOverviewStore>(() => ({
     approvalRate: 0,
     approvalRateValue: "0%",
@@ -99,6 +143,7 @@ export const useManageOverviewStore = create<ManageOverviewStore>(() => ({
     totalUsers: 0,
     eventStatusCounts: { ...emptyEventStatusCounts },
     eventsByCategory: [],
+    monthlyEventData: getMonthlyEventData([]),
     isLoading: false,
     error: null,
 }));
@@ -127,6 +172,7 @@ async function loadOverviewStats() {
             totalUsers: users.length,
             eventStatusCounts,
             eventsByCategory: getEventsByCategory(events),
+            monthlyEventData: getMonthlyEventData(events),
             isLoading: false,
         });
     } catch (error) {
