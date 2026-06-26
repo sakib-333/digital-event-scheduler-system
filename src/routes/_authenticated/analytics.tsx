@@ -252,28 +252,24 @@ function AnalyticsStats() {
       icon: CalendarCheck,
       iconClassName: "bg-primary/10 text-primary",
       label: "Events Tracked",
-      meta: "+14% this month",
       value: "1,284",
     },
     {
       icon: CircleCheck,
       iconClassName: "bg-chart-3/10 text-chart-3",
       label: "Approval Rate",
-      meta: "Healthy",
       value: "94.1%",
     },
     {
       icon: Users,
       iconClassName: "bg-chart-2/10 text-chart-2",
       label: "Attendance",
-      meta: "+9% vs last term",
       value: "18.6K",
     },
     {
       icon: Clock3,
       iconClassName: "bg-chart-4/10 text-chart-4",
       label: "Avg. Review Time",
-      meta: "Down 18%",
       value: "6.4h",
     },
   ];
@@ -291,9 +287,6 @@ function AnalyticsStats() {
             <div className="mb-4 flex items-center justify-between">
               <span className={cn("rounded-lg p-2", stat.iconClassName)}>
                 <Icon className="size-5" aria-hidden="true" />
-              </span>
-              <span className="text-xs font-semibold leading-4 text-muted-foreground">
-                {stat.meta}
               </span>
             </div>
             <p className="text-sm leading-5 text-muted-foreground">
