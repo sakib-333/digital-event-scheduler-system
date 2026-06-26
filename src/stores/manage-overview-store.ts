@@ -11,6 +11,11 @@ type EventCategoryStat = {
     value: string;
 };
 
+type CategoryDataItem = {
+    name: string;
+    value: number;
+};
+
 type EventStatusCounts = Record<EventStatus, number>;
 
 type MonthlyEventStat = {
@@ -29,6 +34,7 @@ type ManageOverviewStore = {
     pendingRateValue: string;
     totalEvents: number;
     totalUsers: number;
+    categoryData: CategoryDataItem[];
     eventStatusCounts: EventStatusCounts;
     eventsByCategory: EventCategoryStat[];
     monthlyEventData: MonthlyEventStat[];
@@ -90,6 +96,13 @@ function getEventsByCategory(events: EventType[]): EventCategoryStat[] {
         .sort((a, b) => b.count - a.count || a.category.localeCompare(b.category));
 }
 
+function getCategoryData(eventsByCategory: EventCategoryStat[]): CategoryDataItem[] {
+    return eventsByCategory.map((item) => ({
+        name: item.category,
+        value: item.count,
+    }));
+}
+
 function getEventStatusCounts(events: EventType[]): EventStatusCounts {
     return events.reduce<EventStatusCounts>(
         (counts, event) => {
@@ -141,6 +154,7 @@ export const useManageOverviewStore = create<ManageOverviewStore>(() => ({
     pendingRateValue: "0%",
     totalEvents: 0,
     totalUsers: 0,
+    categoryData: [],
     eventStatusCounts: { ...emptyEventStatusCounts },
     eventsByCategory: [],
     monthlyEventData: getMonthlyEventData([]),
@@ -160,6 +174,7 @@ async function loadOverviewStats() {
         const approvalRate = getRate(eventStatusCounts.approved, events.length);
         const cancelRate = getRate(eventStatusCounts.canceled, events.length);
         const pendingRate = getRate(eventStatusCounts.pending, events.length);
+        const eventsByCategory = getEventsByCategory(events);
 
         useManageOverviewStore.setState({
             approvalRate,
@@ -170,8 +185,9 @@ async function loadOverviewStats() {
             pendingRateValue: `${pendingRate}%`,
             totalEvents: events.length,
             totalUsers: users.length,
+            categoryData: getCategoryData(eventsByCategory),
             eventStatusCounts,
-            eventsByCategory: getEventsByCategory(events),
+            eventsByCategory,
             monthlyEventData: getMonthlyEventData(events),
             isLoading: false,
         });

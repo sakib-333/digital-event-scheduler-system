@@ -35,19 +35,6 @@ export const Route = createFileRoute("/_authenticated/analytics")({
   component: AnalyticsPage,
 });
 
-const approvalData = [
-  { name: "Approved", value: 856 },
-  { name: "Pending", value: 42 },
-  { name: "Cancelled", value: 18 },
-];
-
-const categoryData = [
-  { name: "Workshops", value: 34 },
-  { name: "Lectures", value: 29 },
-  { name: "Social", value: 18 },
-  { name: "Academic", value: 14 },
-  { name: "Symposium", value: 5 },
-];
 
 const attendanceData = [
   { category: "Workshop", actual: 620, capacity: 760 },
@@ -241,7 +228,11 @@ function AnalyticsPage() {
                 outerRadius={108}
                 paddingAngle={4}
               >
-                {approvalData.map((entry, index) => (
+                {[
+                  { name: "Approved", value: statsData.eventStatusCounts.approved || 0 },
+                  { name: "Pending", value: statsData.eventStatusCounts.pending || 0 },
+                  { name: "Cancelled", value: statsData.eventStatusCounts.canceled || 0 },
+                ].map((entry, index) => (
                   <Cell
                     fill={chartColors[index % chartColors.length]}
                     key={entry.name}
@@ -261,13 +252,13 @@ function AnalyticsPage() {
           title="Events by Category"
         >
           <ResponsiveContainer height={320} width="100%">
-            <BarChart data={categoryData}>
+            <BarChart data={statsData.categoryData}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
               <XAxis dataKey="name" stroke="var(--muted-foreground)" />
               <YAxis stroke="var(--muted-foreground)" />
               <Tooltip />
               <Bar dataKey="value" name="Events" radius={[8, 8, 0, 0]}>
-                {categoryData.map((entry, index) => (
+                {statsData.categoryData.map((entry, index) => (
                   <Cell
                     fill={chartColors[index % chartColors.length]}
                     key={entry.name}
