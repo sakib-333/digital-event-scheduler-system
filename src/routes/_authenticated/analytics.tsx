@@ -230,7 +230,11 @@ function AnalyticsPage() {
           <ResponsiveContainer height={320} width="100%">
             <PieChart>
               <Pie
-                data={approvalData}
+                data={[
+                  { name: "Approved", value: statsData.eventStatusCounts.approved || 0 },
+                  { name: "Pending", value: statsData.eventStatusCounts.pending || 0 },
+                  { name: "Cancelled", value: statsData.eventStatusCounts.canceled || 0 },
+                ]}
                 dataKey="value"
                 innerRadius={68}
                 nameKey="name"
