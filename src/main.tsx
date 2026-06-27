@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from './context/auth-context'
 import { router } from './router'
 
 import { Toaster } from "sonner"
+import NotificationProvider from './components/notification-provider'
 
 function AppRouter() {
     const auth = useAuth()
@@ -22,7 +23,9 @@ if (!rootElement.innerHTML) {
     root.render(
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
             <AuthProvider>
-                <AppRouter />
+                <NotificationProvider>
+                    <AppRouter />
+                </NotificationProvider>
             </AuthProvider>
 
             <Toaster position="top-center" duration={3000} richColors />
