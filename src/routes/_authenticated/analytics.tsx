@@ -34,14 +34,6 @@ export const Route = createFileRoute("/_authenticated/analytics")({
 });
 
 
-const attendanceData = [
-  { category: "Workshop", actual: 620, capacity: 760 },
-  { category: "Lecture", actual: 840, capacity: 980 },
-  { category: "Social", actual: 360, capacity: 440 },
-  { category: "Academic", actual: 510, capacity: 600 },
-  { category: "Symposium", actual: 280, capacity: 320 },
-];
-
 const chartColors = [
   "var(--primary)",
   "var(--chart-2)",
@@ -228,7 +220,7 @@ function AnalyticsPage() {
                 {statsData.categoryData.map((entry, index) => (
                   <Cell
                     fill={chartColors[index % chartColors.length]}
-                    key={entry.name}
+                    key={entry.name + String(index)}
                   />
                 ))}
               </Bar>
@@ -241,7 +233,7 @@ function AnalyticsPage() {
           title="Attendance vs Capacity"
         >
           <ResponsiveContainer height={320} width="100%">
-            <BarChart data={attendanceData}>
+            <BarChart data={statsData.attendanceData}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
               <XAxis dataKey="category" stroke="var(--muted-foreground)" />
               <YAxis stroke="var(--muted-foreground)" />
@@ -249,14 +241,14 @@ function AnalyticsPage() {
               <Legend />
               <Bar
                 dataKey="capacity"
-                fill="var(--muted)"
+                fill="var(--secondary-foreground)"
                 name="Capacity"
                 radius={[8, 8, 0, 0]}
               />
               <Bar
-                dataKey="actual"
+                dataKey="attendees"
                 fill="var(--primary)"
-                name="Actual"
+                name="Attendees"
                 radius={[8, 8, 0, 0]}
               />
             </BarChart>

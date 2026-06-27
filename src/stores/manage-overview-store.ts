@@ -16,6 +16,12 @@ type CategoryDataItem = {
     value: number;
 };
 
+type AttendanceDataItem = {
+    category: string;
+    attendees: number;
+    capacity: number;
+};
+
 type EventStatusCounts = Record<EventStatus, number>;
 
 type MonthlyEventStat = {
@@ -34,6 +40,7 @@ type ManageOverviewStore = {
     pendingRateValue: string;
     totalEvents: number;
     totalUsers: number;
+    attendanceData: AttendanceDataItem[];
     categoryData: CategoryDataItem[];
     eventStatusCounts: EventStatusCounts;
     eventsByCategory: EventCategoryStat[];
@@ -103,6 +110,18 @@ function getCategoryData(eventsByCategory: EventCategoryStat[]): CategoryDataIte
     }));
 }
 
+function getAttendanceData(
+    attendanceByCategory: AttendanceDataItem[],
+): AttendanceDataItem[] {
+    return attendanceByCategory
+        .map((item) => ({
+            category: formatCategoryName(item.category || "Uncategorized"),
+            attendees: item.attendees,
+            capacity: item.capacity,
+        }))
+        .sort((a, b) => b.attendees - a.attendees || a.category.localeCompare(b.category));
+}
+
 function getEventStatusCounts(events: EventType[]): EventStatusCounts {
     return events.reduce<EventStatusCounts>(
         (counts, event) => {
@@ -154,6 +173,7 @@ export const useManageOverviewStore = create<ManageOverviewStore>(() => ({
     pendingRateValue: "0%",
     totalEvents: 0,
     totalUsers: 0,
+    attendanceData: [],
     categoryData: [],
     eventStatusCounts: { ...emptyEventStatusCounts },
     eventsByCategory: [],
@@ -166,9 +186,10 @@ async function loadOverviewStats() {
     useManageOverviewStore.setState({ isLoading: true, error: null });
 
     try {
-        const [events, users] = await Promise.all([
+        const [events, users, attendanceByCategory] = await Promise.all([
             manageEvents.getAllEvents(),
             manageUsers.getAllUsers(),
+            manageEvents.getAttendanceByCategory(),
         ]);
         const eventStatusCounts = getEventStatusCounts(events);
         const approvalRate = getRate(eventStatusCounts.approved, events.length);
@@ -185,6 +206,7 @@ async function loadOverviewStats() {
             pendingRateValue: `${pendingRate}%`,
             totalEvents: events.length,
             totalUsers: users.length,
+            attendanceData: getAttendanceData(attendanceByCategory),
             categoryData: getCategoryData(eventsByCategory),
             eventStatusCounts,
             eventsByCategory,

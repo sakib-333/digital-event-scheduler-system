@@ -135,6 +135,50 @@ class ManageEvents {
             attendee_count: event.event_participants?.length ?? 0,
         })) as EventType[];
     }
+
+    // ─── Get attendance statistics grouped by category ───
+    async getAttendanceByCategory() {
+        const { data, error } = await supabase
+            .from("events")
+            .select("category, capacity, event_participants(id)");
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        const events = (data ?? []) as Array<{
+            category: string;
+            capacity: number;
+            event_participants?: { id: string }[];
+        }>;
+
+        const grouped = events.reduce<
+            Record<
+                string,
+                {
+                    category: string;
+                    attendees: number;
+                    capacity: number;
+                }
+            >
+        >((acc, event) => {
+            if (!acc[event.category]) {
+                acc[event.category] = {
+                    category: event.category,
+                    attendees: 0,
+                    capacity: 0,
+                };
+            }
+
+            acc[event.category].capacity += Number(event.capacity);
+            acc[event.category].attendees +=
+                event.event_participants?.length ?? 0;
+
+            return acc;
+        }, {});
+
+        return Object.values(grouped);
+    }
 }
 
 // ─────────────────────────────────────────────────────
