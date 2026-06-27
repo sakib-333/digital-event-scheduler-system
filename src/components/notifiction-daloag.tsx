@@ -35,12 +35,15 @@ export default function NotificationDialog() {
 
     return (
         <Dialog>
-            <DialogTrigger>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative"
-                >
+            <DialogTrigger
+                render={
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="relative"
+                    />
+                }
+            >
                     {unreadCount > 0 ? (
                         <BellDot className="size-5" />
                     ) : (
@@ -65,7 +68,6 @@ export default function NotificationDialog() {
                             {unreadCount}
                         </Badge>
                     )}
-                </Button>
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-lg">
@@ -140,19 +142,14 @@ export default function NotificationDialog() {
                                         {moment(notification.created_at).fromNow()}
 
                                     </p>
-
                                 </div>
-
                             ))}
 
                         </div>
-
                     )}
 
                 </ScrollArea>
-
             </DialogContent>
-
         </Dialog>
     );
 }
