@@ -2,7 +2,6 @@ import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-route
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
-  Bell,
   Calendar,
   CalendarCheck,
   CalendarDays,
@@ -18,6 +17,7 @@ import {
 import { useAuth } from "@/context/auth-context";
 import { useAuthStore } from "@/stores/auth-store";
 import { getNameInitials, userTypeMap } from "@/utils";
+import NotificationDialog from "../notifiction-daloag";
 
 type UserRole = "admin" | "moderator" | "general";
 
@@ -257,14 +257,7 @@ function DashboardHeader() {
       </div>
 
       <div className="flex items-center gap-6">
-        <button
-          className="relative rounded-md p-1 text-muted-foreground transition-colors hover:text-primary"
-          type="button"
-        >
-          <Bell className="size-5" aria-hidden="true" />
-          <span className="absolute right-1 top-1 size-2 rounded-full bg-destructive" />
-          <span className="sr-only">Notifications</span>
-        </button>
+        <NotificationDialog />
 
         <div className="flex items-center gap-2">
           <div className="hidden text-right sm:block">
