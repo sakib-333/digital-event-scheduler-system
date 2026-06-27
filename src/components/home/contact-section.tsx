@@ -1,5 +1,7 @@
-import { useState, type FormEvent } from "react";
+import emailjs from "@emailjs/browser";
 import { Mail, MapPin, Phone } from "lucide-react";
+import { useForm, type UseFormRegister } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { GlassPanel, SectionShell } from "./section-shell";
@@ -22,12 +24,61 @@ const contactMethods = [
   },
 ];
 
-export function ContactSection() {
-  const [submitted, setSubmitted] = useState(false);
+type ContactFormValues = {
+  firstName: string;
+  lastName: string;
+  universityEmail: string;
+  message: string;
+};
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSubmitted(true);
+const emailServiceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const emailTemplateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+const emailPublicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+export function ContactSection() {
+  const {
+    formState: { isSubmitting },
+    handleSubmit,
+    register,
+    reset,
+  } = useForm<ContactFormValues>();
+
+  async function onSubmit(data: ContactFormValues) {
+    if (!emailServiceId || !emailTemplateId || !emailPublicKey) {
+      toast.error("Email service is not configured yet.");
+      return;
+    }
+
+    try {
+      const firstName = data.firstName.trim();
+      const lastName = data.lastName.trim();
+      const universityEmail = data.universityEmail.trim();
+      const message = data.message.trim();
+      const fullName = [firstName, lastName].filter(Boolean).join(" ");
+
+      await emailjs.send(
+        emailServiceId,
+        emailTemplateId,
+        {
+          first_name: firstName,
+          last_name: lastName,
+          from_name: fullName,
+          from_email: universityEmail,
+          university_email: universityEmail,
+          reply_to: universityEmail,
+          message,
+        },
+        {
+          publicKey: emailPublicKey,
+        },
+      );
+
+      toast.success("Message sent successfully.");
+      reset();
+    } catch (err) {
+      console.log(err)
+      toast.error("Message could not be sent. Please try again later.");
+    }
   }
 
   return (
@@ -61,14 +112,29 @@ export function ContactSection() {
         </div>
 
         <GlassPanel className="min-w-0 p-6">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-              <Field label="First Name" placeholder="John" />
-              <Field label="Last Name" placeholder="Doe" />
+              <Field
+                label="First Name"
+                name="firstName"
+                placeholder="John"
+                register={register}
+                required
+              />
+              <Field
+                label="Last Name"
+                name="lastName"
+                placeholder="Doe"
+                register={register}
+                required
+              />
             </div>
             <Field
               label="University Email"
+              name="universityEmail"
               placeholder="john@university.edu"
+              register={register}
+              required
               type="email"
             />
             <div className="space-y-2">
@@ -83,18 +149,15 @@ export function ContactSection() {
                 rows={4}
                 placeholder="How can we help?"
                 className="w-full resize-none rounded-lg border border-transparent bg-muted p-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:placeholder:text-muted-foreground"
+                {...register("message", { required: true })}
               />
             </div>
-            {submitted ? (
-              <p className="rounded-lg bg-accent px-4 py-3 text-sm font-semibold text-accent-foreground">
-                Message sent successfully.
-              </p>
-            ) : null}
             <Button
               type="submit"
               className="h-12 w-full rounded-xl bg-primary text-base font-bold text-primary-foreground hover:bg-primary/90"
+              disabled={isSubmitting}
             >
-              Send Message
+              {isSubmitting ? "Sending..." : "Send Message"}
             </Button>
           </form>
         </GlassPanel>
@@ -105,11 +168,17 @@ export function ContactSection() {
 
 function Field({
   label,
+  name,
   placeholder,
+  required = false,
+  register,
   type = "text",
 }: {
   label: string;
+  name: keyof ContactFormValues;
   placeholder: string;
+  required?: boolean;
+  register: UseFormRegister<ContactFormValues>;
   type?: string;
 }) {
   const id = label.toLowerCase().replaceAll(" ", "-");
@@ -124,6 +193,7 @@ function Field({
         type={type}
         placeholder={placeholder}
         className="h-12 w-full rounded-lg border border-transparent bg-muted px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:placeholder:text-muted-foreground"
+        {...register(name, { required })}
       />
     </div>
   );
