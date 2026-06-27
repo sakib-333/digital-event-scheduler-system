@@ -32,26 +32,26 @@ export function ContactSection() {
 
   return (
     <SectionShell id="contact">
-      <div className="grid gap-12 md:grid-cols-2">
-        <div>
-          <h2 className="text-4xl font-extrabold text-[#191b23] dark:text-foreground sm:text-5xl">
+      <div className="grid min-w-0 gap-12 md:grid-cols-2">
+        <div className="min-w-0">
+          <h2 className="text-4xl font-extrabold text-foreground sm:text-5xl">
             Get in Touch
           </h2>
-          <p className="mt-5 max-w-xl text-base leading-7 text-[#434655] dark:text-muted-foreground">
+          <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
             Interested in implementing DESS at your institution? Our technical
             deployment team is ready to assist.
           </p>
           <div className="mt-10 space-y-8">
             {contactMethods.map((method) => (
               <div key={method.title} className="flex items-start gap-4">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#dbe1ff] text-[#004ac6]">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                   {method.icon}
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-[#191b23] dark:text-foreground">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-foreground">
                     {method.title}
                   </h3>
-                  <p className="mt-1 text-sm leading-6 text-[#434655] dark:text-muted-foreground">
+                  <p className="mt-1 wrap-break-word text-sm leading-6 text-muted-foreground">
                     {method.detail}
                   </p>
                 </div>
@@ -60,9 +60,9 @@ export function ContactSection() {
           </div>
         </div>
 
-        <GlassPanel className="p-6">
+        <GlassPanel className="min-w-0 p-6">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <Field label="First Name" placeholder="John" />
               <Field label="Last Name" placeholder="Doe" />
             </div>
@@ -73,7 +73,7 @@ export function ContactSection() {
             />
             <div className="space-y-2">
               <label
-                className="text-sm font-semibold text-[#434655] dark:text-muted-foreground"
+                className="text-sm font-semibold text-muted-foreground"
                 htmlFor="message"
               >
                 Message
@@ -82,17 +82,17 @@ export function ContactSection() {
                 id="message"
                 rows={4}
                 placeholder="How can we help?"
-                className="w-full resize-none rounded-lg border border-transparent bg-[#f3f3fe] p-4 text-sm text-[#191b23] outline-none transition focus:border-[#004ac6] focus:ring-2 focus:ring-[#004ac6]/20 dark:bg-muted dark:text-foreground dark:placeholder:text-muted-foreground"
+                className="w-full resize-none rounded-lg border border-transparent bg-muted p-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:placeholder:text-muted-foreground"
               />
             </div>
             {submitted ? (
-              <p className="rounded-lg bg-[#dbe1ff] px-4 py-3 text-sm font-semibold text-[#004ac6]">
+              <p className="rounded-lg bg-accent px-4 py-3 text-sm font-semibold text-accent-foreground">
                 Message sent successfully.
               </p>
             ) : null}
             <Button
               type="submit"
-              className="h-12 w-full rounded-xl bg-[#004ac6] text-base font-bold text-white hover:bg-[#003ea8]"
+              className="h-12 w-full rounded-xl bg-primary text-base font-bold text-primary-foreground hover:bg-primary/90"
             >
               Send Message
             </Button>
@@ -115,15 +115,15 @@ function Field({
   const id = label.toLowerCase().replaceAll(" ", "-");
 
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-semibold text-[#434655] dark:text-muted-foreground" htmlFor={id}>
+    <div className="min-w-0 space-y-2">
+      <label className="text-sm font-semibold text-muted-foreground" htmlFor={id}>
         {label}
       </label>
       <input
         id={id}
         type={type}
         placeholder={placeholder}
-        className="h-12 w-full rounded-lg border border-transparent bg-[#f3f3fe] px-4 text-sm text-[#191b23] outline-none transition focus:border-[#004ac6] focus:ring-2 focus:ring-[#004ac6]/20 dark:bg-muted dark:text-foreground dark:placeholder:text-muted-foreground"
+        className="h-12 w-full rounded-lg border border-transparent bg-muted px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:placeholder:text-muted-foreground"
       />
     </div>
   );

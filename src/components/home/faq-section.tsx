@@ -27,10 +27,10 @@ export function FaqSection() {
   return (
     <SectionShell
       id="faq"
-      className="border-y border-[#c3c6d7]/30 bg-white py-16 transition-colors dark:border-border dark:bg-card/40 lg:py-24"
+      className="border-y border-border/30 bg-card py-16 transition-colors dark:bg-card/40 lg:py-24"
     >
-      <div className="mx-auto max-w-3xl">
-        <h2 className="mb-12 text-center text-4xl font-extrabold text-[#191b23] dark:text-foreground sm:text-5xl">
+      <div className="mx-auto max-w-3xl min-w-0">
+        <h2 className="mb-12 text-center text-4xl font-extrabold text-foreground sm:text-5xl">
           Common Queries
         </h2>
         <div className="space-y-4">
@@ -41,21 +41,21 @@ export function FaqSection() {
               <GlassPanel key={faq.question} className="overflow-hidden">
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between gap-4 p-6 text-left transition-colors hover:bg-[#f3f3fe] dark:hover:bg-muted/50"
+                  className="flex w-full items-center justify-between gap-4 p-6 text-left transition-colors hover:bg-muted dark:hover:bg-muted/50"
                   onClick={() => setOpenIndex(isOpen ? -1 : index)}
                   aria-expanded={isOpen}
                 >
-                  <span className="text-lg font-bold text-[#191b23] dark:text-foreground">
+                  <span className="min-w-0 text-lg font-bold text-foreground">
                     {faq.question}
                   </span>
                   <ChevronDown
-                    className={`size-5 shrink-0 text-[#434655] transition-transform dark:text-muted-foreground ${
+                    className={`size-5 shrink-0 text-muted-foreground transition-transform ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   />
                 </button>
                 {isOpen ? (
-                  <div className="border-t border-[#c3c6d7]/30 px-6 pb-6 pt-4 text-base leading-7 text-[#434655] dark:border-border dark:text-muted-foreground">
+                  <div className="border-t border-border/30 px-6 pb-6 pt-4 text-base leading-7 text-muted-foreground">
                     {faq.answer}
                   </div>
                 ) : null}

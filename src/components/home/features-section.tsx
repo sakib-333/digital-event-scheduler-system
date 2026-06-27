@@ -6,37 +6,37 @@ import { GlassPanel, SectionShell } from "./section-shell";
 export function FeaturesSection() {
   return (
     <SectionShell id="features">
-      <div className="mx-auto mb-12 max-w-3xl text-center">
-        <h2 className="text-4xl font-extrabold text-[#191b23] dark:text-foreground sm:text-5xl">
+      <div className="mx-auto mb-12 max-w-3xl min-w-0 text-center">
+        <h2 className="text-4xl font-extrabold text-foreground sm:text-5xl">
           Engineered for Academic Excellence
         </h2>
-        <p className="mt-4 text-base leading-7 text-[#434655] dark:text-muted-foreground">
+        <p className="mt-4 text-base leading-7 text-muted-foreground">
           A suite of professional tools designed to manage every facet of
           campus event planning with pixel-perfect precision.
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <GlassPanel className="p-6 transition-transform hover:-translate-y-1 md:col-span-2">
+      <div className="grid min-w-0 gap-6 md:grid-cols-3">
+        <GlassPanel className="min-w-0 p-6 transition-transform hover:-translate-y-1 md:col-span-2">
           <FeatureIcon tone="primary">
             <CalendarDays className="size-6" />
           </FeatureIcon>
-          <h3 className="mt-5 text-2xl font-bold text-[#191b23] dark:text-foreground">
+          <h3 className="mt-5 text-2xl font-bold text-foreground">
             Exam Scheduling Matrix
           </h3>
-          <p className="mt-3 max-w-xl text-base leading-7 text-[#434655] dark:text-muted-foreground">
+          <p className="mt-3 max-w-xl text-base leading-7 text-muted-foreground">
             Advanced conflict resolution engine that automatically assigns rooms
             and invigilators, ensuring no student has overlapping sessions.
           </p>
-          <div className="mt-8 h-48 overflow-hidden rounded-xl bg-[#f3f3fe] p-4 dark:bg-muted/40">
+          <div className="mt-8 h-48 min-w-0 overflow-hidden rounded-xl bg-muted p-4 dark:bg-muted/40">
             <div className="flex gap-3 overflow-x-auto pb-3">
-              <div className="min-w-32 rounded-lg bg-[#004ac6] p-3 text-sm font-bold text-white">
+              <div className="min-w-32 rounded-lg bg-primary p-3 text-sm font-bold text-primary-foreground">
                 MATH-101
               </div>
-              <div className="min-w-32 rounded-lg bg-[#dae2fd] p-3 text-sm font-bold text-[#5c647a]">
+              <div className="min-w-32 rounded-lg bg-secondary p-3 text-sm font-bold text-muted-foreground">
                 CS-50 Final
               </div>
-              <div className="min-w-32 rounded-lg border border-[#737686] bg-[#c3c6d7]/30 p-3 text-sm font-bold text-[#434655] dark:border-border dark:text-muted-foreground">
+              <div className="min-w-32 rounded-lg border border-muted-foreground bg-border/30 p-3 text-sm font-bold text-muted-foreground dark:border-border">
                 Room A-12
               </div>
             </div>
@@ -65,20 +65,20 @@ export function FeaturesSection() {
           tone="secondary"
         />
 
-        <GlassPanel className="grid gap-8 p-6 transition-transform hover:-translate-y-1 md:col-span-2 md:grid-cols-[1fr_0.85fr] md:items-center">
-          <div>
+        <GlassPanel className="grid min-w-0 gap-8 p-6 transition-transform hover:-translate-y-1 md:col-span-2 md:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] md:items-center">
+          <div className="min-w-0">
             <FeatureIcon tone="primary">
               <Users className="size-6" />
             </FeatureIcon>
-            <h3 className="mt-5 text-2xl font-bold text-[#191b23] dark:text-foreground">
+            <h3 className="mt-5 text-2xl font-bold text-foreground">
               Seminars & Workshops
             </h3>
-            <p className="mt-3 text-base leading-7 text-[#434655] dark:text-muted-foreground">
+            <p className="mt-3 text-base leading-7 text-muted-foreground">
               Interactive scheduling for guest lectures and technical workshops
               with QR-based attendance tracking.
             </p>
           </div>
-          <div className="rounded-xl bg-[#ededf9] p-5 dark:bg-muted/40">
+          <div className="min-w-0 rounded-xl bg-muted p-5 dark:bg-muted/40">
             <div className="space-y-3">
               <EventRow title="AI Ethics Workshop" status="Live" active />
               <EventRow title="Bio-Tech Seminar" status="Pending" />
@@ -103,10 +103,10 @@ function FeatureCard({
   tone: "primary" | "secondary" | "tertiary";
 }) {
   return (
-    <GlassPanel className="p-6 transition-transform hover:-translate-y-1">
+    <GlassPanel className="min-w-0 p-6 transition-transform hover:-translate-y-1">
       <FeatureIcon tone={tone}>{icon}</FeatureIcon>
-      <h3 className="mt-5 text-2xl font-bold text-[#191b23] dark:text-foreground">{title}</h3>
-      <p className="mt-3 text-base leading-7 text-[#434655] dark:text-muted-foreground">{description}</p>
+      <h3 className="mt-5 text-2xl font-bold text-foreground">{title}</h3>
+      <p className="mt-3 text-base leading-7 text-muted-foreground">{description}</p>
     </GlassPanel>
   );
 }
@@ -119,9 +119,9 @@ function FeatureIcon({
   children: ReactNode;
 }) {
   const toneClass = {
-    primary: "bg-[#dbe1ff] text-[#004ac6]",
-    secondary: "bg-[#dae2fd] text-[#5c647a]",
-    tertiary: "bg-[#ffdbcd] text-[#943700]",
+    primary: "bg-accent text-accent-foreground",
+    secondary: "bg-secondary text-muted-foreground",
+    tertiary: "bg-chart-4/20 text-foreground",
   }[tone];
 
   return (
@@ -143,10 +143,10 @@ function EventRow({
   active?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-lg bg-white px-4 py-3 shadow-sm dark:bg-card">
-      <span className="text-sm font-semibold text-[#191b23] dark:text-foreground">{title}</span>
+    <div className="flex min-w-0 items-center justify-between gap-3 rounded-lg bg-card px-4 py-3 shadow-sm">
+      <span className="min-w-0 truncate text-sm font-semibold text-foreground">{title}</span>
       <span
-        className={`text-sm font-bold ${active ? "text-[#004ac6]" : "text-[#737686]"}`}
+        className={`shrink-0 text-sm font-bold ${active ? "text-primary" : "text-muted-foreground"}`}
       >
         {status}
       </span>
