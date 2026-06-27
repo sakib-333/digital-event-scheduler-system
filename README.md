@@ -1,75 +1,153 @@
-# React + TypeScript + Vite
+# Digital Event Scheduler System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern web application for managing university events, venue scheduling, approvals, attendance, and administrative workflows. The system is built with React, TypeScript, Vite, TanStack Router, Tailwind CSS, Firebase, Supabase, and EmailJS.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Digital Event Scheduler System helps institutions coordinate academic and campus events from a single interface. It supports public landing pages, authenticated dashboards, event creation, event management, calendar views, analytics, user management, notifications, and contact form email delivery.
 
-## React Compiler
+## Features
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- Public home page with hero, feature, about, FAQ, and contact sections
+- Authentication-aware routing with protected dashboard areas
+- Event creation, editing, listing, and detail views
+- Admin event management and approval workflows
+- Calendar-based event visualization
+- Analytics dashboard with charts and summaries
+- User role management
+- Notification provider and notification dialog
+- Theme support with light and dark modes
+- Contact form powered by React Hook Form and EmailJS
+- Toast notifications through Sonner/shadcn UI
 
-Note: This will impact Vite dev & build performances.
+## Tech Stack
 
-## Expanding the ESLint configuration
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn UI components
+- TanStack Router
+- Zustand
+- Firebase
+- Supabase
+- React Hook Form
+- React Big Calendar
+- Recharts
+- EmailJS
+- Sonner
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js 18 or later
+- npm
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Installation
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a `.env` file in the project root and provide the required service credentials.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+# Firebase
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+
+# Supabase
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+
+# Cloudinary
+VITE_CLOUD_NAME=
+VITE_UPLOAD_PRESET=
+
+# EmailJS
+VITE_EMAILJS_SERVICE_ID=
+VITE_EMAILJS_TEMPLATE_ID=
+VITE_EMAILJS_PUBLIC_KEY=
 ```
+
+Do not commit real production credentials to source control.
+
+### Development
+
+```bash
+npm run dev
+```
+
+### Production Build
+
+```bash
+npm run build
+```
+
+### Preview Production Build
+
+```bash
+npm run preview
+```
+
+### Lint
+
+```bash
+npm run lint
+```
+
+## Project Structure
+
+```text
+src/
+  api/                 Data access and service functions
+  assets/              Static assets
+  components/          Shared UI and feature components
+  components/home/     Public landing page sections
+  components/ui/       shadcn UI primitives
+  context/             React context providers
+  layouts/             Application layouts
+  routes/              TanStack Router routes
+  stores/              Zustand state stores
+  types/               Shared TypeScript types
+  utils/               Utility helpers
+```
+
+## Key Routes
+
+- `/` - Public home page
+- `/signin` - Sign in
+- `/signup` - Sign up
+- `/dashboard` - Authenticated dashboard
+- `/events` - Event listing
+- `/event/create-event` - Create event
+- `/event/manage-events` - Manage events
+- `/calendar` - Calendar view
+- `/analytics` - Analytics view
+- `/manage-users` - User management
+- `/settings` - User settings
+
+## Email Delivery
+
+The contact form uses EmailJS with browser-safe public credentials from Vite environment variables. The form submits:
+
+- First name
+- Last name
+- University email
+- Message
+
+Successful and failed submissions are surfaced with Sonner toast notifications.
+
+## Notes
+
+- The app uses Vite environment variables, so all client-exposed values must be prefixed with `VITE_`.
+- Run `npm run build` before deployment to verify TypeScript and production bundling.
+- Generated router files should stay in sync with route changes.
+
