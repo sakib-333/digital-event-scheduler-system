@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -8,10 +9,10 @@ import {
   Clock,
   LayoutDashboard,
   LogOut,
-  Plus,
   Settings,
   User,
   Users,
+  X,
 } from "lucide-react";
 
 import { useAuth } from "@/context/auth-context";
@@ -42,6 +43,10 @@ function normalizeUserRole(role?: string | null): UserRole {
   }
 
   return "general";
+}
+
+function getUserRoleLabel(role?: string | null) {
+  return userTypeMap[normalizeUserRole(role)];
 }
 
 const primaryNavItems: NavItem[] = [
@@ -104,33 +109,6 @@ const secondaryNavItems: NavItem[] = [
   },
 ];
 
-const mobileNavItems: NavItem[] = [
-  {
-    icon: LayoutDashboard,
-    label: "Overview",
-    to: "/dashboard",
-    allowedRoles: ALL_ROLES,
-  },
-  {
-    icon: CalendarCheck,
-    label: "Events",
-    to: "/manage-events",
-    allowedRoles: ["admin", "moderator"],
-  },
-  {
-    icon: BarChart3,
-    label: "Analytics",
-    to: "/analytics",
-    allowedRoles: ["admin", "moderator"],
-  },
-  {
-    icon: User,
-    label: "Profile",
-    to: "/profile",
-    allowedRoles: ALL_ROLES,
-  },
-];
-
 const navItems = [...primaryNavItems, ...secondaryNavItems];
 
 export function getNavItemsByRole(
@@ -147,15 +125,13 @@ export function DashboardShell() {
     <div className="flex min-h-screen bg-background text-foreground">
       <DashboardSidebar />
 
-      <main className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
+      <main className="flex min-w-0 flex-1 flex-col">
         <DashboardHeader />
 
         <section className="mx-auto w-full max-w-360 p-6">
           <Outlet />
         </section>
       </main>
-
-      <MobileDashboardNav />
     </div>
   );
 }
@@ -233,12 +209,17 @@ function SidebarLink({ item }: { item: NavItem }) {
 }
 
 function DashboardHeader() {
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const { signout } = useAuth();
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
 
   const user = useAuthStore((state) => state.user);
   const allowedNavItems = getNavItemsByRole(user, navItems);
+  const allowedPrimaryNavItems = getNavItemsByRole(user, primaryNavItems);
+  const allowedSecondaryNavItems = getNavItemsByRole(user, secondaryNavItems);
 
   let activeTitle =
     allowedNavItems.find((item) => item.to === pathname)?.label ?? "Overview";
@@ -248,94 +229,184 @@ function DashboardHeader() {
     activeTitle = "Event Details";
   }
 
+  async function handleLogout() {
+    await signout();
+    setIsMobileSidebarOpen(false);
+    navigate({ to: "/signin" });
+  }
+
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/60 bg-background/70 px-6 backdrop-blur-md">
-      <div className="flex items-center gap-4">
-        <h2 className="text-2xl font-bold leading-8 text-primary">
-          {activeTitle}
-        </h2>
-      </div>
-
-      <div className="flex items-center gap-6">
-        <NotificationDialog />
-
-        <div className="flex items-center gap-2">
-          <div className="hidden text-right sm:block">
-            <p className="text-sm font-semibold leading-5 text-foreground">
-              {user?.name}
-            </p>
-            <p className="text-xs leading-4 text-muted-foreground">
-              {user?.user_role ? userTypeMap[user?.user_role] : ""}
-            </p>
-          </div>
-          <div className="size-10 rounded-full border-2 border-accent overflow-hidden flex items-center justify-center bg-accent text-accent-content font-semibold">
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                alt="User Avatar"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span>{getNameInitials(user?.name ?? "")}</span>
-            )}
-          </div>
+    <>
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/60 bg-background/70 px-6 backdrop-blur-md">
+        <div className="flex min-w-0 items-center gap-4">
+          <h2 className="truncate text-2xl font-bold leading-8 text-primary">
+            {activeTitle}
+          </h2>
         </div>
-      </div>
-    </header>
-  );
-}
 
-function MobileDashboardNav() {
-  const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
+        <div className="flex items-center gap-6">
+          <NotificationDialog />
 
-  const allowedMobileNavItems = getNavItemsByRole(user, mobileNavItems);
-  const canManageEvents = normalizeUserRole(user?.user_role) !== "general";
+          <div className="hidden items-center gap-2 md:flex">
+            <div className="text-right">
+              <p className="text-sm font-semibold leading-5 text-foreground">
+                {user?.name}
+              </p>
+              <p className="text-xs leading-4 text-muted-foreground">
+                {getUserRoleLabel(user?.user_role)}
+              </p>
+            </div>
+            <UserAvatar user={user} />
+          </div>
 
-  return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex h-16 items-center justify-around border-t border-border/60 bg-background/90 px-2 backdrop-blur-lg md:hidden">
-      {allowedMobileNavItems.slice(0, 2).map((item) => (
-        <MobileNavLink key={item.label} item={item} />
-      ))}
-
-      {canManageEvents ? (
-        <div className="-mt-8">
           <button
-            className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-90"
-            onClick={() => navigate({ to: "/event/manage-events" })}
+            className="md:hidden"
+            onClick={() => setIsMobileSidebarOpen(true)}
             type="button"
+            aria-label="Open dashboard navigation"
           >
-            <Plus className="size-8" aria-hidden="true" />
-            <span className="sr-only">Create event</span>
+            <UserAvatar user={user} />
           </button>
         </div>
-      ) : null}
+      </header>
 
-      {allowedMobileNavItems.slice(2).map((item) => (
-        <MobileNavLink key={item.label} item={item} />
-      ))}
-    </nav>
+      <MobileSidebar
+        isOpen={isMobileSidebarOpen}
+        onClose={() => setIsMobileSidebarOpen(false)}
+        onLogout={handleLogout}
+        primaryItems={allowedPrimaryNavItems}
+        secondaryItems={allowedSecondaryNavItems}
+        user={user}
+      />
+    </>
   );
 }
 
-function MobileNavLink({ item }: { item: NavItem }) {
+function UserAvatar({ user }: { user?: DashboardUser | null }) {
+  return (
+    <div className="flex size-10 items-center justify-center overflow-hidden rounded-full border-2 border-accent bg-accent font-semibold text-accent-foreground">
+      {user?.avatar ? (
+        <img
+          src={user.avatar}
+          alt="User Avatar"
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <span>{getNameInitials(user?.name ?? "")}</span>
+      )}
+    </div>
+  );
+}
+
+function MobileSidebar({
+  isOpen,
+  onClose,
+  onLogout,
+  primaryItems,
+  secondaryItems,
+  user,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onLogout: () => void;
+  primaryItems: NavItem[];
+  secondaryItems: NavItem[];
+  user?: DashboardUser | null;
+}) {
+  return (
+    <div
+      className={`fixed inset-0 z-50 md:hidden ${
+        isOpen ? "pointer-events-auto" : "pointer-events-none"
+      }`}
+      aria-hidden={!isOpen}
+    >
+      <button
+        className={`absolute inset-0 bg-background/70 backdrop-blur-sm transition-opacity duration-300 ease-out ${
+          isOpen ? "opacity-100" : "opacity-0"
+        }`}
+        onClick={onClose}
+        type="button"
+        aria-label="Close dashboard navigation"
+      />
+
+      <aside
+        className={`absolute left-0 top-0 flex h-full w-80 max-w-[85vw] flex-col border-r border-border bg-background shadow-2xl transition-transform duration-300 ease-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-4 border-b border-border/60 p-5">
+          <div className="flex min-w-0 items-center gap-3">
+            <UserAvatar user={user} />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold leading-5 text-foreground">
+                {user?.name}
+              </p>
+              <p className="text-xs leading-4 text-muted-foreground">
+                {getUserRoleLabel(user?.user_role)}
+              </p>
+            </div>
+          </div>
+
+          <button
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            onClick={onClose}
+            type="button"
+            aria-label="Close dashboard navigation"
+          >
+            <X className="size-5" aria-hidden="true" />
+          </button>
+        </div>
+
+        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
+          {primaryItems.map((item) => (
+            <MobileSidebarLink key={item.label} item={item} onClick={onClose} />
+          ))}
+
+          <div className="my-3 border-t border-border/50" />
+
+          {secondaryItems.map((item) => (
+            <MobileSidebarLink key={item.label} item={item} onClick={onClose} />
+          ))}
+        </nav>
+
+        <div className="border-t border-border/60 p-4">
+          <button
+            className="flex w-full items-center gap-4 rounded-lg px-4 py-3 text-sm font-medium leading-5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            onClick={onLogout}
+            type="button"
+          >
+            <LogOut className="size-5" aria-hidden="true" />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+function MobileSidebarLink({
+  item,
+  onClick,
+}: {
+  item: NavItem;
+  onClick: () => void;
+}) {
   const Icon = item.icon;
 
   return (
     <Link
-      className="flex flex-col items-center gap-1"
+      className="flex items-center gap-4 rounded-lg px-4 py-3 text-sm font-medium leading-5 transition-colors"
       activeProps={{
-        className: "text-primary",
+        className: "bg-primary text-primary-foreground",
       }}
       inactiveProps={{
-        className: "text-muted-foreground",
+        className: "text-muted-foreground hover:bg-muted hover:text-foreground",
       }}
+      onClick={onClick}
       to={item.to}
     >
       <Icon className="size-5" aria-hidden="true" />
-      <span className="text-[10px] font-semibold leading-4">
-        {item.label}
-      </span>
+      <span>{item.label}</span>
     </Link>
   );
 }
