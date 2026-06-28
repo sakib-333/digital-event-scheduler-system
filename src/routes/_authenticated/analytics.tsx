@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { requireRouteRoles } from "@/utils/route-permissions";
 import { useManageOverviewStore } from "@/stores/manage-overview-store";
 import { usePageTitle } from "@/utils";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
   beforeLoad: async ({ context }) => {
@@ -43,18 +44,23 @@ const chartColors = [
 ];
 
 function AnalyticsPage() {
-  usePageTitle("Analytics")
+  const { t } = useTranslation();
+  usePageTitle(t("routes.analytics.pageTitle"))
   const statsData = useManageOverviewStore()
+  const approvalHealthData = [
+    { name: t("routes.analytics.chartLabels.approved"), value: statsData.eventStatusCounts.approved || 0 },
+    { name: t("routes.analytics.chartLabels.pending"), value: statsData.eventStatusCounts.pending || 0 },
+    { name: t("routes.analytics.chartLabels.cancelled"), value: statsData.eventStatusCounts.canceled || 0 },
+  ];
 
   return (
     <div className="space-y-6">
       <header className="max-w-3xl">
         <h1 className="text-3xl font-semibold leading-10 text-foreground">
-          Analytics
+          {t("routes.analytics.title")}
         </h1>
         <p className="mt-1 text-base leading-6 text-muted-foreground">
-          Monitor event volume, approval health, attendance performance, and
-          venue utilization across the university scheduling system.
+          {t("routes.analytics.description")}
         </p>
       </header>
 
@@ -69,7 +75,7 @@ function AnalyticsPage() {
             </span>
           </div>
           <p className="text-sm leading-5 text-muted-foreground">
-            Events Tracked
+            {t("routes.analytics.metrics.eventsTracked")}
           </p>
           <h2 className="mt-1 text-3xl font-semibold leading-10 text-foreground">
             {statsData.totalEvents || 0}
@@ -86,7 +92,7 @@ function AnalyticsPage() {
             </span>
           </div>
           <p className="text-sm leading-5 text-muted-foreground">
-            Approval Rate
+            {t("routes.analytics.metrics.approvalRate")}
           </p>
           <h2 className="mt-1 text-3xl font-semibold leading-10 text-foreground">
             {statsData.approvalRate || 0}%
@@ -103,7 +109,7 @@ function AnalyticsPage() {
             </span>
           </div>
           <p className="text-sm leading-5 text-muted-foreground">
-            Pending Rate
+            {t("routes.analytics.metrics.pendingRate")}
           </p>
           <h2 className="mt-1 text-3xl font-semibold leading-10 text-foreground">
             {statsData.pendingRate || 0}%
@@ -120,7 +126,7 @@ function AnalyticsPage() {
             </span>
           </div>
           <p className="text-sm leading-5 text-muted-foreground">
-            Cancel Rate
+            {t("routes.analytics.metrics.cancelRate")}
           </p>
           <h2 className="mt-1 text-3xl font-semibold leading-10 text-foreground">
             {statsData.cancelRate || 0}%
@@ -132,8 +138,8 @@ function AnalyticsPage() {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <ChartPanel
           className="xl:col-span-2"
-          description="Submitted events compared with approved and pending decisions."
-          title="Event Activity Trend"
+          description={t("routes.analytics.panels.eventActivity.description")}
+          title={t("routes.analytics.panels.eventActivity.title")}
         >
           <ResponsiveContainer height={320} width="100%">
             <AreaChart data={statsData.monthlyEventData}>
@@ -146,21 +152,21 @@ function AnalyticsPage() {
                 dataKey="canceled"
                 fill="var(--primary)"
                 fillOpacity={0.14}
-                name="Canceled"
+                name={t("routes.analytics.chartLabels.cancelled")}
                 stroke="var(--primary)"
                 strokeWidth={2}
                 type="monotone"
               />
               <Line
                 dataKey="approved"
-                name="Approved"
+                name={t("routes.analytics.chartLabels.approved")}
                 stroke="var(--chart-3)"
                 strokeWidth={2}
                 type="monotone"
               />
               <Line
                 dataKey="pending"
-                name="Pending"
+                name={t("routes.analytics.chartLabels.pending")}
                 stroke="var(--chart-4)"
                 strokeWidth={2}
                 type="monotone"
@@ -170,28 +176,20 @@ function AnalyticsPage() {
         </ChartPanel>
 
         <ChartPanel
-          description="Current operational status across all submitted events."
-          title="Approval Health"
+          description={t("routes.analytics.panels.approvalHealth.description")}
+          title={t("routes.analytics.panels.approvalHealth.title")}
         >
           <ResponsiveContainer height={320} width="100%">
             <PieChart>
               <Pie
-                data={[
-                  { name: "Approved", value: statsData.eventStatusCounts.approved || 0 },
-                  { name: "Pending", value: statsData.eventStatusCounts.pending || 0 },
-                  { name: "Cancelled", value: statsData.eventStatusCounts.canceled || 0 },
-                ]}
+                data={approvalHealthData}
                 dataKey="value"
                 innerRadius={68}
                 nameKey="name"
                 outerRadius={108}
                 paddingAngle={4}
               >
-                {[
-                  { name: "Approved", value: statsData.eventStatusCounts.approved || 0 },
-                  { name: "Pending", value: statsData.eventStatusCounts.pending || 0 },
-                  { name: "Cancelled", value: statsData.eventStatusCounts.canceled || 0 },
-                ].map((entry, index) => (
+                {approvalHealthData.map((entry, index) => (
                   <Cell
                     fill={chartColors[index % chartColors.length]}
                     key={entry.name}
@@ -207,8 +205,8 @@ function AnalyticsPage() {
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <ChartPanel
-          description="Share of scheduled programming by event category."
-          title="Events by Category"
+          description={t("routes.analytics.panels.eventsByCategory.description")}
+          title={t("routes.analytics.panels.eventsByCategory.title")}
         >
           <ResponsiveContainer height={320} width="100%">
             <BarChart data={statsData.categoryData}>
@@ -216,7 +214,7 @@ function AnalyticsPage() {
               <XAxis dataKey="name" stroke="var(--muted-foreground)" />
               <YAxis stroke="var(--muted-foreground)" />
               <Tooltip />
-              <Bar dataKey="value" name="Events" radius={[8, 8, 0, 0]}>
+              <Bar dataKey="value" name={t("routes.analytics.chartLabels.events")} radius={[8, 8, 0, 0]}>
                 {statsData.categoryData.map((entry, index) => (
                   <Cell
                     fill={chartColors[index % chartColors.length]}
@@ -229,8 +227,8 @@ function AnalyticsPage() {
         </ChartPanel>
 
         <ChartPanel
-          description="Actual attendance measured against expected room capacity."
-          title="Attendance vs Capacity"
+          description={t("routes.analytics.panels.attendance.description")}
+          title={t("routes.analytics.panels.attendance.title")}
         >
           <ResponsiveContainer height={320} width="100%">
             <BarChart data={statsData.attendanceData}>
@@ -242,13 +240,13 @@ function AnalyticsPage() {
               <Bar
                 dataKey="capacity"
                 fill="var(--secondary-foreground)"
-                name="Capacity"
+                name={t("routes.analytics.chartLabels.capacity")}
                 radius={[8, 8, 0, 0]}
               />
               <Bar
                 dataKey="attendees"
                 fill="var(--primary)"
-                name="Attendees"
+                name={t("routes.analytics.chartLabels.attendees")}
                 radius={[8, 8, 0, 0]}
               />
             </BarChart>

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PlusCircle, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { EventCard } from "@/components/event-card";
 import { useAuth } from "@/context/auth-context";
@@ -27,14 +28,14 @@ type EventCategory =
 // Event Categories Constant
 // Used for filtering and category selection
 // ─────────────────────────────────────────────────────
-const EVENT_CATEGORIES: { label: string; value: EventCategory }[] = [
-  { label: "Exam", value: "exam" },
-  { label: "Contest", value: "contest" },
-  { label: "Game", value: "game" },
-  { label: "Feast", value: "feast" },
-  { label: "Tour", value: "tour" },
-  { label: "Concert", value: "concert" },
-  { label: "Others", value: "others" },
+const EVENT_CATEGORIES: { labelKey: string; value: EventCategory }[] = [
+  { labelKey: "routes.common.categories.exam", value: "exam" },
+  { labelKey: "routes.common.categories.contest", value: "contest" },
+  { labelKey: "routes.common.categories.game", value: "game" },
+  { labelKey: "routes.common.categories.feast", value: "feast" },
+  { labelKey: "routes.common.categories.tour", value: "tour" },
+  { labelKey: "routes.common.categories.concert", value: "concert" },
+  { labelKey: "routes.common.categories.others", value: "others" },
 ];
 
 // ─────────────────────────────────────────────────────
@@ -55,6 +56,8 @@ function EventControls({
   onCategoryChange: (category: EventCategory | "all") => void;
   onSearchChange: (query: string) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <section className="flex flex-col items-center gap-4 rounded-xl border border-border/60 bg-card p-4 shadow-sm lg:flex-row">
       <label className="relative w-full flex-1">
@@ -62,10 +65,10 @@ function EventControls({
           className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
           aria-hidden="true"
         />
-        <span className="sr-only">Search events</span>
+        <span className="sr-only">{t("routes.myEvents.searchAria")}</span>
         <input
           className="h-10 w-full rounded-lg border border-transparent bg-muted pl-12 pr-4 text-base leading-6 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
-          placeholder="Search events by title, organizer, or location..."
+          placeholder={t("routes.myEvents.searchPlaceholder")}
           type="search"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
@@ -80,10 +83,10 @@ function EventControls({
             onCategoryChange(e.target.value as EventCategory | "all")
           }
         >
-          <option value="all">All Categories</option>
-          {EVENT_CATEGORIES.map(({ label, value }) => (
+          <option value="all">{t("routes.common.categories.all")}</option>
+          {EVENT_CATEGORIES.map(({ labelKey, value }) => (
             <option key={value} value={value}>
-              {label}
+              {t(labelKey)}
             </option>
           ))}
         </select>
@@ -97,6 +100,7 @@ function EventControls({
 // Main Events Page Component
 // ─────────────────────────────────────────────────────
 function MyEventsPage() {
+  const { t } = useTranslation();
   // ─────────────────────────────────────────────────────
   // Get current user from auth context
   // ─────────────────────────────────────────────────────
@@ -152,7 +156,7 @@ function MyEventsPage() {
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-muted-foreground">Loading your events...</p>
+          <p className="text-muted-foreground">{t("routes.myEvents.loading")}</p>
         </div>
       </div>
     );
@@ -163,18 +167,16 @@ function MyEventsPage() {
       <header className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div>
           <h1 className="text-3xl font-semibold leading-10 text-foreground">
-            My Events
+            {t("routes.myEvents.title")}
           </h1>
           <p className="mt-1 max-w-2xl text-base leading-6 text-muted-foreground">
-            Manage and track your upcoming university schedules and registered
-            activities. Total: {filteredEvents.length} event
-            {filteredEvents.length !== 1 ? "s" : ""}
+            {t("routes.myEvents.description", { count: filteredEvents.length })}
           </p>
         </div>
         <Link to="/event/create-event">
           <Button className="h-11 gap-2 rounded-xl px-6 shadow-sm" type="button">
             <PlusCircle className="size-5" aria-hidden="true" />
-            <span>Create New Event</span>
+            <span>{t("routes.myEvents.createNew")}</span>
           </Button>
         </Link>
       </header>
@@ -190,8 +192,8 @@ function MyEventsPage() {
         <div className="rounded-lg border border-border/60 bg-card p-12 text-center">
           <p className="text-lg text-muted-foreground">
             {events.length === 0
-              ? "No events found. Create your first event to get started!"
-              : "No events match your filters. Try adjusting your search or category."}
+              ? t("routes.myEvents.empty")
+              : t("routes.myEvents.noMatches")}
           </p>
         </div>
       ) : (

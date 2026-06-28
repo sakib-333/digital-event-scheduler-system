@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import type { TFunction } from "i18next";
 import { Search, ShieldCheck, UserCog, UserPlus, Users } from "lucide-react";
 
 import {
@@ -14,6 +15,7 @@ import { useManageUsersStore } from "@/stores/manage-users-store";
 import type { UserType } from "@/types/user";
 import { formatDate, getNameInitials, isNewThisWeek } from "@/utils";
 import { requireRouteRoles } from "@/utils/route-permissions";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/manage-users")({
   beforeLoad: async ({ context }) => {
@@ -29,6 +31,7 @@ const roleOptions: UserRole[] = ["moderator", "general"];
 const roleFilterOptions: RoleFilter[] = ["all", "admin", ...roleOptions];
 
 function ManageUsersPage() {
+  const { t } = useTranslation();
   const error = useManageUsersStore((state) => state.error);
   const getAllUsers = useManageUsersStore((state) => state.getAllUsers);
   const isLoading = useManageUsersStore((state) => state.isLoading);
@@ -66,11 +69,10 @@ function ManageUsersPage() {
     <div className="space-y-6">
       <header className="max-w-3xl">
         <h1 className="text-3xl font-semibold leading-10 text-foreground">
-          Manage Users
+          {t("routes.manageUsers.title")}
         </h1>
         <p className="mt-1 text-base leading-6 text-muted-foreground">
-          Review institutional accounts, search by user details, filter by role,
-          and update access between admin, moderator, and general user roles.
+          {t("routes.manageUsers.description")}
         </p>
       </header>
 
@@ -83,11 +85,11 @@ function ManageUsersPage() {
               className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
             />
-            <span className="sr-only">Search users</span>
+            <span className="sr-only">{t("routes.manageUsers.searchAria")}</span>
             <input
               className="h-10 w-full rounded-xl border border-border/60 bg-muted pl-10 pr-4 text-sm leading-5 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search users by name or email..."
+              placeholder={t("routes.manageUsers.searchPlaceholder")}
               type="search"
               value={query}
             />
@@ -111,18 +113,19 @@ function ManageUsersPage() {
 }
 
 function UserStats({ users }: { users: UserType[] }) {
+  const { t } = useTranslation();
   console.log(users)
   const cards = [
     {
       icon: Users,
       iconClassName: "bg-primary/10 text-primary",
-      label: "Total Users",
+      label: t("routes.manageUsers.stats.totalUsers"),
       value: users.length.toString(),
     },
     {
       icon: ShieldCheck,
       iconClassName: "bg-chart-4/10 text-chart-4",
-      label: "Moderators",
+      label: t("routes.manageUsers.stats.moderators"),
       value: users
         .filter((user) => getUserRole(user) === "moderator")
         .length.toString(),
@@ -130,7 +133,7 @@ function UserStats({ users }: { users: UserType[] }) {
     {
       icon: UserCog,
       iconClassName: "bg-secondary text-secondary-foreground",
-      label: "General Users",
+      label: t("routes.manageUsers.stats.generalUsers"),
       value: users
         .filter((user) => getUserRole(user) === "general")
         .length.toString(),
@@ -138,7 +141,7 @@ function UserStats({ users }: { users: UserType[] }) {
     {
       icon: UserPlus,
       iconClassName: "bg-chart-3/10 text-chart-3",
-      label: "New This Week",
+      label: t("routes.manageUsers.stats.newThisWeek"),
       value: users.filter((user) => isNewThisWeek(user.created_at)).length.toString(),
     },
   ];
@@ -178,13 +181,15 @@ function RoleFilterSelect({
   onValueChange: (value: RoleFilter) => void;
   value: RoleFilter;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex w-full items-center gap-2 sm:w-auto">
       <span
         className="text-xs font-semibold leading-4 text-muted-foreground"
         id="role-filter-label"
       >
-        Role
+        {t("routes.manageUsers.filters.role")}
       </span>
       <Select
         value={value}
@@ -202,7 +207,9 @@ function RoleFilterSelect({
         >
           {roleFilterOptions.map((role) => (
             <SelectItem key={role} value={role}>
-              {role === "all" ? "All Roles" : getRoleLabel(role)}
+              {role === "all"
+                ? t("routes.manageUsers.filters.allRoles")
+                : getRoleLabel(role, t)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -228,28 +235,31 @@ function UsersTable({
   updatingUserId: string | null;
   users: UserType[];
 }) {
+  const { t } = useTranslation();
+  const tableColumns = ["user", "role", "joinedDate", "action"] as const;
+
   return (
     <section className="overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-sm backdrop-blur-xl">
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-border/60 bg-muted/60">
-              {["User", "Role", "Joined Date", "Action"].map((heading) => (
+              {tableColumns.map((heading) => (
                 <th
                   className={cn(
                     "px-6 py-4 text-sm font-medium leading-5 text-muted-foreground",
-                    heading === "Action" && "text-right",
+                    heading === "action" && "text-right",
                   )}
                   key={heading}
                 >
-                  {heading}
+                  {t(`routes.manageUsers.table.columns.${heading}`)}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
             {isLoading ? (
-              <TableMessage message="Loading users..." />
+              <TableMessage message={t("routes.manageUsers.table.loading")} />
             ) : error ? (
               <TableMessage message={error} />
             ) : users.length > 0 ? (
@@ -262,7 +272,7 @@ function UsersTable({
                 />
               ))
             ) : (
-              <TableMessage message="No users match the current search and filter." />
+              <TableMessage message={t("routes.manageUsers.table.empty")} />
             )}
           </tbody>
         </table>
@@ -270,8 +280,10 @@ function UsersTable({
 
       <div className="flex flex-col items-center justify-between gap-4 border-t border-border/60 bg-muted/30 px-6 py-4 sm:flex-row">
         <p className="text-xs font-semibold leading-4 text-muted-foreground">
-          Showing <span className="text-foreground">{users.length}</span> of{" "}
-          <span className="text-foreground">{totalUsers}</span> users
+          {t("routes.manageUsers.table.showing", {
+            shown: users.length,
+            total: totalUsers,
+          })}
         </p>
       </div>
     </section>
@@ -287,6 +299,7 @@ function UserRow({
   onRoleChange: (userId: string, role: UserRole) => void;
   user: UserType;
 }) {
+  const { t } = useTranslation();
   const role = getUserRole(user);
 
   return (
@@ -297,7 +310,9 @@ function UserRow({
             {user?.avatar ? (
               <img
                 src={user.avatar}
-                alt={`${user.name} avatar`}
+                alt={t("routes.manageUsers.table.avatarAlt", {
+                  name: user.name,
+                })}
                 className="size-full object-cover"
               />
             ) : (
@@ -328,7 +343,9 @@ function UserRow({
             onValueChange={(nextRole) => onRoleChange(user.uid, nextRole as UserRole)}
           >
             <SelectTrigger
-              aria-label={`Change role for ${user.name}`}
+              aria-label={t("routes.manageUsers.table.changeRoleAria", {
+                name: user.name,
+              })}
               className="h-10 min-w-40 rounded-xl border-border/60 bg-muted px-4 text-sm leading-5 text-foreground shadow-none"
               disabled={role === "admin"}
             >
@@ -340,7 +357,7 @@ function UserRow({
             >
               {roleOptions.map((role) => (
                 <SelectItem key={role} value={role} disabled={role === "admin"}>
-                  {getRoleLabel(role)}
+                  {getRoleLabel(role, t)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -352,6 +369,8 @@ function UserRow({
 }
 
 function RoleBadge({ role }: { role: UserRole }) {
+  const { t } = useTranslation();
+
   return (
     <span
       className={cn(
@@ -361,7 +380,7 @@ function RoleBadge({ role }: { role: UserRole }) {
         role === "general" && "bg-secondary text-secondary-foreground",
       )}
     >
-      {getRoleLabel(role)}
+      {getRoleLabel(role, t)}
     </span>
   );
 }
@@ -380,12 +399,6 @@ function getUserRole(user: UserType): UserRole {
   return user.user_role ?? "general";
 }
 
-function getRoleLabel(role: UserRole) {
-  const labels: Record<UserRole, string> = {
-    admin: "Admin",
-    general: "General User",
-    moderator: "Moderator",
-  };
-
-  return labels[role];
+function getRoleLabel(role: UserRole, t: TFunction) {
+  return t(`routes.manageUsers.roles.${role}`);
 }

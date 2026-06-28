@@ -7,6 +7,7 @@ import { useManageEventsStore } from "@/stores/manage-events-store";
 import type { EventType } from "@/types/event";
 import { usePageTitle } from "@/utils";
 import { createFileRoute } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 const localizer = momentLocalizer(moment);
 
@@ -176,7 +177,8 @@ export const Route = createFileRoute("/_authenticated/calendar")({
 });
 
 function RouteComponent() {
-  usePageTitle("Calendar");
+  const { t } = useTranslation();
+  usePageTitle(t("routes.calendar.pageTitle"));
 
   const events = useManageEventsStore((state) => state.events);
   const isLoading = useManageEventsStore((state) => state.isLoading);
@@ -203,9 +205,11 @@ function RouteComponent() {
       <style>{calendarStyles}</style>
       <section className="space-y-4">
       <header>
-        <h1 className="text-2xl font-semibold text-foreground">Calendar</h1>
+        <h1 className="text-2xl font-semibold text-foreground">
+          {t("routes.calendar.title")}
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Approved events are shown by title.
+          {t("routes.calendar.description")}
         </p>
       </header>
 
@@ -218,7 +222,7 @@ function RouteComponent() {
       <div className="event-calendar h-180 overflow-hidden rounded-lg border border-border bg-card p-3 text-card-foreground shadow-sm">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            Loading approved events...
+            {t("routes.calendar.loading")}
           </div>
         ) : (
           <BigCalendar
@@ -229,6 +233,18 @@ function RouteComponent() {
             titleAccessor="title"
             views={["month", "week", "day"]}
             defaultView="month"
+            messages={{
+              today: t("routes.calendar.controls.today"),
+              previous: t("routes.calendar.controls.previous"),
+              next: t("routes.calendar.controls.next"),
+              month: t("routes.calendar.views.month"),
+              week: t("routes.calendar.views.week"),
+              day: t("routes.calendar.views.day"),
+              date: t("routes.calendar.agenda.date"),
+              time: t("routes.calendar.agenda.time"),
+              event: t("routes.calendar.agenda.event"),
+              noEventsInRange: t("routes.calendar.agenda.empty"),
+            }}
             popup
             components={{
               event: TitleOnlyEvent,

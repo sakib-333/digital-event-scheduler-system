@@ -305,5 +305,193 @@
         "uncategorized": "Uncategorized"
       }
     }
+  },
+  "settings": {
+    "badge": "Workspace preferences",
+    "title": "Settings",
+    "description": "Personalize how the event scheduling dashboard feels and responds to you.",
+    "activeLanguage": "Active language",
+    "language": {
+      "title": "Language",
+      "description": "Choose the interface language used across navigation, forms, and dashboard content.",
+      "displayLabel": "Display language",
+      "selected": "Selected",
+      "region": {
+        "en": "United States",
+        "bn": "Bangladesh"
+      }
+    },
+    "summary": {
+      "title": "Preference summary",
+      "description": "Language updates are saved by your browser and applied automatically next time.",
+      "language": "Language",
+      "storage": "Storage",
+      "localBrowser": "Local browser"
+    }
+  },
+  "routes": {
+    "common": {
+      "categories": {
+        "all": "All Categories",
+        "exam": "Exam",
+        "contest": "Contest",
+        "game": "Game",
+        "feast": "Feast",
+        "tour": "Tour",
+        "concert": "Concert",
+        "others": "Others"
+      }
+    },
+    "analytics": {
+      "pageTitle": "Analytics",
+      "title": "Analytics",
+      "description": "Monitor event volume, approval health, attendance performance, and venue utilization across the university scheduling system.",
+      "metrics": {
+        "eventsTracked": "Events Tracked",
+        "approvalRate": "Approval Rate",
+        "pendingRate": "Pending Rate",
+        "cancelRate": "Cancel Rate"
+      },
+      "panels": {
+        "eventActivity": {
+          "title": "Event Activity Trend",
+          "description": "Submitted events compared with approved and pending decisions."
+        },
+        "approvalHealth": {
+          "title": "Approval Health",
+          "description": "Current operational status across all submitted events."
+        },
+        "eventsByCategory": {
+          "title": "Events by Category",
+          "description": "Share of scheduled programming by event category."
+        },
+        "attendance": {
+          "title": "Attendance vs Capacity",
+          "description": "Actual attendance measured against expected room capacity."
+        }
+      },
+      "chartLabels": {
+        "approved": "Approved",
+        "pending": "Pending",
+        "cancelled": "Cancelled",
+        "events": "Events",
+        "capacity": "Capacity",
+        "attendees": "Attendees"
+      }
+    },
+    "calendar": {
+      "pageTitle": "Calendar",
+      "title": "Calendar",
+      "description": "Approved events are shown by title.",
+      "loading": "Loading approved events...",
+      "controls": {
+        "today": "Today",
+        "previous": "Back",
+        "next": "Next"
+      },
+      "views": {
+        "month": "Month",
+        "week": "Week",
+        "day": "Day"
+      },
+      "agenda": {
+        "date": "Date",
+        "time": "Time",
+        "event": "Event",
+        "empty": "No events in this range."
+      }
+    },
+    "events": {
+      "title": "Approved Events",
+      "description_one": "Browse all approved events available to your university community. Total: {{count}} approved event",
+      "description_other": "Browse all approved events available to your university community. Total: {{count}} approved events",
+      "searchAria": "Search events",
+      "searchPlaceholder": "Search approved events by title, organizer, or location...",
+      "loading": "Loading approved events...",
+      "empty": "No approved events are available right now.",
+      "noMatches": "No approved events match your filters. Try another search or category."
+    },
+    "manageUsers": {
+      "title": "Manage Users",
+      "description": "Review institutional accounts, search by user details, filter by role, and update access between admin, moderator, and general user roles.",
+      "searchAria": "Search users",
+      "searchPlaceholder": "Search users by name or email...",
+      "stats": {
+        "totalUsers": "Total Users",
+        "moderators": "Moderators",
+        "generalUsers": "General Users",
+        "newThisWeek": "New This Week"
+      },
+      "filters": {
+        "role": "Role",
+        "allRoles": "All Roles"
+      },
+      "roles": {
+        "admin": "Admin",
+        "moderator": "Moderator",
+        "general": "General User"
+      },
+      "table": {
+        "columns": {
+          "user": "User",
+          "role": "Role",
+          "joinedDate": "Joined Date",
+          "action": "Action"
+        },
+        "loading": "Loading users...",
+        "empty": "No users match the current search and filter.",
+        "showing": "Showing {{shown}} of {{total}} users",
+        "avatarAlt": "{{name}} avatar",
+        "changeRoleAria": "Change role for {{name}}"
+      }
+    },
+    "myEvents": {
+      "title": "My Events",
+      "description_one": "Manage and track your upcoming university schedules and registered activities. Total: {{count}} event",
+      "description_other": "Manage and track your upcoming university schedules and registered activities. Total: {{count}} events",
+      "searchAria": "Search events",
+      "searchPlaceholder": "Search events by title, organizer, or location...",
+      "loading": "Loading your events...",
+      "createNew": "Create New Event",
+      "empty": "No events found. Create your first event to get started!",
+      "noMatches": "No events match your filters. Try adjusting your search or category."
+    },
+    "profile": {
+      "title": "Profile",
+      "description": "Review your account details and update the editable profile fields used across the scheduling system.",
+      "avatarAlt": "{{name}} avatar",
+      "uploadAvatar": "Upload profile avatar",
+      "account": {
+        "title": "Account Information",
+        "description": "Name, phone, and avatar image are editable. Identity fields are shown for reference."
+      },
+      "fields": {
+        "userId": "User ID",
+        "userType": "User Type",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "memberSince": "Member Since"
+      },
+      "roles": {
+        "admin": "Admin",
+        "moderator": "Moderator",
+        "general": "General"
+      },
+      "validation": {
+        "invalidPhone": "Please enter a valid Bangladesh phone number."
+      },
+      "messages": {
+        "noUser": "No authenticated user found.",
+        "saved": "Profile changes saved.",
+        "saveError": "Unable to save profile changes.",
+        "invalidImage": "Please upload a JPG or PNG image.",
+        "default": "Save changes after updating editable fields."
+      },
+      "actions": {
+        "saving": "Saving...",
+        "save": "Save Updated Data"
+      }
+    }
   }
 }

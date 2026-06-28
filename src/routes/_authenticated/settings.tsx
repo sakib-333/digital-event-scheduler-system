@@ -65,24 +65,19 @@ function SettingsPage() {
               className="mb-4 gap-2 rounded-md px-3 py-1 text-sm font-semibold"
             >
               <MonitorCog className="size-4" aria-hidden="true" />
-              {t("settings.badge", { defaultValue: "Workspace preferences" })}
+              {t("settings.badge")}
             </Badge>
             <h1 className="text-3xl font-semibold leading-10 text-foreground">
-              {t("settings.title", { defaultValue: "Settings" })}
+              {t("settings.title")}
             </h1>
             <p className="mt-2 text-base leading-7 text-muted-foreground">
-              {t("settings.description", {
-                defaultValue:
-                  "Personalize how the event scheduling dashboard feels and responds to you.",
-              })}
+              {t("settings.description")}
             </p>
           </div>
 
           <div className="grid min-w-52 gap-2 rounded-lg border border-border/70 bg-background/70 p-4">
             <span className="text-sm font-semibold text-muted-foreground">
-              {t("settings.activeLanguage", {
-                defaultValue: "Active language",
-              })}
+              {t("settings.activeLanguage")}
             </span>
             <span className="flex items-center gap-2 text-lg font-semibold text-foreground">
               <Globe2 className="size-5 text-primary" aria-hidden="true" />
@@ -101,13 +96,10 @@ function SettingsPage() {
               </span>
               <div className="min-w-0">
                 <CardTitle className="text-xl font-semibold leading-7 text-foreground">
-                  {t("settings.language.title", { defaultValue: "Language" })}
+                  {t("settings.language.title")}
                 </CardTitle>
                 <CardDescription className="mt-1 leading-6">
-                  {t("settings.language.description", {
-                    defaultValue:
-                      "Choose the interface language used across navigation, forms, and dashboard content.",
-                  })}
+                  {t("settings.language.description")}
                 </CardDescription>
               </div>
             </div>
@@ -118,9 +110,7 @@ function SettingsPage() {
                 className="text-sm font-semibold leading-5 text-muted-foreground"
                 id="language-select-label"
               >
-                {t("settings.language.displayLabel", {
-                  defaultValue: "Display language",
-                })}
+                {t("settings.language.displayLabel")}
               </label>
               <Select value={currentLanguage} onValueChange={handleLanguageChange}>
                 <SelectTrigger
@@ -157,18 +147,14 @@ function SettingsPage() {
                           {language.nativeLabel}
                         </h2>
                         <p className="mt-1 text-sm leading-5 text-muted-foreground">
-                          {t(`settings.language.region.${language.value}`, {
-                            defaultValue: language.region,
-                          })}
+                          {t(`settings.language.region.${language.value}`)}
                         </p>
                       </div>
                       {isSelected ? (
                         <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
                           <Check className="size-4" aria-hidden="true" />
                           <span className="sr-only">
-                            {t("settings.language.selected", {
-                              defaultValue: "Selected",
-                            })}
+                            {t("settings.language.selected")}
                           </span>
                         </span>
                       ) : null}
@@ -183,22 +169,17 @@ function SettingsPage() {
         <Card className="border-border/70 bg-card/80 shadow-sm backdrop-blur-xl">
           <CardHeader>
             <CardTitle className="text-lg font-semibold leading-7 text-foreground">
-              {t("settings.summary.title", { defaultValue: "Preference summary" })}
+              {t("settings.summary.title")}
             </CardTitle>
             <CardDescription className="leading-6">
-              {t("settings.summary.description", {
-                defaultValue:
-                  "Language updates are saved by your browser and applied automatically next time.",
-              })}
+              {t("settings.summary.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <dl className="space-y-4">
               <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-4">
                 <dt className="text-sm font-semibold text-muted-foreground">
-                  {t("settings.summary.language", {
-                    defaultValue: "Language",
-                  })}
+                  {t("settings.summary.language")}
                 </dt>
                 <dd className="text-sm font-semibold text-foreground">
                   {selectedLanguage.nativeLabel}
@@ -206,14 +187,10 @@ function SettingsPage() {
               </div>
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-sm font-semibold text-muted-foreground">
-                  {t("settings.summary.storage", {
-                    defaultValue: "Storage",
-                  })}
+                  {t("settings.summary.storage")}
                 </dt>
                 <dd className="text-sm font-semibold text-foreground">
-                  {t("settings.summary.localBrowser", {
-                    defaultValue: "Local browser",
-                  })}
+                  {t("settings.summary.localBrowser")}
                 </dd>
               </div>
             </dl>

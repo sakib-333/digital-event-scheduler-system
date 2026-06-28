@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import type { TFunction } from "i18next";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Camera, Mail, Phone, Save, ShieldCheck, User } from "lucide-react";
 
@@ -24,6 +25,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import type { UserType } from "@/types/user";
 import { getNameInitials, isValidBDPhoneNumber, uploadImage } from "@/utils";
 import moment from "moment";
+import { useTranslation } from "react-i18next";
 
 /*━━ Profile route ━━━━━━ */
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -42,6 +44,7 @@ const defaultProfile: UserType = {
 
 /*━━ Profile page component ━━━━━━ */
 function ProfilePage() {
+  const { t } = useTranslation();
   const authUser = useAuthStore((state) => state.user);
   const setAuthUser = useAuthStore((state) => state.setUser);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -69,7 +72,7 @@ function ProfilePage() {
     validate: (value) =>
       !value ||
       isValidBDPhoneNumber(value) ||
-      "Please enter a valid Bangladesh phone number.",
+      t("routes.profile.validation.invalidPhone"),
   });
 
   /*━━ Sync zustand user with form ━━━━━━ */
@@ -82,7 +85,7 @@ function ProfilePage() {
   /*━━ Save profile method ━━━━━━ */
   const handleSave: SubmitHandler<ProfileFormValues> = async (formData) => {
     if (!formData.uid) {
-      setSavedMessage("No authenticated user found.");
+      setSavedMessage(t("routes.profile.messages.noUser"));
       return;
     }
 
@@ -102,12 +105,12 @@ function ProfilePage() {
       setAuthUser(updatedUser);
       reset(updatedUser);
       setAvatarFile(null);
-      setSavedMessage("Profile changes saved.");
+      setSavedMessage(t("routes.profile.messages.saved"));
     } catch (error) {
       setSavedMessage(
         error instanceof Error
           ? error.message
-          : "Unable to save profile changes.",
+          : t("routes.profile.messages.saveError"),
       );
     }
   };
@@ -121,7 +124,7 @@ function ProfilePage() {
     }
 
     if (!["image/jpeg", "image/png"].includes(file.type)) {
-      setSavedMessage("Please upload a JPG or PNG image.");
+      setSavedMessage(t("routes.profile.messages.invalidImage"));
       return;
     }
 
@@ -137,11 +140,10 @@ function ProfilePage() {
     <div className="space-y-6">
       <header className="max-w-3xl">
         <h1 className="text-3xl font-semibold leading-10 text-foreground">
-          Profile
+          {t("routes.profile.title")}
         </h1>
         <p className="mt-1 text-base leading-6 text-muted-foreground">
-          Review your account details and update the editable profile fields
-          used across the scheduling system.
+          {t("routes.profile.description")}
         </p>
       </header>
 
@@ -154,7 +156,9 @@ function ProfilePage() {
                   {profileAvatar ? (
                     <img
                       src={profileAvatar}
-                      alt={`${profileName} avatar`}
+                      alt={t("routes.profile.avatarAlt", {
+                        name: profileName,
+                      })}
                       className="size-full object-cover"
                     />
                   ) : (
@@ -164,7 +168,9 @@ function ProfilePage() {
 
                 <label className="absolute bottom-1 right-1 flex size-9 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform active:scale-95">
                   <Camera className="size-4" aria-hidden="true" />
-                  <span className="sr-only">Upload profile avatar</span>
+                  <span className="sr-only">
+                    {t("routes.profile.uploadAvatar")}
+                  </span>
                   <Input
                     type="file"
                     accept="image/jpeg,image/png"
@@ -183,7 +189,7 @@ function ProfilePage() {
                 </CardDescription>
                 <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
                   <ShieldCheck className="size-4" aria-hidden="true" />
-                  {formatRole(profileRole)}
+                  {formatRole(profileRole, t)}
                 </span>
               </div>
             </div>
@@ -192,16 +198,15 @@ function ProfilePage() {
           <CardContent>
             <div className="mb-6">
               <h2 className="text-xl font-semibold leading-7 text-foreground">
-                Account Information
+                {t("routes.profile.account.title")}
               </h2>
               <p className="mt-1 text-sm leading-5 text-muted-foreground">
-                Name, phone, and avatar image are editable. Identity fields are
-                shown for reference.
+                {t("routes.profile.account.description")}
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <ProfileField label="User ID">
+              <ProfileField label={t("routes.profile.fields.userId")}>
                 <Input
                   className="h-11 rounded-xl bg-muted"
                   readOnly
@@ -209,15 +214,15 @@ function ProfilePage() {
                 />
               </ProfileField>
 
-              <ProfileField label="User Type">
+              <ProfileField label={t("routes.profile.fields.userType")}>
                 <Input
                   className="h-11 rounded-xl bg-muted"
                   readOnly
-                  value={formatRole(profileRole)}
+                  value={formatRole(profileRole, t)}
                 />
               </ProfileField>
 
-              <ProfileField label="Name">
+              <ProfileField label={t("routes.profile.fields.name")}>
                 <Input
                   className="h-11 rounded-xl bg-background"
                   {...nameField}
@@ -228,7 +233,7 @@ function ProfilePage() {
                 />
               </ProfileField>
 
-              <ProfileField label="Email">
+              <ProfileField label={t("routes.profile.fields.email")}>
                 <div className="relative">
                   <Mail
                     className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -243,7 +248,7 @@ function ProfilePage() {
                 </div>
               </ProfileField>
 
-              <ProfileField label="Phone">
+              <ProfileField label={t("routes.profile.fields.phone")}>
                 <div className="relative">
                   <Phone
                     className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -270,7 +275,7 @@ function ProfilePage() {
                 ) : null}
               </ProfileField>
 
-              <ProfileField label="Member Since">
+              <ProfileField label={t("routes.profile.fields.memberSince")}>
                 <Input
                   className="h-11 rounded-xl bg-muted"
                   readOnly
@@ -281,7 +286,7 @@ function ProfilePage() {
 
             <div className="mt-6 flex flex-col gap-3 border-t border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm leading-5 text-muted-foreground">
-                {savedMessage || "Save changes after updating editable fields."}
+                {savedMessage || t("routes.profile.messages.default")}
               </p>
               <Button
                 className="h-11 gap-2 rounded-xl px-6"
@@ -289,7 +294,11 @@ function ProfilePage() {
                 type="submit"
               >
                 <Save className="size-4" aria-hidden="true" />
-                <span>{isSubmitting ? "Saving..." : "Save Updated Data"}</span>
+                <span>
+                  {isSubmitting
+                    ? t("routes.profile.actions.saving")
+                    : t("routes.profile.actions.save")}
+                </span>
               </Button>
             </div>
           </CardContent>
@@ -302,15 +311,12 @@ function ProfilePage() {
 type ProfileFormValues = UserType;
 
 /*━━ Format user role method ━━━━━━ */
-function formatRole(role: UserType["user_role"]) {
+function formatRole(role: UserType["user_role"], t: TFunction) {
   if (!role) {
-    return "General";
+    return t("routes.profile.roles.general");
   }
 
-  return role
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
+  return t(`routes.profile.roles.${role}`);
 }
 
 /*━━ Profile field component ━━━━━━ */
