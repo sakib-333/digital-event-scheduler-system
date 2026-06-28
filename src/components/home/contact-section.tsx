@@ -1,28 +1,11 @@
 import emailjs from "@emailjs/browser";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { useForm, type UseFormRegister } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { GlassPanel, SectionShell } from "./section-shell";
-
-const contactMethods = [
-  {
-    icon: <Mail className="size-5" />,
-    title: "Email Us",
-    detail: "support@dess-university.edu",
-  },
-  {
-    icon: <Phone className="size-5" />,
-    title: "Call Infrastructure",
-    detail: "+1 (555) 123-4567",
-  },
-  {
-    icon: <MapPin className="size-5" />,
-    title: "Office Address",
-    detail: "Building 4, University Plaza, Innovation District, CA 94103",
-  },
-];
 
 type ContactFormValues = {
   firstName: string;
@@ -36,16 +19,34 @@ const emailTemplateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
 const emailPublicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
 export function ContactSection() {
+  const { t } = useTranslation();
   const {
     formState: { isSubmitting },
     handleSubmit,
     register,
     reset,
   } = useForm<ContactFormValues>();
+  const contactMethods = [
+    {
+      icon: <Mail className="size-5" />,
+      title: t("home.contact.methods.email.title"),
+      detail: "support@dess-university.edu",
+    },
+    {
+      icon: <Phone className="size-5" />,
+      title: t("home.contact.methods.phone.title"),
+      detail: "+1 (555) 123-4567",
+    },
+    {
+      icon: <MapPin className="size-5" />,
+      title: t("home.contact.methods.address.title"),
+      detail: t("home.contact.methods.address.detail"),
+    },
+  ];
 
   async function onSubmit(data: ContactFormValues) {
     if (!emailServiceId || !emailTemplateId || !emailPublicKey) {
-      toast.error("Email service is not configured yet.");
+      toast.error(t("home.contact.toast.notConfigured"));
       return;
     }
 
@@ -73,11 +74,11 @@ export function ContactSection() {
         },
       );
 
-      toast.success("Message sent successfully.");
+      toast.success(t("home.contact.toast.success"));
       reset();
     } catch (err) {
       console.log(err)
-      toast.error("Message could not be sent. Please try again later.");
+      toast.error(t("home.contact.toast.error"));
     }
   }
 
@@ -86,11 +87,10 @@ export function ContactSection() {
       <div className="grid min-w-0 gap-12 md:grid-cols-2">
         <div className="min-w-0">
           <h2 className="text-4xl font-extrabold text-foreground sm:text-5xl">
-            Get in Touch
+            {t("home.contact.title")}
           </h2>
           <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
-            Interested in implementing DESS at your institution? Our technical
-            deployment team is ready to assist.
+            {t("home.contact.description")}
           </p>
           <div className="mt-10 space-y-8">
             {contactMethods.map((method) => (
@@ -115,24 +115,27 @@ export function ContactSection() {
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <Field
-                label="First Name"
+                id="first-name"
+                label={t("home.contact.form.firstName.label")}
                 name="firstName"
-                placeholder="John"
+                placeholder={t("home.contact.form.firstName.placeholder")}
                 register={register}
                 required
               />
               <Field
-                label="Last Name"
+                id="last-name"
+                label={t("home.contact.form.lastName.label")}
                 name="lastName"
-                placeholder="Doe"
+                placeholder={t("home.contact.form.lastName.placeholder")}
                 register={register}
                 required
               />
             </div>
             <Field
-              label="University Email"
+              id="university-email"
+              label={t("home.contact.form.universityEmail.label")}
               name="universityEmail"
-              placeholder="john@university.edu"
+              placeholder={t("home.contact.form.universityEmail.placeholder")}
               register={register}
               required
               type="email"
@@ -142,12 +145,12 @@ export function ContactSection() {
                 className="text-sm font-semibold text-muted-foreground"
                 htmlFor="message"
               >
-                Message
+                {t("home.contact.form.message.label")}
               </label>
               <textarea
                 id="message"
                 rows={4}
-                placeholder="How can we help?"
+                placeholder={t("home.contact.form.message.placeholder")}
                 className="w-full resize-none rounded-lg border border-transparent bg-muted p-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:placeholder:text-muted-foreground"
                 {...register("message", { required: true })}
               />
@@ -157,7 +160,9 @@ export function ContactSection() {
               className="h-12 w-full rounded-xl bg-primary text-base font-bold text-primary-foreground hover:bg-primary/90"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Sending..." : "Send Message"}
+              {isSubmitting
+                ? t("home.contact.form.sending")
+                : t("home.contact.form.send")}
             </Button>
           </form>
         </GlassPanel>
@@ -167,6 +172,7 @@ export function ContactSection() {
 }
 
 function Field({
+  id,
   label,
   name,
   placeholder,
@@ -174,6 +180,7 @@ function Field({
   register,
   type = "text",
 }: {
+  id: string;
   label: string;
   name: keyof ContactFormValues;
   placeholder: string;
@@ -181,8 +188,6 @@ function Field({
   register: UseFormRegister<ContactFormValues>;
   type?: string;
 }) {
-  const id = label.toLowerCase().replaceAll(" ", "-");
-
   return (
     <div className="min-w-0 space-y-2">
       <label className="text-sm font-semibold text-muted-foreground" htmlFor={id}>

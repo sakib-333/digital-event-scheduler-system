@@ -1,0 +1,183 @@
+{
+  "home": {
+    "header": {
+      "brandAria": "DESS home",
+      "primaryNavAria": "Primary",
+      "mobileNavAria": "Mobile primary",
+      "toggleNavAria": "Toggle navigation",
+      "login": "Login",
+      "getStarted": "Get Started",
+      "nav": {
+        "home": "Home",
+        "about": "About",
+        "features": "Features",
+        "faq": "FAQ",
+        "contact": "Contact"
+      }
+    },
+    "hero": {
+      "eyebrow": "Digital Event Scheduler System",
+      "titlePrefix": "Streamlining",
+      "titleHighlight": "University Events",
+      "titleSuffix": "with Precision.",
+      "description": "The all-in-one command center for campus administration. Orchestrate exams, hackathons, and workshops through an intuitive, institutional-grade platform.",
+      "cta": "Get Started Free",
+      "preview": {
+        "title": "Campus Operations",
+        "subtitle": "April event matrix",
+        "live": "Live",
+        "sidebar": {
+          "exams": "Exams",
+          "hackathons": "Hackathons",
+          "seminars": "Seminars",
+          "venues": "Venues"
+        },
+        "weekdays": {
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri"
+        },
+        "events": {
+          "cs50": "CS-50",
+          "workshop": "Workshop",
+          "hackathon": "Hackathon"
+        },
+        "stats": {
+          "eventsQueued": "Events queued",
+          "roomConflictsSolved": "Room conflicts solved",
+          "attendanceSync": "Attendance sync"
+        }
+      }
+    },
+    "about": {
+      "imageAlt": "Students collaborating in a modern university space",
+      "title": "Our Institutional Mission",
+      "descriptionOne": "DESS was engineered by university infrastructure experts to bridge the gap between traditional scheduling hurdles and modern digital efficiency. We provide a robust architecture that handles the complexities of higher education logistical needs.",
+      "descriptionTwo": "From automated conflict resolution for large-scale exams to tiered approval workflows for student-led hackathons, our system ensures that every event on campus is executed flawlessly.",
+      "stats": {
+        "efficiency": "Efficiency Increase",
+        "institutions": "Institutions"
+      }
+    },
+    "features": {
+      "title": "Engineered for Academic Excellence",
+      "description": "A suite of professional tools designed to manage every facet of campus event planning with pixel-perfect precision.",
+      "exam": {
+        "title": "Exam Scheduling Matrix",
+        "description": "Advanced conflict resolution engine that automatically assigns rooms and invigilators, ensuring no student has overlapping sessions.",
+        "preview": {
+          "math": "MATH-101",
+          "csFinal": "CS-50 Final",
+          "room": "Room A-12"
+        }
+      },
+      "hackathon": {
+        "title": "Hackathon Hub",
+        "description": "Dedicated pipeline for technical events, including registration management and mentor matching."
+      },
+      "approvals": {
+        "title": "Admin Approvals",
+        "description": "Multi-tier workflow for facility management, security, and departmental approval chains."
+      },
+      "seminars": {
+        "title": "Seminars & Workshops",
+        "description": "Interactive scheduling for guest lectures and technical workshops with QR-based attendance tracking.",
+        "events": {
+          "aiEthics": "AI Ethics Workshop",
+          "bioTech": "Bio-Tech Seminar",
+          "cloudSystems": "Cloud Systems Lab"
+        },
+        "status": {
+          "live": "Live",
+          "pending": "Pending",
+          "review": "Review"
+        }
+      }
+    },
+    "faq": {
+      "title": "Common Queries",
+      "items": {
+        "createEvent": {
+          "question": "How do I create a new event?",
+          "answer": "Navigate to your Command Center dashboard and click the Create New Event button in the sidebar. Follow the guided wizard to set your date, venue, and attendance requirements."
+        },
+        "approvals": {
+          "question": "Who can approve events?",
+          "answer": "Approvals follow a hierarchical chain. Department Heads approve initial requests, while Facility Managers confirm venue availability. High-profile events may require approval from the Dean's office."
+        },
+        "attendance": {
+          "question": "Is there a limit on student attendance?",
+          "answer": "Attendance limits are automatically synchronized with the maximum capacity of the selected venue. Once capacity is reached, the system opens a waitlist."
+        }
+      }
+    },
+    "contact": {
+      "title": "Get in Touch",
+      "description": "Interested in implementing DESS at your institution? Our technical deployment team is ready to assist.",
+      "methods": {
+        "email": {
+          "title": "Email Us"
+        },
+        "phone": {
+          "title": "Call Infrastructure"
+        },
+        "address": {
+          "title": "Office Address",
+          "detail": "Building 4, University Plaza, Innovation District, CA 94103"
+        }
+      },
+      "form": {
+        "firstName": {
+          "label": "First Name",
+          "placeholder": "John"
+        },
+        "lastName": {
+          "label": "Last Name",
+          "placeholder": "Doe"
+        },
+        "universityEmail": {
+          "label": "University Email",
+          "placeholder": "john@university.edu"
+        },
+        "message": {
+          "label": "Message",
+          "placeholder": "How can we help?"
+        },
+        "sending": "Sending...",
+        "send": "Send Message"
+      },
+      "toast": {
+        "notConfigured": "Email service is not configured yet.",
+        "success": "Message sent successfully.",
+        "error": "Message could not be sent. Please try again later."
+      }
+    },
+    "footer": {
+      "description": "Digital Event Scheduler System. Streamlining university logistics through advanced technology and intuitive design.",
+      "quickLinks": {
+        "title": "Quick Links",
+        "adminPortal": "Admin Portal",
+        "studentLogin": "Student Login",
+        "documentation": "Documentation",
+        "systemStatus": "System Status"
+      },
+      "support": {
+        "title": "Support",
+        "helpCenter": "Help Center",
+        "submitTicket": "Submit a Ticket",
+        "privacyPolicy": "Privacy Policy",
+        "terms": "Terms of Service"
+      },
+      "newsletter": {
+        "title": "Newsletter",
+        "description": "Get the latest updates on campus events.",
+        "placeholder": "Email",
+        "emailAria": "Newsletter email",
+        "subscribeAria": "Subscribe"
+      },
+      "copyright": "© 2024 Digital Event Scheduler System. University Infrastructure Division."
+    }
+  }
+}

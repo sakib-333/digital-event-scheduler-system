@@ -1,18 +1,20 @@
 import { CalendarDays, Code2, ShieldCheck, Users } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import { GlassPanel, SectionShell } from "./section-shell";
 
 export function FeaturesSection() {
+  const { t } = useTranslation();
+
   return (
     <SectionShell id="features">
       <div className="mx-auto mb-12 max-w-3xl min-w-0 text-center">
         <h2 className="text-4xl font-extrabold text-foreground sm:text-5xl">
-          Engineered for Academic Excellence
+          {t("home.features.title")}
         </h2>
         <p className="mt-4 text-base leading-7 text-muted-foreground">
-          A suite of professional tools designed to manage every facet of
-          campus event planning with pixel-perfect precision.
+          {t("home.features.description")}
         </p>
       </div>
 
@@ -22,22 +24,21 @@ export function FeaturesSection() {
             <CalendarDays className="size-6" />
           </FeatureIcon>
           <h3 className="mt-5 text-2xl font-bold text-foreground">
-            Exam Scheduling Matrix
+            {t("home.features.exam.title")}
           </h3>
           <p className="mt-3 max-w-xl text-base leading-7 text-muted-foreground">
-            Advanced conflict resolution engine that automatically assigns rooms
-            and invigilators, ensuring no student has overlapping sessions.
+            {t("home.features.exam.description")}
           </p>
           <div className="mt-8 h-48 min-w-0 overflow-hidden rounded-xl bg-muted p-4 dark:bg-muted/40">
             <div className="flex gap-3 overflow-x-auto pb-3">
               <div className="min-w-32 rounded-lg bg-primary p-3 text-sm font-bold text-primary-foreground">
-                MATH-101
+                {t("home.features.exam.preview.math")}
               </div>
               <div className="min-w-32 rounded-lg bg-secondary p-3 text-sm font-bold text-muted-foreground">
-                CS-50 Final
+                {t("home.features.exam.preview.csFinal")}
               </div>
               <div className="min-w-32 rounded-lg border border-muted-foreground bg-border/30 p-3 text-sm font-bold text-muted-foreground dark:border-border">
-                Room A-12
+                {t("home.features.exam.preview.room")}
               </div>
             </div>
             <div className="mt-3 grid grid-cols-4 gap-3">
@@ -53,15 +54,15 @@ export function FeaturesSection() {
 
         <FeatureCard
           icon={<Code2 className="size-6" />}
-          title="Hackathon Hub"
-          description="Dedicated pipeline for technical events, including registration management and mentor matching."
+          title={t("home.features.hackathon.title")}
+          description={t("home.features.hackathon.description")}
           tone="tertiary"
         />
 
         <FeatureCard
           icon={<ShieldCheck className="size-6" />}
-          title="Admin Approvals"
-          description="Multi-tier workflow for facility management, security, and departmental approval chains."
+          title={t("home.features.approvals.title")}
+          description={t("home.features.approvals.description")}
           tone="secondary"
         />
 
@@ -71,18 +72,27 @@ export function FeaturesSection() {
               <Users className="size-6" />
             </FeatureIcon>
             <h3 className="mt-5 text-2xl font-bold text-foreground">
-              Seminars & Workshops
+              {t("home.features.seminars.title")}
             </h3>
             <p className="mt-3 text-base leading-7 text-muted-foreground">
-              Interactive scheduling for guest lectures and technical workshops
-              with QR-based attendance tracking.
+              {t("home.features.seminars.description")}
             </p>
           </div>
           <div className="min-w-0 rounded-xl bg-muted p-5 dark:bg-muted/40">
             <div className="space-y-3">
-              <EventRow title="AI Ethics Workshop" status="Live" active />
-              <EventRow title="Bio-Tech Seminar" status="Pending" />
-              <EventRow title="Cloud Systems Lab" status="Review" />
+              <EventRow
+                title={t("home.features.seminars.events.aiEthics")}
+                status={t("home.features.seminars.status.live")}
+                active
+              />
+              <EventRow
+                title={t("home.features.seminars.events.bioTech")}
+                status={t("home.features.seminars.status.pending")}
+              />
+              <EventRow
+                title={t("home.features.seminars.events.cloudSystems")}
+                status={t("home.features.seminars.status.review")}
+              />
             </div>
           </div>
         </GlassPanel>

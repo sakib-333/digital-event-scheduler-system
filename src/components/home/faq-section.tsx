@@ -1,28 +1,26 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { GlassPanel, SectionShell } from "./section-shell";
 
-const faqs = [
-  {
-    question: "How do I create a new event?",
-    answer:
-      "Navigate to your Command Center dashboard and click the Create New Event button in the sidebar. Follow the guided wizard to set your date, venue, and attendance requirements.",
-  },
-  {
-    question: "Who can approve events?",
-    answer:
-      "Approvals follow a hierarchical chain. Department Heads approve initial requests, while Facility Managers confirm venue availability. High-profile events may require approval from the Dean's office.",
-  },
-  {
-    question: "Is there a limit on student attendance?",
-    answer:
-      "Attendance limits are automatically synchronized with the maximum capacity of the selected venue. Once capacity is reached, the system opens a waitlist.",
-  },
-];
-
 export function FaqSection() {
+  const { t } = useTranslation();
   const [openIndex, setOpenIndex] = useState(0);
+  const faqs = [
+    {
+      question: t("home.faq.items.createEvent.question"),
+      answer: t("home.faq.items.createEvent.answer"),
+    },
+    {
+      question: t("home.faq.items.approvals.question"),
+      answer: t("home.faq.items.approvals.answer"),
+    },
+    {
+      question: t("home.faq.items.attendance.question"),
+      answer: t("home.faq.items.attendance.answer"),
+    },
+  ];
 
   return (
     <SectionShell
@@ -31,7 +29,7 @@ export function FaqSection() {
     >
       <div className="mx-auto max-w-3xl min-w-0">
         <h2 className="mb-12 text-center text-4xl font-extrabold text-foreground sm:text-5xl">
-          Common Queries
+          {t("home.faq.title")}
         </h2>
         <div className="space-y-4">
           {faqs.map((faq, index) => {
