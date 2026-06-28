@@ -7,6 +7,7 @@ import {
   type SubmitHandler,
   type UseFormRegisterReturn,
 } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -32,14 +33,14 @@ type EventCategory =
   | 'concert'
   | 'others'
 
-const EVENT_CATEGORIES: { label: string; value: EventCategory }[] = [
-  { label: 'Exam', value: 'exam' },
-  { label: 'Contest', value: 'contest' },
-  { label: 'Game', value: 'game' },
-  { label: 'Feast', value: 'feast' },
-  { label: 'Tour', value: 'tour' },
-  { label: 'Concert', value: 'concert' },
-  { label: 'Others', value: 'others' },
+const EVENT_CATEGORIES: { labelKey: string; value: EventCategory }[] = [
+  { labelKey: 'routes.common.categories.exam', value: 'exam' },
+  { labelKey: 'routes.common.categories.contest', value: 'contest' },
+  { labelKey: 'routes.common.categories.game', value: 'game' },
+  { labelKey: 'routes.common.categories.feast', value: 'feast' },
+  { labelKey: 'routes.common.categories.tour', value: 'tour' },
+  { labelKey: 'routes.common.categories.concert', value: 'concert' },
+  { labelKey: 'routes.common.categories.others', value: 'others' },
 ]
 
 type EventFormValues = Omit<
@@ -67,6 +68,7 @@ const defaultEventValues: EventFormValues = {
 }
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const { eventId } = Route.useParams()
   const navigate = useNavigate()
   const storeEvent = useManageEventsStore((state) =>
@@ -121,7 +123,7 @@ function RouteComponent() {
         }
       } catch (error) {
         console.error('Failed to load event:', error)
-        toast.error('Failed to load event details.')
+        toast.error(t('routes.eventForm.toast.loadFailed'))
       } finally {
         if (isMounted) {
           setIsLoadingEvent(false)
@@ -189,7 +191,7 @@ function RouteComponent() {
 
   const handleEditEvent: SubmitHandler<EventFormValues> = async (data) => {
     if (!event) {
-      toast.error('Event not found.')
+      toast.error(t('routes.eventForm.edit.notFoundTitle'))
       return
     }
 
@@ -205,7 +207,7 @@ function RouteComponent() {
       }
     } catch (error) {
       console.error('Image upload failed:', error)
-      toast.error('Failed to upload banner image.')
+      toast.error(t('routes.eventForm.toast.imageUploadFailed'))
       return
     }
 
@@ -236,9 +238,11 @@ function RouteComponent() {
     return (
       <div className="space-y-6">
         <header className="max-w-3xl">
-          <h1 className="text-3xl font-semibold leading-10 text-foreground">Edit Event</h1>
+          <h1 className="text-3xl font-semibold leading-10 text-foreground">
+            {t('routes.eventForm.edit.title')}
+          </h1>
           <p className="mt-1 text-base leading-6 text-muted-foreground">
-            Loading event details...
+            {t('routes.eventForm.edit.loading')}
           </p>
         </header>
 
@@ -265,16 +269,18 @@ function RouteComponent() {
       <div className="min-h-screen bg-background px-4 py-10 text-foreground">
         <div className="mx-auto max-w-3xl rounded-3xl border border-border/70 bg-card/80 p-10 text-center shadow-sm backdrop-blur-xl">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-            Edit event
+            {t('routes.eventForm.edit.eyebrow')}
           </p>
-          <h1 className="mt-4 text-3xl font-semibold">Event not found</h1>
+          <h1 className="mt-4 text-3xl font-semibold">
+            {t('routes.eventForm.edit.notFoundTitle')}
+          </h1>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            We could not locate the event you want to edit. Please return to the event list and try again.
+            {t('routes.eventForm.edit.notFoundDescription')}
           </p>
           <div className="mt-8">
             <Button variant="outline" onClick={() => navigate({ to: '/event/manage-events' })}>
               <ArrowLeft className="size-4" aria-hidden="true" />
-              Back to events
+              {t('routes.eventForm.backToEvents')}
             </Button>
           </div>
         </div>
@@ -285,9 +291,11 @@ function RouteComponent() {
   return (
     <div className="space-y-6">
       <header className="max-w-3xl">
-        <h1 className="text-3xl font-semibold leading-10 text-foreground">Edit Event</h1>
+        <h1 className="text-3xl font-semibold leading-10 text-foreground">
+          {t('routes.eventForm.edit.title')}
+        </h1>
         <p className="mt-1 text-base leading-6 text-muted-foreground">
-          Update event details, schedule, capacity, and banner image.
+          {t('routes.eventForm.edit.description')}
         </p>
       </header>
 
@@ -297,24 +305,26 @@ function RouteComponent() {
       >
         <div className="mb-6">
           <span className="mb-2 block text-sm font-semibold leading-5 text-muted-foreground">
-            Banner Image
+            {t('routes.eventForm.fields.bannerImage')}
           </span>
 
           {imagePreview ? (
             <div className="relative w-full overflow-hidden rounded-xl border border-border/60">
               <img
-                alt="Banner preview"
+                alt={t('routes.eventForm.banner.previewAlt')}
                 className="h-52 w-full object-cover"
                 src={imagePreview}
               />
               <button
                 className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-background/80 text-foreground shadow backdrop-blur-sm transition-colors hover:bg-destructive hover:text-destructive-foreground"
                 onClick={clearImage}
-                title="Remove image"
+                title={t('routes.eventForm.banner.remove')}
                 type="button"
               >
                 <X className="size-4" aria-hidden="true" />
-                <span className="sr-only">Remove image</span>
+                <span className="sr-only">
+                  {t('routes.eventForm.banner.remove')}
+                </span>
               </button>
             </div>
           ) : (
@@ -326,8 +336,12 @@ function RouteComponent() {
                 <ImagePlus className="size-6" aria-hidden="true" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium text-foreground">Click to upload banner image</p>
-                <p className="text-xs text-muted-foreground">PNG, JPG, WEBP — max 5 MB</p>
+                <p className="text-sm font-medium text-foreground">
+                  {t('routes.eventForm.banner.upload')}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t('routes.eventForm.banner.help')}
+                </p>
               </div>
             </label>
           )}
@@ -349,38 +363,48 @@ function RouteComponent() {
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <EventField
             className="md:col-span-2"
-            label="Title"
+            label={t('routes.eventForm.fields.title')}
             registration={register('title', { required: true })}
           />
 
           <label className="space-y-2">
-            <span className="text-sm font-semibold leading-5 text-muted-foreground">Category</span>
+            <span className="text-sm font-semibold leading-5 text-muted-foreground">
+              {t('routes.eventForm.fields.category')}
+            </span>
             <select
               className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm leading-5 text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-ring/50"
               {...register('category', { required: true })}
             >
               <option value="" disabled>
-                Select a category
+                {t('routes.eventForm.placeholders.category')}
               </option>
-              {EVENT_CATEGORIES.map(({ label, value }) => (
+              {EVENT_CATEGORIES.map(({ labelKey, value }) => (
                 <option key={value} value={value}>
-                  {label}
+                  {t(labelKey)}
                 </option>
               ))}
             </select>
             {errors.category && (
-              <p className="text-xs text-destructive">Category is required.</p>
+              <p className="text-xs text-destructive">
+                {t('routes.eventForm.validation.categoryRequired')}
+              </p>
             )}
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-semibold leading-5 text-muted-foreground">Event Type</span>
+            <span className="text-sm font-semibold leading-5 text-muted-foreground">
+              {t('routes.eventForm.fields.eventType')}
+            </span>
             <select
               className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm leading-5 text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-ring/50"
               {...register('event_type', { required: true })}
             >
-              <option value="offline">Offline</option>
-              <option value="online">Online</option>
+              <option value="offline">
+                {t('routes.eventForm.eventTypes.offline')}
+              </option>
+              <option value="online">
+                {t('routes.eventForm.eventTypes.online')}
+              </option>
             </select>
           </label>
 
@@ -391,16 +415,18 @@ function RouteComponent() {
                 htmlFor="meeting_link"
               >
                 <Link2 className="size-4 text-primary" aria-hidden="true" />
-                Meeting Link
+                {t('routes.eventForm.fields.meetingLink')}
                 <span className="text-destructive">*</span>
               </label>
               <input
                 className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm leading-5 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
                 id="meeting_link"
-                placeholder="https://zoom.us/j/... or Google Meet link"
+                placeholder={t('routes.eventForm.placeholders.meetingLink')}
                 type="url"
                 {...register('meeting_link', {
-                  required: isOnline ? 'Meeting link is required for online events.' : false,
+                  required: isOnline
+                    ? t('routes.eventForm.validation.meetingLinkRequired')
+                    : false,
                 })}
               />
               {errors.meeting_link && (
@@ -410,48 +436,50 @@ function RouteComponent() {
           )}
 
           <label className="space-y-2 md:col-span-2">
-            <span className="text-sm font-semibold leading-5 text-muted-foreground">Description</span>
+            <span className="text-sm font-semibold leading-5 text-muted-foreground">
+              {t('routes.eventForm.fields.description')}
+            </span>
             <textarea
               className="min-h-32 w-full resize-y rounded-xl border border-input bg-background px-3 py-3 text-sm leading-6 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
-              placeholder="Write a short event description"
+              placeholder={t('routes.eventForm.placeholders.description')}
               {...register('description', { required: true })}
             />
           </label>
 
           {!isOnline && (
             <EventField
-              label="Location"
-              placeholder="Auditorium, room number, venue..."
+              label={t('routes.eventForm.fields.location')}
+              placeholder={t('routes.eventForm.placeholders.location')}
               registration={register('location')}
             />
           )}
 
           <EventField
-            label="Start Date"
+            label={t('routes.eventForm.fields.startDate')}
             registration={register('start_date', { required: true })}
             type="date"
           />
 
           <EventField
-            label="End Date"
+            label={t('routes.eventForm.fields.endDate')}
             registration={register('end_date', { required: true })}
             type="date"
           />
 
           <EventField
-            label="Start Time"
+            label={t('routes.eventForm.fields.startTime')}
             registration={register('start_time', { required: true })}
             type="time"
           />
 
           <EventField
-            label="End Time"
+            label={t('routes.eventForm.fields.endTime')}
             registration={register('end_time', { required: true })}
             type="time"
           />
 
           <EventField
-            label="Capacity"
+            label={t('routes.eventForm.fields.capacity')}
             min={0}
             registration={register('capacity', {
               min: 0,
@@ -461,7 +489,7 @@ function RouteComponent() {
           />
 
           <EventField
-            label="Organizer Name"
+            label={t('routes.eventForm.fields.organizerName')}
             registration={register('organizer_name', { required: true })}
           />
         </div>
@@ -469,7 +497,11 @@ function RouteComponent() {
         <div className="mt-6 flex justify-end border-t border-border/60 pt-5">
           <Button className="h-11 gap-2 rounded-xl px-6" disabled={isUpdating} type="submit">
             <CalendarPlus className="size-4" aria-hidden="true" />
-            <span>{isUpdating ? 'Saving...' : 'Save changes'}</span>
+            <span>
+              {isUpdating
+                ? t('routes.eventForm.edit.submitting')
+                : t('routes.eventForm.edit.submit')}
+            </span>
           </Button>
         </div>
       </form>

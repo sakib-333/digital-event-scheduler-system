@@ -7,6 +7,7 @@ import {
   type SubmitHandler,
   type UseFormRegisterReturn,
 } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -32,14 +33,14 @@ type EventCategory =
   | "concert"
   | "others";
 
-const EVENT_CATEGORIES: { label: string; value: EventCategory }[] = [
-  { label: "Exam", value: "exam" },
-  { label: "Contest", value: "contest" },
-  { label: "Game", value: "game" },
-  { label: "Feast", value: "feast" },
-  { label: "Tour", value: "tour" },
-  { label: "Concert", value: "concert" },
-  { label: "Others", value: "others" },
+const EVENT_CATEGORIES: { labelKey: string; value: EventCategory }[] = [
+  { labelKey: "routes.common.categories.exam", value: "exam" },
+  { labelKey: "routes.common.categories.contest", value: "contest" },
+  { labelKey: "routes.common.categories.game", value: "game" },
+  { labelKey: "routes.common.categories.feast", value: "feast" },
+  { labelKey: "routes.common.categories.tour", value: "tour" },
+  { labelKey: "routes.common.categories.concert", value: "concert" },
+  { labelKey: "routes.common.categories.others", value: "others" },
 ];
 
 type EventFormValues = Omit<
@@ -67,6 +68,7 @@ const defaultEventValues: EventFormValues = {
 };
 
 function CreateEventPage() {
+  const { t } = useTranslation();
   // ─── Hooks and State ───
   const {
     control,
@@ -108,7 +110,7 @@ function CreateEventPage() {
   // ─── Form Submission ───
   const handleCreateEvent: SubmitHandler<EventFormValues> = async (data) => {
     if (!authUser) {
-      toast.error("You must be signed in to create an event.");
+      toast.error(t("routes.eventForm.toast.signInRequired"));
       return;
     }
 
@@ -119,7 +121,7 @@ function CreateEventPage() {
       }
     } catch (error) {
       console.error("Image upload failed:", error);
-      toast.error("Failed to upload banner image.");
+      toast.error(t("routes.eventForm.toast.imageUploadFailed"));
       return;
     }
 
@@ -150,10 +152,10 @@ function CreateEventPage() {
     <div className="space-y-6">
       <header className="max-w-3xl">
         <h1 className="text-3xl font-semibold leading-10 text-foreground">
-          Create Event
+          {t("routes.eventForm.create.title")}
         </h1>
         <p className="mt-1 text-base leading-6 text-muted-foreground">
-          Add the event details, schedule, capacity, and publication assets.
+          {t("routes.eventForm.create.description")}
         </p>
       </header>
 
@@ -164,24 +166,26 @@ function CreateEventPage() {
         {/* ─── Banner Image Upload ─── */}
         <div className="mb-6">
           <span className="mb-2 block text-sm font-semibold leading-5 text-muted-foreground">
-            Banner Image
+            {t("routes.eventForm.fields.bannerImage")}
           </span>
 
           {imagePreview ? (
             <div className="relative w-full overflow-hidden rounded-xl border border-border/60">
               <img
-                alt="Banner preview"
+                alt={t("routes.eventForm.banner.previewAlt")}
                 className="h-52 w-full object-cover"
                 src={imagePreview}
               />
               <button
                 className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-background/80 text-foreground shadow backdrop-blur-sm transition-colors hover:bg-destructive hover:text-destructive-foreground"
                 onClick={clearImage}
-                title="Remove image"
+                title={t("routes.eventForm.banner.remove")}
                 type="button"
               >
                 <X className="size-4" aria-hidden="true" />
-                <span className="sr-only">Remove image</span>
+                <span className="sr-only">
+                  {t("routes.eventForm.banner.remove")}
+                </span>
               </button>
             </div>
           ) : (
@@ -194,10 +198,10 @@ function CreateEventPage() {
               </div>
               <div className="text-center">
                 <p className="text-sm font-medium text-foreground">
-                  Click to upload banner image
+                  {t("routes.eventForm.banner.upload")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  PNG, JPG, WEBP — max 5 MB
+                  {t("routes.eventForm.banner.help")}
                 </p>
               </div>
             </label>
@@ -221,44 +225,50 @@ function CreateEventPage() {
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <EventField
             className="md:col-span-2"
-            label="Title"
+            label={t("routes.eventForm.fields.title")}
             registration={register("title", { required: true })}
           />
 
           {/* ─── Category Dropdown ─── */}
           <label className="space-y-2">
             <span className="text-sm font-semibold leading-5 text-muted-foreground">
-              Category
+              {t("routes.eventForm.fields.category")}
             </span>
             <select
               className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm leading-5 text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-ring/50"
               {...register("category", { required: true })}
             >
               <option value="" disabled>
-                Select a category
+                {t("routes.eventForm.placeholders.category")}
               </option>
-              {EVENT_CATEGORIES.map(({ label, value }) => (
+              {EVENT_CATEGORIES.map(({ labelKey, value }) => (
                 <option key={value} value={value}>
-                  {label}
+                  {t(labelKey)}
                 </option>
               ))}
             </select>
             {errors.category && (
-              <p className="text-xs text-destructive">Category is required.</p>
+              <p className="text-xs text-destructive">
+                {t("routes.eventForm.validation.categoryRequired")}
+              </p>
             )}
           </label>
 
           {/* ─── Event Type Dropdown ─── */}
           <label className="space-y-2">
             <span className="text-sm font-semibold leading-5 text-muted-foreground">
-              Event Type
+              {t("routes.eventForm.fields.eventType")}
             </span>
             <select
               className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm leading-5 text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-ring/50"
               {...register("event_type", { required: true })}
             >
-              <option value="offline">Offline</option>
-              <option value="online">Online</option>
+              <option value="offline">
+                {t("routes.eventForm.eventTypes.offline")}
+              </option>
+              <option value="online">
+                {t("routes.eventForm.eventTypes.online")}
+              </option>
             </select>
           </label>
 
@@ -270,16 +280,18 @@ function CreateEventPage() {
                 htmlFor="meeting_link"
               >
                 <Link2 className="size-4 text-primary" aria-hidden="true" />
-                Meeting Link
+                {t("routes.eventForm.fields.meetingLink")}
                 <span className="text-destructive">*</span>
               </label>
               <input
                 className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm leading-5 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
                 id="meeting_link"
-                placeholder="https://zoom.us/j/... or Google Meet link"
+                placeholder={t("routes.eventForm.placeholders.meetingLink")}
                 type="url"
                 {...register("meeting_link", {
-                  required: isOnline ? "Meeting link is required for online events." : false,
+                  required: isOnline
+                    ? t("routes.eventForm.validation.meetingLinkRequired")
+                    : false,
                 })}
               />
               {errors.meeting_link && (
@@ -292,11 +304,11 @@ function CreateEventPage() {
 
           <label className="space-y-2 md:col-span-2">
             <span className="text-sm font-semibold leading-5 text-muted-foreground">
-              Description
+              {t("routes.eventForm.fields.description")}
             </span>
             <textarea
               className="min-h-32 w-full resize-y rounded-xl border border-input bg-background px-3 py-3 text-sm leading-6 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
-              placeholder="Write a short event description"
+              placeholder={t("routes.eventForm.placeholders.description")}
               {...register("description", { required: true })}
             />
           </label>
@@ -304,38 +316,38 @@ function CreateEventPage() {
           {/* ─── Location ─── */}
           {!isOnline && (
             <EventField
-              label="Location"
-              placeholder="Auditorium, room number, venue..."
+              label={t("routes.eventForm.fields.location")}
+              placeholder={t("routes.eventForm.placeholders.location")}
               registration={register("location")}
             />
           )}
 
           <EventField
-            label="Start Date"
+            label={t("routes.eventForm.fields.startDate")}
             registration={register("start_date", { required: true })}
             type="date"
           />
 
           <EventField
-            label="End Date"
+            label={t("routes.eventForm.fields.endDate")}
             registration={register("end_date", { required: true })}
             type="date"
           />
 
           <EventField
-            label="Start Time"
+            label={t("routes.eventForm.fields.startTime")}
             registration={register("start_time", { required: true })}
             type="time"
           />
 
           <EventField
-            label="End Time"
+            label={t("routes.eventForm.fields.endTime")}
             registration={register("end_time", { required: true })}
             type="time"
           />
 
           <EventField
-            label="Capacity"
+            label={t("routes.eventForm.fields.capacity")}
             min={0}
             registration={register("capacity", {
               min: 0,
@@ -345,7 +357,7 @@ function CreateEventPage() {
           />
 
           <EventField
-            label="Organizer Name"
+            label={t("routes.eventForm.fields.organizerName")}
             registration={register("organizer_name", { required: true })}
           />
         </div>
@@ -357,7 +369,11 @@ function CreateEventPage() {
             type="submit"
           >
             <CalendarPlus className="size-4" aria-hidden="true" />
-            <span>{isSubmitting ? "Creating..." : "Create Event"}</span>
+            <span>
+              {isSubmitting
+                ? t("routes.eventForm.create.submitting")
+                : t("routes.eventForm.create.submit")}
+            </span>
           </Button>
         </div>
       </form>

@@ -342,6 +342,120 @@
         "others": "Others"
       }
     },
+    "eventForm": {
+      "backToEvents": "Back to events",
+      "toast": {
+        "signInRequired": "You must be signed in to create an event.",
+        "imageUploadFailed": "Failed to upload banner image.",
+        "loadFailed": "Failed to load event details."
+      },
+      "create": {
+        "title": "Create Event",
+        "description": "Add the event details, schedule, capacity, and publication assets.",
+        "submitting": "Creating...",
+        "submit": "Create Event"
+      },
+      "edit": {
+        "title": "Edit Event",
+        "description": "Update event details, schedule, capacity, and banner image.",
+        "loading": "Loading event details...",
+        "eyebrow": "Edit event",
+        "notFoundTitle": "Event not found",
+        "notFoundDescription": "We could not locate the event you want to edit. Please return to the event list and try again.",
+        "submitting": "Saving...",
+        "submit": "Save changes"
+      },
+      "banner": {
+        "previewAlt": "Banner preview",
+        "remove": "Remove image",
+        "upload": "Click to upload banner image",
+        "help": "PNG, JPG, WEBP - max 5 MB"
+      },
+      "fields": {
+        "bannerImage": "Banner Image",
+        "title": "Title",
+        "category": "Category",
+        "eventType": "Event Type",
+        "meetingLink": "Meeting Link",
+        "description": "Description",
+        "location": "Location",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "startTime": "Start Time",
+        "endTime": "End Time",
+        "capacity": "Capacity",
+        "organizerName": "Organizer Name"
+      },
+      "placeholders": {
+        "category": "Select a category",
+        "meetingLink": "https://zoom.us/j/... or Google Meet link",
+        "description": "Write a short event description",
+        "location": "Auditorium, room number, venue..."
+      },
+      "eventTypes": {
+        "offline": "Offline",
+        "online": "Online"
+      },
+      "validation": {
+        "categoryRequired": "Category is required.",
+        "meetingLinkRequired": "Meeting link is required for online events."
+      }
+    },
+    "eventDetails": {
+      "eyebrow": "Event details",
+      "notFoundTitle": "Event not found",
+      "notFoundDescription": "We could not locate the event details. Please return to the event list and try again.",
+      "backToEvents": "Back to events",
+      "categoryFallback": "Event",
+      "organizedBy": "Organized by {{name}}",
+      "descriptionFallback": "A polished overview of this event with essential details for attendees.",
+      "creatorAvatarAlt": "{{name}} avatar",
+      "tbd": "TBD",
+      "openMeetingLink": "Open meeting link",
+      "linkNotProvided": "Link not provided",
+      "status": {
+        "scheduled": "Scheduled",
+        "pending": "Pending",
+        "approved": "Approved",
+        "canceled": "Canceled",
+        "cancelled": "Cancelled"
+      },
+      "actions": {
+        "edit": "Edit event",
+        "delete": "Delete event",
+        "alreadyJoined": "Already joined",
+        "join": "Join event"
+      },
+      "labels": {
+        "eventDate": "Event date",
+        "time": "Time",
+        "meetingLink": "Meeting link",
+        "location": "Location",
+        "attendees": "Attendees"
+      },
+      "about": {
+        "title": "About this event",
+        "description": "A quick summary of what attendees can expect from this session.",
+        "emptyDescription": "No event description is available yet.",
+        "hostedBy": "Hosted by {{organizer}}, this session is designed for anyone interested in {{category}} with a clean, engaging event flow.",
+        "topicFallback": "a compelling topic"
+      },
+      "summary": {
+        "title": "Event summary",
+        "organizer": "Organizer",
+        "type": "Type",
+        "capacity": "Capacity",
+        "createdBy": "Created by"
+      },
+      "action": {
+        "title": "Action",
+        "owner": "Event owner",
+        "joined": "Already joined",
+        "ready": "Ready to join",
+        "ownerDescription": "As the creator of this event, you can review the details and prepare the content before launching it to the wider audience.",
+        "joinDescription": "Join or review this event once you are ready. The button is a visual placeholder until the join experience is implemented."
+      }
+    },
     "analytics": {
       "pageTitle": "Analytics",
       "title": "Analytics",
