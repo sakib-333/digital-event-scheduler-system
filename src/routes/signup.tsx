@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm, type SubmitHandler, type UseFormRegisterReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import {
   CalendarDays,
   Eye,
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/signup")({
 function SignupPage() {
   const navigate = useNavigate();
   const { signInWithGoogle, signUpWithEmail } = useAuth();
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const {
@@ -40,7 +42,7 @@ function SignupPage() {
       await signUpWithEmail(email, password);
       navigate({ to: "/dashboard" });
     } catch (error) {
-      setErrorMessage(getAuthErrorMessage(error));
+      setErrorMessage(getAuthErrorMessage(error, t("auth.signup.error")));
     }
   };
 
@@ -51,7 +53,7 @@ function SignupPage() {
       await signInWithGoogle();
       navigate({ to: "/dashboard" });
     } catch (error) {
-      setErrorMessage(getAuthErrorMessage(error));
+      setErrorMessage(getAuthErrorMessage(error, t("auth.signup.error")));
     }
   }
 
@@ -63,10 +65,10 @@ function SignupPage() {
             <CalendarDays className="size-7" aria-hidden="true" />
           </div>
           <h1 className="text-2xl font-semibold leading-8 text-foreground">
-            Digital Event Scheduler System
+            {t("auth.brand")}
           </h1>
           <p className="mt-1 text-sm leading-5 text-muted-foreground">
-            Create your institutional account
+            {t("auth.signup.subtitle")}
           </p>
         </div>
 
@@ -79,8 +81,8 @@ function SignupPage() {
               autoComplete="email"
               icon={<Mail className="size-5" aria-hidden="true" />}
               id="email"
-              label="Email Address"
-              placeholder="name@university.edu"
+              label={t("auth.form.email.label")}
+              placeholder={t("auth.form.email.placeholder")}
               registration={register("email", { required: true })}
               type="email"
             />
@@ -89,8 +91,8 @@ function SignupPage() {
               autoComplete="new-password"
               icon={<Lock className="size-5" aria-hidden="true" />}
               id="password"
-              label="Password"
-              placeholder="Min. 8 characters"
+              label={t("auth.form.password.label")}
+              placeholder={t("auth.signup.passwordPlaceholder")}
               registration={register("password", {
                 minLength: 8,
                 required: true,
@@ -98,7 +100,11 @@ function SignupPage() {
               type={showPassword ? "text" : "password"}
               endControl={
                 <button
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showPassword
+                      ? t("auth.signup.hidePassword")
+                      : t("auth.signup.showPassword")
+                  }
                   className="absolute inset-y-0 right-0 flex items-center pr-4 text-muted-foreground transition-colors hover:text-foreground"
                   onClick={() => setShowPassword((visible) => !visible)}
                   type="button"
@@ -117,12 +123,12 @@ function SignupPage() {
               autoComplete="new-password"
               icon={<ShieldCheck className="size-5" aria-hidden="true" />}
               id="confirm-password"
-              label="Confirm Password"
-              placeholder="Repeat your password"
+              label={t("auth.signup.confirmPassword.label")}
+              placeholder={t("auth.signup.confirmPassword.placeholder")}
               registration={register("confirmPassword", {
                 required: true,
                 validate: (value) =>
-                  value === password || "Passwords do not match.",
+                  value === password || t("auth.signup.passwordMismatch"),
               })}
               type="password"
             />
@@ -138,13 +144,15 @@ function SignupPage() {
               disabled={isSubmitting}
               type="submit"
             >
-              {isSubmitting ? "Creating account..." : "Create Account"}
+              {isSubmitting
+                ? t("auth.signup.submitting")
+                : t("auth.signup.submit")}
             </Button>
 
             <div className="my-1 flex items-center gap-4">
               <div className="h-px flex-1 bg-border/50" />
               <span className="text-sm font-medium leading-5 text-muted-foreground">
-                OR
+                {t("auth.divider")}
               </span>
               <div className="h-px flex-1 bg-border/50" />
             </div>
@@ -162,18 +170,18 @@ function SignupPage() {
               >
                 G
               </span>
-              <span>Sign up with Google</span>
+              <span>{t("auth.signup.google")}</span>
             </Button>
           </form>
         </section>
 
         <p className="mt-8 text-center text-sm leading-5 text-muted-foreground">
-          Already have an account?{" "}
+          {t("auth.signup.signinPrompt")}{" "}
           <Link
             className="font-bold text-primary underline-offset-4 transition-colors hover:underline"
             to="/signin"
           >
-            Signin
+            {t("auth.signup.signinLink")}
           </Link>
         </p>
       </div>
@@ -236,10 +244,10 @@ function SignupField({
   );
 }
 
-function getAuthErrorMessage(error: unknown) {
+function getAuthErrorMessage(error: unknown, fallbackMessage: string) {
   if (error instanceof Error) {
     return error.message;
   }
 
-  return "Unable to create your account. Please try again.";
+  return fallbackMessage;
 }

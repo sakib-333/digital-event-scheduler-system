@@ -179,5 +179,45 @@
       },
       "copyright": "© ২০২৪ ডিজিটাল ইভেন্ট শিডিউলার সিস্টেম। বিশ্ববিদ্যালয় অবকাঠামো বিভাগ।"
     }
+  },
+  "auth": {
+    "brand": "Digital Event Scheduler System",
+    "divider": "অথবা",
+    "form": {
+      "email": {
+        "label": "ইমেইল ঠিকানা",
+        "placeholder": "name@university.edu"
+      },
+      "password": {
+        "label": "পাসওয়ার্ড"
+      }
+    },
+    "signin": {
+      "subtitle": "আপনার বিশ্ববিদ্যালয় শিডিউলিং পোর্টালে প্রবেশ করুন",
+      "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?",
+      "submitting": "সাইন ইন হচ্ছে...",
+      "submit": "সাইন ইন",
+      "google": "Google দিয়ে সাইন ইন করুন",
+      "signupPrompt": "প্ল্যাটফর্মে নতুন?",
+      "signupLink": "সাইন আপ",
+      "error": "সাইন ইন করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।"
+    },
+    "signup": {
+      "subtitle": "আপনার প্রাতিষ্ঠানিক অ্যাকাউন্ট তৈরি করুন",
+      "passwordPlaceholder": "কমপক্ষে ৮ অক্ষর",
+      "showPassword": "পাসওয়ার্ড দেখান",
+      "hidePassword": "পাসওয়ার্ড লুকান",
+      "confirmPassword": {
+        "label": "পাসওয়ার্ড নিশ্চিত করুন",
+        "placeholder": "আপনার পাসওয়ার্ড আবার লিখুন"
+      },
+      "passwordMismatch": "পাসওয়ার্ড মিলছে না।",
+      "submitting": "অ্যাকাউন্ট তৈরি হচ্ছে...",
+      "submit": "অ্যাকাউন্ট তৈরি করুন",
+      "google": "Google দিয়ে সাইন আপ করুন",
+      "signinPrompt": "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+      "signinLink": "সাইন ইন",
+      "error": "আপনার অ্যাকাউন্ট তৈরি করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।"
+    }
   }
 }

@@ -179,5 +179,45 @@
       },
       "copyright": "© 2024 Digital Event Scheduler System. University Infrastructure Division."
     }
+  },
+  "auth": {
+    "brand": "Digital Event Scheduler System",
+    "divider": "OR",
+    "form": {
+      "email": {
+        "label": "Email Address",
+        "placeholder": "name@university.edu"
+      },
+      "password": {
+        "label": "Password"
+      }
+    },
+    "signin": {
+      "subtitle": "Access your university scheduling portal",
+      "forgotPassword": "Forgot password?",
+      "submitting": "Signing in...",
+      "submit": "Sign In",
+      "google": "Sign in with Google",
+      "signupPrompt": "New to the platform?",
+      "signupLink": "Signup",
+      "error": "Unable to sign in. Please try again."
+    },
+    "signup": {
+      "subtitle": "Create your institutional account",
+      "passwordPlaceholder": "Min. 8 characters",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "placeholder": "Repeat your password"
+      },
+      "passwordMismatch": "Passwords do not match.",
+      "submitting": "Creating account...",
+      "submit": "Create Account",
+      "google": "Sign up with Google",
+      "signinPrompt": "Already have an account?",
+      "signinLink": "Signin",
+      "error": "Unable to create your account. Please try again."
+    }
   }
 }

@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, CalendarCheck } from "lucide-react";
 import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/signin")({
 function SigninPage() {
   const navigate = useNavigate();
   const { signInWithEmail, signInWithGoogle } = useAuth();
+  const { t } = useTranslation();
   const [errorMessage, setErrorMessage] = useState("");
   const {
     formState: { isSubmitting },
@@ -30,7 +32,7 @@ function SigninPage() {
       await signInWithEmail(email, password);
       navigate({ to: "/dashboard" });
     } catch (error) {
-      setErrorMessage(getAuthErrorMessage(error));
+      setErrorMessage(getAuthErrorMessage(error, t("auth.signin.error")));
     }
   };
 
@@ -41,7 +43,7 @@ function SigninPage() {
       await signInWithGoogle();
       navigate({ to: "/dashboard" });
     } catch (error) {
-      setErrorMessage(getAuthErrorMessage(error));
+      setErrorMessage(getAuthErrorMessage(error, t("auth.signin.error")));
     }
   }
 
@@ -55,10 +57,10 @@ function SigninPage() {
             </div>
 
             <h1 className="text-2xl font-semibold leading-8 text-foreground">
-              Digital Event Scheduler System
+              {t("auth.brand")}
             </h1>
             <p className="mt-1 text-sm leading-5 text-muted-foreground">
-              Access your university scheduling portal
+              {t("auth.signin.subtitle")}
             </p>
           </div>
 
@@ -71,12 +73,12 @@ function SigninPage() {
                 className="block text-sm font-medium leading-5 text-muted-foreground transition-colors group-focus-within:text-primary"
                 htmlFor="email"
               >
-                Email Address
+                {t("auth.form.email.label")}
               </label>
               <input
                 className="h-10 w-full rounded-lg border border-input bg-background px-4 text-base leading-6 text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/50"
                 id="email"
-                placeholder="name@university.edu"
+                placeholder={t("auth.form.email.placeholder")}
                 type="email"
                 {...register("email", { required: true })}
               />
@@ -88,13 +90,13 @@ function SigninPage() {
                   className="block text-sm font-medium leading-5 text-muted-foreground transition-colors group-focus-within:text-primary"
                   htmlFor="password"
                 >
-                  Password
+                  {t("auth.form.password.label")}
                 </label>
                 <a
                   className="text-xs font-semibold leading-4 text-primary underline-offset-4 transition-colors hover:underline"
                   href="#"
                 >
-                  Forgot password?
+                  {t("auth.signin.forgotPassword")}
                 </a>
               </div>
               <input
@@ -118,14 +120,18 @@ function SigninPage() {
                 disabled={isSubmitting}
                 type="submit"
               >
-                <span>{isSubmitting ? "Signing in..." : "Sign In"}</span>
+                <span>
+                  {isSubmitting
+                    ? t("auth.signin.submitting")
+                    : t("auth.signin.submit")}
+                </span>
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
 
               <div className="flex items-center py-2">
                 <div className="h-px flex-1 bg-border/50" />
                 <span className="mx-4 text-xs font-semibold leading-4 text-muted-foreground">
-                  OR
+                  {t("auth.divider")}
                 </span>
                 <div className="h-px flex-1 bg-border/50" />
               </div>
@@ -143,19 +149,19 @@ function SigninPage() {
                 >
                   G
                 </span>
-                <span>Sign in with Google</span>
+                <span>{t("auth.signin.google")}</span>
               </Button>
             </div>
           </form>
 
           <div className="mt-8 text-center">
             <p className="text-sm leading-5 text-muted-foreground">
-              New to the platform?{" "}
+              {t("auth.signin.signupPrompt")}{" "}
               <Link
                 className="font-semibold text-primary underline-offset-4 transition-colors hover:underline"
                 to="/signup"
               >
-                Signup
+                {t("auth.signin.signupLink")}
               </Link>
             </p>
           </div>
@@ -170,10 +176,10 @@ type SigninFormValues = {
   password: string;
 };
 
-function getAuthErrorMessage(error: unknown) {
+function getAuthErrorMessage(error: unknown, fallbackMessage: string) {
   if (error instanceof Error) {
     return error.message;
   }
 
-  return "Unable to sign in. Please try again.";
+  return fallbackMessage;
 }
