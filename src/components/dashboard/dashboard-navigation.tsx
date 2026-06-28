@@ -2,16 +2,16 @@ import { useState } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import {
-  BarChart3,
-  Calendar,
-  CalendarCheck,
-  CalendarDays,
-  Clock,
+  CalendarFold,
+  CalendarRange,
+  ChartColumn,
+  ClipboardCheck,
   LayoutDashboard,
   LogOut,
   Settings,
+  Tickets,
   User,
-  Users,
+  UsersRound,
   X,
 } from "lucide-react";
 
@@ -57,37 +57,37 @@ const primaryNavItems: NavItem[] = [
     allowedRoles: ALL_ROLES,
   },
   {
-    icon: Calendar,
+    icon: CalendarRange,
     label: "Events",
     to: "/events",
     allowedRoles: ALL_ROLES,
   },
   {
-    icon: Clock,
+    icon: CalendarFold,
     label: "Calendar",
     to: "/calendar",
     allowedRoles: ALL_ROLES,
   },
   {
-    icon: CalendarDays,
+    icon: Tickets,
     label: "My Events",
     to: "/my-events",
     allowedRoles: ALL_ROLES,
   },
   {
-    icon: CalendarCheck,
+    icon: ClipboardCheck,
     label: "Manage Events",
     to: "/event/manage-events",
     allowedRoles: ["admin", "moderator"],
   },
   {
-    icon: Users,
+    icon: UsersRound,
     label: "Manage Users",
     to: "/manage-users",
     allowedRoles: ["admin"],
   },
   {
-    icon: BarChart3,
+    icon: ChartColumn,
     label: "Analytics",
     to: "/analytics",
     allowedRoles: ["admin", "moderator"],
