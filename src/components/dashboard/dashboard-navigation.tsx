@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import type { TFunction } from "i18next";
 import type { LucideIcon } from "lucide-react";
 import {
   CalendarFold,
@@ -14,10 +15,11 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { useAuth } from "@/context/auth-context";
 import { useAuthStore } from "@/stores/auth-store";
-import { getNameInitials, userTypeMap } from "@/utils";
+import { getNameInitials } from "@/utils";
 import NotificationDialog from "../notifiction-daloag";
 
 type UserRole = "admin" | "moderator" | "general";
@@ -30,7 +32,7 @@ type DashboardUser = {
 
 type NavItem = {
   icon: LucideIcon;
-  label: string;
+  labelKey: string;
   to: string;
   allowedRoles: UserRole[];
 };
@@ -45,50 +47,50 @@ function normalizeUserRole(role?: string | null): UserRole {
   return "general";
 }
 
-function getUserRoleLabel(role?: string | null) {
-  return userTypeMap[normalizeUserRole(role)];
+function getUserRoleLabel(t: TFunction, role?: string | null) {
+  return t(`dashboard.roles.${normalizeUserRole(role)}`);
 }
 
 const primaryNavItems: NavItem[] = [
   {
     icon: LayoutDashboard,
-    label: "Overview",
+    labelKey: "dashboard.nav.overview",
     to: "/dashboard",
     allowedRoles: ALL_ROLES,
   },
   {
     icon: CalendarRange,
-    label: "Events",
+    labelKey: "dashboard.nav.events",
     to: "/events",
     allowedRoles: ALL_ROLES,
   },
   {
     icon: CalendarFold,
-    label: "Calendar",
+    labelKey: "dashboard.nav.calendar",
     to: "/calendar",
     allowedRoles: ALL_ROLES,
   },
   {
     icon: Tickets,
-    label: "My Events",
+    labelKey: "dashboard.nav.myEvents",
     to: "/my-events",
     allowedRoles: ALL_ROLES,
   },
   {
     icon: ClipboardCheck,
-    label: "Manage Events",
+    labelKey: "dashboard.nav.manageEvents",
     to: "/event/manage-events",
     allowedRoles: ["admin", "moderator"],
   },
   {
     icon: UsersRound,
-    label: "Manage Users",
+    labelKey: "dashboard.nav.manageUsers",
     to: "/manage-users",
     allowedRoles: ["admin"],
   },
   {
     icon: ChartColumn,
-    label: "Analytics",
+    labelKey: "dashboard.nav.analytics",
     to: "/analytics",
     allowedRoles: ["admin", "moderator"],
   },
@@ -97,13 +99,13 @@ const primaryNavItems: NavItem[] = [
 const secondaryNavItems: NavItem[] = [
   {
     icon: User,
-    label: "Profile",
+    labelKey: "dashboard.nav.profile",
     to: "/profile",
     allowedRoles: ALL_ROLES,
   },
   {
     icon: Settings,
-    label: "Settings",
+    labelKey: "dashboard.nav.settings",
     to: "/settings",
     allowedRoles: ALL_ROLES,
   },
@@ -139,6 +141,7 @@ export function DashboardShell() {
 function DashboardSidebar() {
   const navigate = useNavigate();
   const { signout } = useAuth();
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
 
   const allowedPrimaryNavItems = getNavItemsByRole(user, primaryNavItems);
@@ -153,22 +156,22 @@ function DashboardSidebar() {
     <aside className="sticky left-0 top-0 z-40 hidden h-screen w-64 flex-col gap-2 border-r border-border/50 bg-secondary/30 px-4 py-6 md:flex">
       <div className="mb-8 px-2">
         <h1 className="text-xl font-bold leading-7 text-secondary-foreground">
-          Command Center
+          {t("dashboard.shell.title")}
         </h1>
         <p className="text-sm leading-5 text-muted-foreground">
-          University Portal
+          {t("dashboard.shell.subtitle")}
         </p>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1">
         {allowedPrimaryNavItems.map((item) => (
-          <SidebarLink key={item.label} item={item} />
+          <SidebarLink key={item.labelKey} item={item} />
         ))}
 
         <div className="my-4 border-t border-border/50" />
 
         {allowedSecondaryNavItems.map((item) => (
-          <SidebarLink key={item.label} item={item} />
+          <SidebarLink key={item.labelKey} item={item} />
         ))}
       </nav>
 
@@ -179,7 +182,7 @@ function DashboardSidebar() {
           type="button"
         >
           <LogOut className="size-5" aria-hidden="true" />
-          <span>Logout</span>
+          <span>{t("dashboard.nav.logout")}</span>
         </button>
       </div>
     </aside>
@@ -188,6 +191,7 @@ function DashboardSidebar() {
 
 function SidebarLink({ item }: { item: NavItem }) {
   const Icon = item.icon;
+  const { t } = useTranslation();
 
   return (
     <Link
@@ -203,7 +207,7 @@ function SidebarLink({ item }: { item: NavItem }) {
       to={item.to}
     >
       <Icon className="size-5" aria-hidden="true" />
-      <span>{item.label}</span>
+      <span>{t(item.labelKey)}</span>
     </Link>
   );
 }
@@ -212,6 +216,7 @@ function DashboardHeader() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const { signout } = useAuth();
+  const { t } = useTranslation();
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
@@ -222,11 +227,12 @@ function DashboardHeader() {
   const allowedSecondaryNavItems = getNavItemsByRole(user, secondaryNavItems);
 
   let activeTitle =
-    allowedNavItems.find((item) => item.to === pathname)?.label ?? "Overview";
+    allowedNavItems.find((item) => item.to === pathname)?.labelKey ??
+    "dashboard.nav.overview";
 
   const eventDetailRegex = /^\/(?:_authenticated\/)?event\/[^/]+$/;
   if (eventDetailRegex.test(pathname)) {
-    activeTitle = "Event Details";
+    activeTitle = "dashboard.nav.eventDetails";
   }
 
   async function handleLogout() {
@@ -240,7 +246,7 @@ function DashboardHeader() {
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/60 bg-background/70 px-6 backdrop-blur-md">
         <div className="flex min-w-0 items-center gap-4">
           <h2 className="truncate text-2xl font-bold leading-8 text-primary">
-            {activeTitle}
+            {t(activeTitle)}
           </h2>
         </div>
 
@@ -253,7 +259,7 @@ function DashboardHeader() {
                 {user?.name}
               </p>
               <p className="text-xs leading-4 text-muted-foreground">
-                {getUserRoleLabel(user?.user_role)}
+                {getUserRoleLabel(t, user?.user_role)}
               </p>
             </div>
             <UserAvatar user={user} />
@@ -263,7 +269,7 @@ function DashboardHeader() {
             className="md:hidden"
             onClick={() => setIsMobileSidebarOpen(true)}
             type="button"
-            aria-label="Open dashboard navigation"
+            aria-label={t("dashboard.mobile.openAria")}
           >
             <UserAvatar user={user} />
           </button>
@@ -283,12 +289,14 @@ function DashboardHeader() {
 }
 
 function UserAvatar({ user }: { user?: DashboardUser | null }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex size-10 items-center justify-center overflow-hidden rounded-full border-2 border-accent bg-accent font-semibold text-accent-foreground">
       {user?.avatar ? (
         <img
           src={user.avatar}
-          alt="User Avatar"
+          alt={t("dashboard.user.avatarAlt")}
           className="h-full w-full object-cover"
         />
       ) : (
@@ -313,6 +321,8 @@ function MobileSidebar({
   secondaryItems: NavItem[];
   user?: DashboardUser | null;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div
       className={`fixed inset-0 z-50 md:hidden ${
@@ -326,7 +336,7 @@ function MobileSidebar({
         }`}
         onClick={onClose}
         type="button"
-        aria-label="Close dashboard navigation"
+        aria-label={t("dashboard.mobile.closeAria")}
       />
 
       <aside
@@ -342,7 +352,7 @@ function MobileSidebar({
                 {user?.name}
               </p>
               <p className="text-xs leading-4 text-muted-foreground">
-                {getUserRoleLabel(user?.user_role)}
+                {getUserRoleLabel(t, user?.user_role)}
               </p>
             </div>
           </div>
@@ -351,7 +361,7 @@ function MobileSidebar({
             className="flex size-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             onClick={onClose}
             type="button"
-            aria-label="Close dashboard navigation"
+            aria-label={t("dashboard.mobile.closeAria")}
           >
             <X className="size-5" aria-hidden="true" />
           </button>
@@ -359,13 +369,13 @@ function MobileSidebar({
 
         <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
           {primaryItems.map((item) => (
-            <MobileSidebarLink key={item.label} item={item} onClick={onClose} />
+            <MobileSidebarLink key={item.labelKey} item={item} onClick={onClose} />
           ))}
 
           <div className="my-3 border-t border-border/50" />
 
           {secondaryItems.map((item) => (
-            <MobileSidebarLink key={item.label} item={item} onClick={onClose} />
+            <MobileSidebarLink key={item.labelKey} item={item} onClick={onClose} />
           ))}
         </nav>
 
@@ -376,7 +386,7 @@ function MobileSidebar({
             type="button"
           >
             <LogOut className="size-5" aria-hidden="true" />
-            <span>Logout</span>
+            <span>{t("dashboard.nav.logout")}</span>
           </button>
         </div>
       </aside>
@@ -392,6 +402,7 @@ function MobileSidebarLink({
   onClick: () => void;
 }) {
   const Icon = item.icon;
+  const { t } = useTranslation();
 
   return (
     <Link
@@ -406,7 +417,7 @@ function MobileSidebarLink({
       to={item.to}
     >
       <Icon className="size-5" aria-hidden="true" />
-      <span>{item.label}</span>
+      <span>{t(item.labelKey)}</span>
     </Link>
   );
 }

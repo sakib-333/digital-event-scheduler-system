@@ -219,5 +219,91 @@
       "signinLink": "সাইন ইন",
       "error": "আপনার অ্যাকাউন্ট তৈরি করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।"
     }
+  },
+  "dashboard": {
+    "shell": {
+      "title": "Command Center",
+      "subtitle": "Organization Portal"
+    },
+    "nav": {
+      "overview": "ওভারভিউ",
+      "events": "ইভেন্টসমূহ",
+      "calendar": "ক্যালেন্ডার",
+      "myEvents": "আমার ইভেন্ট",
+      "manageEvents": "ইভেন্ট পরিচালনা",
+      "manageUsers": "ব্যবহারকারী পরিচালনা",
+      "analytics": "অ্যানালিটিক্স",
+      "profile": "প্রোফাইল",
+      "settings": "সেটিংস",
+      "eventDetails": "ইভেন্টের বিস্তারিত",
+      "logout": "লগআউট"
+    },
+    "roles": {
+      "admin": "অ্যাডমিন",
+      "moderator": "মডারেটর",
+      "general": "সাধারণ"
+    },
+    "mobile": {
+      "openAria": "ড্যাশবোর্ড নেভিগেশন খুলুন",
+      "closeAria": "ড্যাশবোর্ড নেভিগেশন বন্ধ করুন"
+    },
+    "user": {
+      "avatarAlt": "ব্যবহারকারীর অ্যাভাটার"
+    },
+    "overview": {
+      "welcome": "আবার স্বাগতম,",
+      "stats": {
+        "totalEvents": "মোট ইভেন্ট",
+        "pendingApproval": "অনুমোদনের অপেক্ষায়",
+        "approved": "অনুমোদিত",
+        "cancelled": "বাতিল",
+        "totalUsers": "মোট ব্যবহারকারী"
+      },
+      "pendingEvents": {
+        "title": "অপেক্ষমাণ ইভেন্ট",
+        "description": "সাম্প্রতিক জমা দেওয়া ইভেন্ট পর্যালোচনা ও পরিচালনা করুন",
+        "viewAll": "সব দেখুন",
+        "loading": "অপেক্ষমাণ ইভেন্ট লোড হচ্ছে...",
+        "empty": "কোনো অপেক্ষমাণ ইভেন্ট পাওয়া যায়নি।",
+        "paginationAria": "অপেক্ষমাণ ইভেন্টের পৃষ্ঠা",
+        "previousPage": "আগের পৃষ্ঠা",
+        "nextPage": "পরের পৃষ্ঠা",
+        "pageStatus": "পৃষ্ঠা {{page}} / {{total}}",
+        "columns": {
+          "eventName": "ইভেন্টের নাম",
+          "organizer": "আয়োজক",
+          "date": "তারিখ",
+          "status": "স্ট্যাটাস",
+          "actions": "অ্যাকশন"
+        },
+        "status": {
+          "pendingReview": "পর্যালোচনার অপেক্ষায়"
+        },
+        "actions": {
+          "approve": "অনুমোদন",
+          "approving": "অনুমোদন হচ্ছে...",
+          "confirmApprove": "হ্যাঁ, অনুমোদন করুন",
+          "approveTitle": "ইভেন্ট অনুমোদন",
+          "approveDescription": "আপনি কি <strong>{{title}}</strong> অনুমোদন করতে চান? এটি ইভেন্টটিকে অনুমোদিত হিসেবে চিহ্নিত করবে।",
+          "cancel": "বাতিল",
+          "cancelling": "বাতিল করা হচ্ছে...",
+          "confirmCancel": "হ্যাঁ, বাতিল করুন",
+          "cancelTitle": "ইভেন্ট বাতিল",
+          "cancelDescription": "আপনি কি <strong>{{title}}</strong> বাতিল করতে চান? এটি ইভেন্টটিকে বাতিল হিসেবে চিহ্নিত করবে।",
+          "goBack": "ফিরে যান",
+          "delete": "মুছুন",
+          "deleting": "মোছা হচ্ছে...",
+          "confirmDelete": "হ্যাঁ, মুছুন",
+          "deleteTitle": "ইভেন্ট মুছুন",
+          "deleteDescription": "আপনি কি <event>{{title}}</event> স্থায়ীভাবে মুছে ফেলতে চান? এই কাজটি <warning>ফিরিয়ে আনা যাবে না</warning>।",
+          "keepEvent": "ইভেন্ট রাখুন"
+        }
+      },
+      "analytics": {
+        "title": "ক্যাটাগরি অনুযায়ী ইভেন্ট",
+        "empty": "ক্যাটাগরি ডেটা পাওয়া যায়নি।",
+        "uncategorized": "ক্যাটাগরিবিহীন"
+      }
+    }
   }
 }

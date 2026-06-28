@@ -219,5 +219,91 @@
       "signinLink": "Signin",
       "error": "Unable to create your account. Please try again."
     }
+  },
+  "dashboard": {
+    "shell": {
+      "title": "Command Center",
+      "subtitle": "Organization Portal"
+    },
+    "nav": {
+      "overview": "Overview",
+      "events": "Events",
+      "calendar": "Calendar",
+      "myEvents": "My Events",
+      "manageEvents": "Manage Events",
+      "manageUsers": "Manage Users",
+      "analytics": "Analytics",
+      "profile": "Profile",
+      "settings": "Settings",
+      "eventDetails": "Event Details",
+      "logout": "Logout"
+    },
+    "roles": {
+      "admin": "Admin",
+      "moderator": "Moderator",
+      "general": "General"
+    },
+    "mobile": {
+      "openAria": "Open dashboard navigation",
+      "closeAria": "Close dashboard navigation"
+    },
+    "user": {
+      "avatarAlt": "User Avatar"
+    },
+    "overview": {
+      "welcome": "Welcome back,",
+      "stats": {
+        "totalEvents": "Total Events",
+        "pendingApproval": "Pending Approval",
+        "approved": "Approved",
+        "cancelled": "Cancelled",
+        "totalUsers": "Total Users"
+      },
+      "pendingEvents": {
+        "title": "Pending Events",
+        "description": "Review and manage recent submissions",
+        "viewAll": "View All",
+        "loading": "Loading pending events...",
+        "empty": "No pending events found.",
+        "paginationAria": "Pending events pages",
+        "previousPage": "Previous page",
+        "nextPage": "Next page",
+        "pageStatus": "Page {{page}} of {{total}}",
+        "columns": {
+          "eventName": "Event Name",
+          "organizer": "Organizer",
+          "date": "Date",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "status": {
+          "pendingReview": "PENDING REVIEW"
+        },
+        "actions": {
+          "approve": "Approve",
+          "approving": "Approving...",
+          "confirmApprove": "Yes, Approve",
+          "approveTitle": "Approve Event",
+          "approveDescription": "Are you sure you want to approve <strong>{{title}}</strong>? This will mark the event as approved.",
+          "cancel": "Cancel",
+          "cancelling": "Cancelling...",
+          "confirmCancel": "Yes, Cancel",
+          "cancelTitle": "Cancel Event",
+          "cancelDescription": "Are you sure you want to cancel <strong>{{title}}</strong>? This will mark the event as cancelled.",
+          "goBack": "Go Back",
+          "delete": "Delete",
+          "deleting": "Deleting...",
+          "confirmDelete": "Yes, Delete",
+          "deleteTitle": "Delete Event",
+          "deleteDescription": "Are you sure you want to permanently delete <event>{{title}}</event>? This action <warning>cannot be undone</warning>.",
+          "keepEvent": "Keep Event"
+        }
+      },
+      "analytics": {
+        "title": "Events by Category",
+        "empty": "No category data available.",
+        "uncategorized": "Uncategorized"
+      }
+    }
   }
 }

@@ -15,6 +15,7 @@ import {
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Trans, useTranslation } from "react-i18next";
 
 import { DashboardPanel } from "./dashboard-panel";
 import { useManageOverviewStore } from "@/stores/manage-overview-store";
@@ -28,7 +29,8 @@ import { formatDate } from "@/utils";
 type StatCard = {
   icon: LucideIcon;
   iconClassName: string;
-  label: string;
+  id: "totalEvents" | "pendingApproval" | "approved" | "cancelled" | "totalUsers";
+  labelKey: string;
   metaClassName?: string;
   value: string;
 };
@@ -41,40 +43,45 @@ type CategoryMetric = {
   value: string;
 };
 
-const tableColumns = ["Event Name", "Organizer", "Date", "Status"];
+const tableColumns = ["eventName", "organizer", "date", "status"] as const;
 
 const stats: StatCard[] = [
   {
     icon: CalendarCheck,
     iconClassName: "bg-primary/10 text-primary",
-    label: "Total Events",
+    id: "totalEvents",
+    labelKey: "dashboard.overview.stats.totalEvents",
     metaClassName: "bg-chart-3/10 text-chart-3",
     value: "1,284",
   },
   {
     icon: CalendarDays,
     iconClassName: "bg-chart-4/10 text-chart-4",
-    label: "Pending Approval",
+    id: "pendingApproval",
+    labelKey: "dashboard.overview.stats.pendingApproval",
     metaClassName: "text-chart-4",
     value: "42",
   },
   {
     icon: CheckCircle2,
     iconClassName: "bg-chart-3/10 text-chart-3",
-    label: "Approved",
+    id: "approved",
+    labelKey: "dashboard.overview.stats.approved",
     value: "856",
   },
   {
     icon: CircleX,
     iconClassName: "bg-destructive/10 text-destructive",
-    label: "Cancelled",
+    id: "cancelled",
+    labelKey: "dashboard.overview.stats.cancelled",
     metaClassName: "text-destructive",
     value: "18",
   },
   {
     icon: Users,
     iconClassName: "bg-secondary text-secondary-foreground",
-    label: "Total Users",
+    id: "totalUsers",
+    labelKey: "dashboard.overview.stats.totalUsers",
     value: "4,912",
   },
 ];
@@ -85,35 +92,35 @@ function formatStatValue(value: number) {
 
 function getStats(statsData: ReturnType<typeof useManageOverviewStore.getState>) {
   return stats.map((stat) => {
-    if (stat.label === "Total Events") {
+    if (stat.id === "totalEvents") {
       return {
         ...stat,
         value: formatStatValue(statsData.totalEvents),
       };
     }
 
-    if (stat.label === "Pending Approval") {
+    if (stat.id === "pendingApproval") {
       return {
         ...stat,
         value: formatStatValue(statsData.eventStatusCounts.pending),
       };
     }
 
-    if (stat.label === "Approved") {
+    if (stat.id === "approved") {
       return {
         ...stat,
         value: formatStatValue(statsData.eventStatusCounts.approved),
       };
     }
 
-    if (stat.label === "Cancelled") {
+    if (stat.id === "cancelled") {
       return {
         ...stat,
         value: formatStatValue(statsData.eventStatusCounts.canceled),
       };
     }
 
-    if (stat.label === "Total Users") {
+    if (stat.id === "totalUsers") {
       return {
         ...stat,
         value: formatStatValue(statsData.totalUsers),
@@ -138,15 +145,19 @@ export function DashboardOverview({
 }: {
   currentUserName?: string;
 }) {
+  const { t } = useTranslation();
   const statsData = useManageOverviewStore((state) => state);
   const dashboardStats = getStats(statsData);
-  const categoryMetrics = getCategoryMetrics(statsData.eventsByCategory);
+  const categoryMetrics = getCategoryMetrics(
+    statsData.eventsByCategory,
+    t("dashboard.overview.analytics.uncategorized"),
+  );
 
   return (
     <>
       {currentUserName ? (
         <p className="mb-4 text-sm font-medium leading-5 text-muted-foreground">
-          Welcome back,{" "}
+          {t("dashboard.overview.welcome")}{" "}
           <span className="text-foreground">{currentUserName}</span>
         </p>
       ) : null}
@@ -165,11 +176,12 @@ function getCategoryMetrics(
   eventsByCategory: ReturnType<
     typeof useManageOverviewStore.getState
   >["eventsByCategory"],
+  uncategorizedLabel: string,
 ): CategoryMetric[] {
   const groupedCategories = eventsByCategory.reduce<
     Record<string, { count: number; label: string }>
   >((acc, item) => {
-    const label = item.category.trim() || "Uncategorized";
+    const label = item.category.trim() || uncategorizedLabel;
     const key = label.toLowerCase();
 
     acc[key] = {
@@ -207,7 +219,7 @@ function StatsGrid({ stats }: { stats: StatCard[] }) {
   return (
     <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
       {stats.map((stat) => (
-        <StatSummaryCard key={stat.label} stat={stat} />
+        <StatSummaryCard key={stat.id} stat={stat} />
       ))}
     </div>
   );
@@ -215,6 +227,7 @@ function StatsGrid({ stats }: { stats: StatCard[] }) {
 
 function StatSummaryCard({ stat }: { stat: StatCard }) {
   const Icon = stat.icon;
+  const { t } = useTranslation();
 
   return (
     <DashboardPanel className="p-6 transition-all hover:-translate-y-1 hover:shadow-md">
@@ -224,7 +237,7 @@ function StatSummaryCard({ stat }: { stat: StatCard }) {
         </span>
       </div>
       <p className="text-sm leading-5 text-muted-foreground">
-        {stat.label}
+        {t(stat.labelKey)}
       </p>
       <h3 className="mt-1 text-3xl font-semibold leading-10 text-foreground">
         {stat.value}
@@ -234,6 +247,7 @@ function StatSummaryCard({ stat }: { stat: StatCard }) {
 }
 
 function PendingEventsTable() {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const {
     events,
@@ -244,7 +258,7 @@ function PendingEventsTable() {
   } = useManageEventsStore();
   const [currentPage, setCurrentPage] = useState(1);
   const canManageEvents = user?.user_role !== "general";
-  const columns = canManageEvents ? [...tableColumns, "Actions"] : tableColumns;
+  const columns = canManageEvents ? [...tableColumns, "actions"] : [...tableColumns];
   const pendingEvents = events.filter((event) => event.status === "pending");
   const itemsPerPage = 4;
   const totalPages = Math.ceil(pendingEvents.length / itemsPerPage) || 1;
@@ -282,15 +296,15 @@ function PendingEventsTable() {
       <div className="flex items-center justify-between border-b border-border/50 p-6">
         <div>
           <h4 className="text-xl font-semibold leading-7 text-foreground">
-            Pending Events
+            {t("dashboard.overview.pendingEvents.title")}
           </h4>
           <p className="text-sm leading-5 text-muted-foreground">
-            Review and manage recent submissions
+            {t("dashboard.overview.pendingEvents.description")}
           </p>
         </div>
         <Link to="/events">
           <Button type="button" variant="link">
-            View All
+            {t("dashboard.overview.pendingEvents.viewAll")}
           </Button>
         </Link>
       </div>
@@ -303,11 +317,11 @@ function PendingEventsTable() {
                 <th
                   className={cn(
                     "px-6 py-4 text-sm font-medium leading-5 text-muted-foreground",
-                    heading === "Actions" && "text-right",
+                    heading === "actions" && "text-right",
                   )}
                   key={heading}
                 >
-                  {heading}
+                  {t(`dashboard.overview.pendingEvents.columns.${heading}`)}
                 </th>
               ))}
             </tr>
@@ -319,7 +333,7 @@ function PendingEventsTable() {
                   className="px-6 py-10 text-center text-sm text-muted-foreground"
                   colSpan={columns.length}
                 >
-                  Loading pending events...
+                  {t("dashboard.overview.pendingEvents.loading")}
                 </td>
               </tr>
             ) : paginatedEvents.length === 0 ? (
@@ -328,7 +342,7 @@ function PendingEventsTable() {
                   className="px-6 py-10 text-center text-sm text-muted-foreground"
                   colSpan={columns.length}
                 >
-                  No pending events found.
+                  {t("dashboard.overview.pendingEvents.empty")}
                 </td>
               </tr>
             ) : (
@@ -350,30 +364,37 @@ function PendingEventsTable() {
       <div className="mt-auto flex justify-center border-t border-border/40 bg-card px-4 py-3">
         <nav
           className="flex items-center gap-1"
-          aria-label="Pending events pages"
+          aria-label={t("dashboard.overview.pendingEvents.paginationAria")}
         >
           <button
             className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
             disabled={activePage <= 1}
-            title="Previous page"
+            title={t("dashboard.overview.pendingEvents.previousPage")}
             type="button"
             onClick={() => setCurrentPage(activePage - 1)}
           >
             <ChevronLeft className="size-5" aria-hidden="true" />
-            <span className="sr-only">Previous page</span>
+            <span className="sr-only">
+              {t("dashboard.overview.pendingEvents.previousPage")}
+            </span>
           </button>
           <span className="px-2 text-sm font-medium leading-5">
-            Page {activePage} of {totalPages}
+            {t("dashboard.overview.pendingEvents.pageStatus", {
+              page: activePage,
+              total: totalPages,
+            })}
           </span>
           <button
             className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
             disabled={activePage >= totalPages}
-            title="Next page"
+            title={t("dashboard.overview.pendingEvents.nextPage")}
             type="button"
             onClick={() => setCurrentPage(activePage + 1)}
           >
             <ChevronRight className="size-5" aria-hidden="true" />
-            <span className="sr-only">Next page</span>
+            <span className="sr-only">
+              {t("dashboard.overview.pendingEvents.nextPage")}
+            </span>
           </button>
         </nav>
       </div>
@@ -394,6 +415,7 @@ function PendingEventRow({
   onCancel: (id: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [isUpdating, setIsUpdating] = useState(false);
 
   async function handleAction(action: () => Promise<void>) {
@@ -423,7 +445,7 @@ function PendingEventRow({
       </td>
       <td className="px-6 py-4">
         <span className="rounded-full bg-chart-4/10 px-2 py-1 text-xs font-semibold leading-4 text-chart-4">
-          PENDING REVIEW
+          {t("dashboard.overview.pendingEvents.status.pendingReview")}
         </span>
       </td>
       {canManageEvents ? (
@@ -431,75 +453,90 @@ function PendingEventRow({
           <div className="flex items-center justify-end gap-2">
             <ConfirmationDialog
               actionClassName="bg-emerald-600 text-white hover:bg-emerald-700"
-              actionLabel={isUpdating ? "Approving..." : "Yes, Approve"}
-              cancelLabel="Cancel"
+              actionLabel={
+                isUpdating
+                  ? t("dashboard.overview.pendingEvents.actions.approving")
+                  : t("dashboard.overview.pendingEvents.actions.confirmApprove")
+              }
+              cancelLabel={t("dashboard.overview.pendingEvents.actions.cancel")}
               description={
-                <>
-                  Are you sure you want to approve{" "}
-                  <strong className="text-foreground">{event.title}</strong>? This
-                  will mark the event as approved.
-                </>
+                <Trans
+                  i18nKey="dashboard.overview.pendingEvents.actions.approveDescription"
+                  values={{ title: event.title }}
+                  components={{ strong: <strong className="text-foreground" /> }}
+                />
               }
               disabled={isUpdating}
               icon={<ShieldCheck />}
               mediaClassName="bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
-              title="Approve Event"
+              title={t("dashboard.overview.pendingEvents.actions.approveTitle")}
               onConfirm={() => handleAction(() => onApprove(event.id))}
             >
               <PendingActionButton
                 className="text-primary hover:bg-primary/10"
                 disabled={isUpdating}
-                label="Approve"
+                label={t("dashboard.overview.pendingEvents.actions.approve")}
               >
                 <CheckCircle2 className="size-5" aria-hidden="true" />
               </PendingActionButton>
             </ConfirmationDialog>
             <ConfirmationDialog
               actionClassName="bg-amber-500 text-white hover:bg-amber-600"
-              actionLabel={isUpdating ? "Cancelling..." : "Yes, Cancel"}
-              cancelLabel="Go Back"
+              actionLabel={
+                isUpdating
+                  ? t("dashboard.overview.pendingEvents.actions.cancelling")
+                  : t("dashboard.overview.pendingEvents.actions.confirmCancel")
+              }
+              cancelLabel={t("dashboard.overview.pendingEvents.actions.goBack")}
               description={
-                <>
-                  Are you sure you want to cancel{" "}
-                  <strong className="text-foreground">{event.title}</strong>? This
-                  will mark the event as cancelled.
-                </>
+                <Trans
+                  i18nKey="dashboard.overview.pendingEvents.actions.cancelDescription"
+                  values={{ title: event.title }}
+                  components={{ strong: <strong className="text-foreground" /> }}
+                />
               }
               disabled={isUpdating}
               icon={<XCircle />}
               mediaClassName="bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"
-              title="Cancel Event"
+              title={t("dashboard.overview.pendingEvents.actions.cancelTitle")}
               onConfirm={() => handleAction(() => onCancel(event.id))}
             >
               <PendingActionButton
                 className="text-destructive hover:bg-destructive/10"
                 disabled={isUpdating}
-                label="Cancel"
+                label={t("dashboard.overview.pendingEvents.actions.cancel")}
               >
                 <CircleX className="size-5" aria-hidden="true" />
               </PendingActionButton>
             </ConfirmationDialog>
             <ConfirmationDialog
-              actionLabel={isUpdating ? "Deleting..." : "Yes, Delete"}
-              cancelLabel="Keep Event"
+              actionLabel={
+                isUpdating
+                  ? t("dashboard.overview.pendingEvents.actions.deleting")
+                  : t("dashboard.overview.pendingEvents.actions.confirmDelete")
+              }
+              cancelLabel={t("dashboard.overview.pendingEvents.actions.keepEvent")}
               description={
-                <>
-                  Are you sure you want to permanently delete{" "}
-                  <strong className="text-foreground">{event.title}</strong>? This
-                  action <strong>cannot be undone</strong>.
-                </>
+                <Trans
+                  i18nKey="dashboard.overview.pendingEvents.actions.deleteDescription"
+                  values={{ title: event.title }}
+                  components={{
+                    event: <strong className="text-foreground" />,
+                    warning: <strong />,
+                  }}
+                />
               }
               disabled={isUpdating}
               icon={<Trash2 />}
               mediaClassName="bg-destructive/10 text-destructive"
-              title="Delete Event"
+              title={t("dashboard.overview.pendingEvents.actions.deleteTitle")}
               variant="destructive"
               onConfirm={() => handleAction(() => onDelete(event.id))}
             >
               <PendingActionButton
                 className="text-destructive hover:bg-destructive/10"
                 disabled={isUpdating}
-                label="Delete"
+                label={t("dashboard.overview.pendingEvents.actions.delete")}
               >
                 <Trash2 className="size-5" aria-hidden="true" />
               </PendingActionButton>
@@ -542,11 +579,13 @@ function DashboardAnalytics({
 }: {
   categoryMetrics: CategoryMetric[];
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-6">
       <DashboardPanel className="flex min-h-80 flex-col p-6">
         <h4 className="mb-4 text-xl font-semibold leading-7 text-foreground">
-          Events by Category
+          {t("dashboard.overview.analytics.title")}
         </h4>
 
         <div className="flex flex-1 flex-col justify-center gap-4">
@@ -556,7 +595,7 @@ function DashboardAnalytics({
             ))
           ) : (
             <p className="text-sm leading-5 text-muted-foreground">
-              No category data available.
+              {t("dashboard.overview.analytics.empty")}
             </p>
           )}
         </div>
