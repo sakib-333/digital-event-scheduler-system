@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import type { UserType } from "@/types/user";
-import { getNameInitials, isValidBDPhoneNumber, uploadImage } from "@/utils";
+import { getNameInitials, isValidBDPhoneNumber, uploadImage, usePageTitle } from "@/utils";
 import moment from "moment";
 import { useTranslation } from "react-i18next";
 
@@ -44,6 +44,7 @@ const defaultProfile: UserType = {
 
 /*━━ Profile page component ━━━━━━ */
 function ProfilePage() {
+  usePageTitle("Profile");
   const { t } = useTranslation();
   const authUser = useAuthStore((state) => state.user);
   const setAuthUser = useAuthStore((state) => state.setUser);

@@ -45,7 +45,7 @@ const chartColors = [
 
 function AnalyticsPage() {
   const { t } = useTranslation();
-  usePageTitle(t("routes.analytics.pageTitle"))
+  usePageTitle("Analytics");
   const statsData = useManageOverviewStore()
   const approvalHealthData = [
     { name: t("routes.analytics.chartLabels.approved"), value: statsData.eventStatusCounts.approved || 0 },

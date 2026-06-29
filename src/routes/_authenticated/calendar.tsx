@@ -178,7 +178,7 @@ export const Route = createFileRoute("/_authenticated/calendar")({
 
 function RouteComponent() {
   const { t } = useTranslation();
-  usePageTitle(t("routes.calendar.pageTitle"));
+  usePageTitle("Calendar");
 
   const events = useManageEventsStore((state) => state.events);
   const isLoading = useManageEventsStore((state) => state.isLoading);

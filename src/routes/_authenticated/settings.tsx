@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { usePageTitle } from "@/utils";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -36,6 +37,7 @@ const languageOptions = [
 ] as const;
 
 function SettingsPage() {
+  usePageTitle("Settings");
   const { i18n, t } = useTranslation();
   const currentLanguageCode = i18n.resolvedLanguage?.split("-")[0] ?? "en";
   const currentLanguage = languageOptions.some(

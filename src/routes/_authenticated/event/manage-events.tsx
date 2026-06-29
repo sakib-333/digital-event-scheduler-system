@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { useManageEventsStore } from "@/stores/manage-events-store";
 import type { EventType } from "@/types/event";
 import { requireRouteRoles } from "@/utils/route-permissions";
+import { usePageTitle } from "@/utils";
 
 export const Route = createFileRoute("/_authenticated/event/manage-events")({
   beforeLoad: async ({ context }) => {
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/_authenticated/event/manage-events")({
  * Connects to `useManageEventsStore` to load and mutate event statuses.
  */
 function ManageEventsPage() {
+  usePageTitle("Manage Events");
   const { events, isLoading, getAllEvents, updateEvent, deleteEvent } =
     useManageEventsStore();
 

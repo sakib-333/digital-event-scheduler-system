@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils'
 import manageEvents from '@/api/manage-events'
 import { useManageEventsStore } from '@/stores/manage-events-store'
 import type { EventType } from '@/types/event'
-import { uploadImage } from '@/utils'
+import { uploadImage, usePageTitle } from '@/utils'
 
 export const Route = createFileRoute(
   '/_authenticated/event/edit-event/$eventId',
@@ -68,6 +68,7 @@ const defaultEventValues: EventFormValues = {
 }
 
 function RouteComponent() {
+  usePageTitle("Edit Event");
   const { t } = useTranslation()
   const { eventId } = Route.useParams()
   const navigate = useNavigate()

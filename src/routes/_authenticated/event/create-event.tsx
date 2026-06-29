@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { useManageEventsStore } from "@/stores/manage-events-store";
 import type { EventType } from "@/types/event";
-import { uploadImage } from "@/utils";
+import { uploadImage, usePageTitle } from "@/utils";
 
 // ─── Route Definition ───
 export const Route = createFileRoute("/_authenticated/event/create-event")({
@@ -68,6 +68,7 @@ const defaultEventValues: EventFormValues = {
 };
 
 function CreateEventPage() {
+  usePageTitle("Create Event");
   const { t } = useTranslation();
   // ─── Hooks and State ───
   const {

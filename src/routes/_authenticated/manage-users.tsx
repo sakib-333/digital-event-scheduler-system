@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useManageUsersStore } from "@/stores/manage-users-store";
 import type { UserType } from "@/types/user";
-import { formatDate, getNameInitials, isNewThisWeek } from "@/utils";
+import { formatDate, getNameInitials, isNewThisWeek, usePageTitle } from "@/utils";
 import { requireRouteRoles } from "@/utils/route-permissions";
 import { useTranslation } from "react-i18next";
 
@@ -31,6 +31,7 @@ const roleOptions: UserRole[] = ["moderator", "general"];
 const roleFilterOptions: RoleFilter[] = ["all", "admin", ...roleOptions];
 
 function ManageUsersPage() {
+  usePageTitle("Manage Users");
   const { t } = useTranslation();
   const error = useManageUsersStore((state) => state.error);
   const getAllUsers = useManageUsersStore((state) => state.getAllUsers);

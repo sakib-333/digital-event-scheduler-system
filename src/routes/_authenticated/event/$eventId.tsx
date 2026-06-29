@@ -7,7 +7,7 @@ import { useManageEventsStore } from "@/stores/manage-events-store"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import fallbackBanner from "/images/event-fallback-image.jpg"
-import { formatDate, formatTime, getNameInitials } from "@/utils"
+import { formatDate, formatTime, getNameInitials, usePageTitle } from "@/utils"
 import { useEffect, useState } from "react"
 import type { UserType } from "@/types/user"
 import manageUsers from "@/api/manage-users"
@@ -23,6 +23,7 @@ export const Route = createFileRoute('/_authenticated/event/$eventId')({
 })
 
 function RouteComponent() {
+  usePageTitle("Events Details");
   const { t } = useTranslation()
   const [creator, setCreator] = useState<UserType | null>(null)
   const navigate = useNavigate()

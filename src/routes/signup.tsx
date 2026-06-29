@@ -13,12 +13,14 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
+import { usePageTitle } from "@/utils";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
 });
 
 function SignupPage() {
+  usePageTitle("Signup");
   const navigate = useNavigate();
   const { signInWithGoogle, signUpWithEmail } = useAuth();
   const { t } = useTranslation();

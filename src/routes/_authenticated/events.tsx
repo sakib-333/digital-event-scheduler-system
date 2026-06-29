@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import { EventCard } from '@/components/event-card'
 import { useManageEventsStore } from '@/stores/manage-events-store'
+import { usePageTitle } from '@/utils'
 
 export const Route = createFileRoute('/_authenticated/events')({
   component: ApprovedEventsPage,
@@ -61,6 +62,7 @@ function EventControls({
 }
 
 function ApprovedEventsPage() {
+  usePageTitle("Events");
   const { t } = useTranslation()
   const { events, isLoading, getApprovedEvents } = useManageEventsStore()
   const [searchQuery, setSearchQuery] = useState('')

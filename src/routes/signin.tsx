@@ -6,12 +6,14 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
+import { usePageTitle } from "@/utils";
 
 export const Route = createFileRoute("/signin")({
   component: SigninPage,
 });
 
 function SigninPage() {
+  usePageTitle("Signin");
   const navigate = useNavigate();
   const { signInWithEmail, signInWithGoogle } = useAuth();
   const { t } = useTranslation();

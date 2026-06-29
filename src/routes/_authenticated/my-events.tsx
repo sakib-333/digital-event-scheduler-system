@@ -7,6 +7,7 @@ import { EventCard } from "@/components/event-card";
 import { useAuth } from "@/context/auth-context";
 import { useManageEventsStore } from "@/stores/manage-events-store";
 import { Button } from "@/components/ui/button";
+import { usePageTitle } from "@/utils";
 
 export const Route = createFileRoute("/_authenticated/my-events")({
   component: MyEventsPage,
@@ -56,6 +57,7 @@ function EventControls({
   onCategoryChange: (category: EventCategory | "all") => void;
   onSearchChange: (query: string) => void;
 }) {
+  usePageTitle("My Events");
   const { t } = useTranslation();
 
   return (
