@@ -228,6 +228,9 @@
     "nav": {
       "overview": "Overview",
       "events": "Events",
+      "createEvent": "Create Event",
+      "editEvent": "Edit Event",
+      "detailsEvent": "Event Details",
       "calendar": "Calendar",
       "myEvents": "My Events",
       "manageEvents": "Manage Events",

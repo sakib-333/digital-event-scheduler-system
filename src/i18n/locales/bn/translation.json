@@ -228,6 +228,9 @@
     "nav": {
       "overview": "ওভারভিউ",
       "events": "ইভেন্টসমূহ",
+      "createEvent": "ইভেন্ট তৈরি করুন",
+      "editEvent": "ইভেন্ট সম্পাদনা করুন",
+      "detailsEvent": "ইভেন্টের বিস্তারিত",
       "calendar": "ক্যালেন্ডার",
       "myEvents": "আমার ইভেন্ট",
       "manageEvents": "ইভেন্ট পরিচালনা",

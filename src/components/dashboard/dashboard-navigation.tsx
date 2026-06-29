@@ -230,9 +230,12 @@ function DashboardHeader() {
     allowedNavItems.find((item) => item.to === pathname)?.labelKey ??
     "dashboard.nav.overview";
 
-  const eventDetailRegex = /^\/(?:_authenticated\/)?event\/[^/]+$/;
-  if (eventDetailRegex.test(pathname)) {
-    activeTitle = "dashboard.nav.eventDetails";
+  if (pathname.startsWith("/event/create-event")) {
+    activeTitle = "dashboard.nav.createEvent";
+  } else if(pathname.startsWith("/event/edit-event")) {
+    activeTitle = "dashboard.nav.editEvent";
+  } else {
+    activeTitle = "dashboard.nav.detailsEvent";
   }
 
   async function handleLogout() {
