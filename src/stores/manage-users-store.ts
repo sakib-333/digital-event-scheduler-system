@@ -5,16 +5,19 @@ import type { UserType } from "@/types/user";
 import { toast } from 'sonner';
 
 type ManageUsersStore = {
+    user: UserType | null;
     users: UserType[];
     isLoading: boolean;
     isUpdatingRole: boolean;
     updatingUserId: string | null;
     error: string | null;
     getAllUsers: () => Promise<void>;
+    getUserById: (uid: string) => Promise<void>;
     userUserRole: (uid: string, userRole: NonNullable<UserType["user_role"]>) => Promise<void>;
 };
 
 export const useManageUsersStore = create<ManageUsersStore>((set) => ({
+    user: null,
     users: [],
     isLoading: false,
     isUpdatingRole: false,
@@ -33,6 +36,21 @@ export const useManageUsersStore = create<ManageUsersStore>((set) => ({
             });
         }
     },
+
+    getUserById: async (uid) => {
+        set({ isLoading: true, error: null });
+
+        try {
+            const user = await manageUsers.getUserByUid(uid);
+            set({ user, isLoading: false });
+        } catch (error) {
+            set({
+                error: error instanceof Error ? error.message : "Failed to load user.",
+                isLoading: false,
+            });
+        }
+    },
+
     userUserRole: async (uid, userRole) => {
         set({ error: null, isUpdatingRole: true, updatingUserId: uid });
 

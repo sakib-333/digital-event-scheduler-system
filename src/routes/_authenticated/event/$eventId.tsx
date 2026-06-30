@@ -3,15 +3,14 @@
 import { ArrowLeft, CalendarDays, Check, Clock, Edit2, MapPin, Trash2, Users, Link2 } from "lucide-react"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useAuth } from "@/context/auth-context"
-import { useManageEventsStore } from "@/stores/manage-events-store"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import fallbackBanner from "/images/event-fallback-image.jpg"
 import { formatDate, formatTime, getNameInitials, usePageTitle } from "@/utils"
-import { useEffect, useState } from "react"
-import type { UserType } from "@/types/user"
-import manageUsers from "@/api/manage-users"
+import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { useManageEventsStore } from "@/stores/manage-events-store"
+import { useManageUsersStore } from "@/stores/manage-users-store"
 
 /*
  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -25,28 +24,33 @@ export const Route = createFileRoute('/_authenticated/event/$eventId')({
 function RouteComponent() {
   usePageTitle("Events Details");
   const { t } = useTranslation()
-  const [creator, setCreator] = useState<UserType | null>(null)
   const navigate = useNavigate()
   const { user } = useAuth()
   const { eventId } = Route.useParams()
+  const {user: eventCreator, getUserById } = useManageUsersStore()
+  const { event, getEventById, isLoading, error } = useManageEventsStore()
 
-  const event = useManageEventsStore((state) =>
-    state.events.find((item) => item.id === eventId),
-  )
+  useEffect(() => {
+    const fetchEvent = async () => {
+      if (eventId) {
+        await getEventById(eventId)
+      }
+    }
 
-  const isOwner = Boolean(user && event && event.created_by === user.uid)
-  const hasJoined = Boolean(event && !isOwner && false)
+    fetchEvent()
+  }, [eventId, getEventById])
 
   useEffect(() => {
     const fetchCreator = async () => {
       if (event && event.created_by) {
-        const user = await manageUsers.getUserByUid(event.created_by)
-        setCreator(user)
+        await getUserById(event.created_by)
       }
     }
-
     fetchCreator()
-  }, [eventId])
+    }, [eventId, event, getUserById])
+
+  const isOwner = Boolean(user && event && event.created_by === user.uid)
+  const hasJoined = Boolean(event && !isOwner && false)
 
   const ctaButton = event ? (
     isOwner ? (
@@ -84,6 +88,43 @@ function RouteComponent() {
       </Button>
     )
   ) : null
+
+  if (isLoading && !event) {
+    return (
+      <div className="min-h-screen bg-background px-4 py-10 text-foreground">
+        <div className="mx-auto max-w-3xl rounded-3xl border border-border/70 bg-card/80 p-10 text-center shadow-sm backdrop-blur-xl">
+          <div className="mx-auto mb-6 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <h1 className="text-3xl font-semibold">
+            {t("routes.events.loading")}
+          </h1>
+        </div>
+      </div>
+    )
+  }
+
+  if (error && !event) {
+    return (
+      <div className="min-h-screen bg-background px-4 py-10 text-foreground">
+        <div className="mx-auto max-w-3xl rounded-3xl border border-border/70 bg-card/80 p-10 text-center shadow-sm backdrop-blur-xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-destructive">
+            {t("routes.eventDetails.eyebrow")}
+          </p>
+          <h1 className="mt-4 text-3xl font-semibold">
+            {t("routes.eventDetails.notFoundTitle")}
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            {error}
+          </p>
+          <div className="mt-8">
+            <Button variant="outline" onClick={() => navigate({ to: "/events" })}>
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              {t("routes.eventDetails.backToEvents")}
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (!event) {
     return (
@@ -316,22 +357,22 @@ function RouteComponent() {
                     </p>
                     <div className="mt-2 flex items-center gap-3">
                       <div className="size-10 rounded-full overflow-hidden bg-accent text-accent-content font-semibold flex items-center justify-center">
-                        {creator?.avatar ? (
+                        {eventCreator?.avatar ? (
                           <img
-                            src={creator.avatar}
+                            src={eventCreator.avatar}
                             alt={t("routes.eventDetails.creatorAvatarAlt", {
-                              name: creator.name,
+                              name: eventCreator.name,
                             })}
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span>{getNameInitials(creator?.name ?? event.organizer_name ?? "")}</span>
+                          <span>{getNameInitials(eventCreator?.name ?? event.organizer_name ?? "")}</span>
                         )}
                       </div>
 
                       <div>
-                        <p className="text-sm font-semibold text-foreground">{creator?.name ?? event.organizer_name ?? event.created_by}</p>
-                        {creator?.email ? <p className="text-xs text-muted-foreground">{creator.email}</p> : null}
+                        <p className="text-sm font-semibold text-foreground">{eventCreator?.name ?? event.organizer_name ?? event.created_by}</p>
+                        {eventCreator?.email ? <p className="text-xs text-muted-foreground">{eventCreator.email}</p> : null}
                       </div>
                     </div>
                   </div>

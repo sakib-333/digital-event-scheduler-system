@@ -9,6 +9,7 @@ import type { EventType } from "@/types/event";
 // Defines the shape of the events store with state and actions
 // ─────────────────────────────────────────────────────
 type ManageEventsStore = {
+    event: EventType | null;
     events: EventType[];
     isLoading: boolean;
     isCreating: boolean;
@@ -17,6 +18,7 @@ type ManageEventsStore = {
     error: string | null;
 
     getAllEvents: () => Promise<void>;
+    getEventById: (id: string) => Promise<void>;
     getAllPendingEvents: () => Promise<void>;
     getApprovedEvents: () => Promise<void>;
     getEventsByUserId: (userId: string) => Promise<void>;
@@ -32,6 +34,7 @@ export const useManageEventsStore = create<ManageEventsStore>((set) => ({
     // ─────────────────────────────────────────────────────
     // Initial State
     // ─────────────────────────────────────────────────────
+    event: null,
     events: [],
     isLoading: false,
     isCreating: false,
@@ -55,6 +58,22 @@ export const useManageEventsStore = create<ManageEventsStore>((set) => ({
                 isLoading: false,
             });
             toast.error("Failed to load events.");
+        }
+    },
+
+    // ─── Fetch Event by id ───
+    getEventById: async (id: string) => {
+        set({ isLoading: true, error: null });
+
+        try {
+            const event = await manageEvents.getEventById(id);
+            set({ event, isLoading: false });
+        } catch (error) {
+            set({
+                error: error instanceof Error ? error.message : "Failed to load event.",
+                isLoading: false,
+            });
+            toast.error("Failed to load event.");
         }
     },
 
