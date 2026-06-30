@@ -9,6 +9,7 @@ import fallbackBanner from "/images/event-fallback-image.jpg"
 import { formatDate, formatTime, getNameInitials, usePageTitle } from "@/utils"
 import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { ConfirmationDialog } from "@/components/confirmation-dialog"
 import { useManageEventsStore } from "@/stores/manage-events-store"
 import { useManageUsersStore } from "@/stores/manage-users-store"
 
@@ -28,7 +29,7 @@ function RouteComponent() {
   const { user } = useAuth()
   const { eventId } = Route.useParams()
   const {user: eventCreator, getUserById } = useManageUsersStore()
-  const { event, getEventById, isLoading, error } = useManageEventsStore()
+  const { event, getEventById, deleteEvent, isLoading, isDeleting, error } = useManageEventsStore()
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -52,6 +53,15 @@ function RouteComponent() {
   const isOwner = Boolean(user && event && event.created_by === user.uid)
   const hasJoined = Boolean(event && !isOwner && false)
 
+  const handleDeleteEvent = async () => {
+    if (!event) return
+
+    const success = await deleteEvent(event.id)
+    if (success) {
+      navigate({ to: "/events" })
+    }
+  }
+
   const ctaButton = event ? (
     isOwner ? (
       <div className="flex flex-wrap items-center gap-3">
@@ -65,14 +75,33 @@ function RouteComponent() {
             {t("routes.eventDetails.actions.edit")}
           </button>
         </Link>
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive transition hover:border-destructive/70 hover:bg-destructive/20"
-          aria-label={t("routes.eventDetails.actions.delete")}
+        <ConfirmationDialog
+          actionLabel={isDeleting ? "Deleting..." : "Yes, Delete"}
+          cancelLabel="Keep Event"
+          description={
+            <>
+              Are you sure you want to permanently delete{" "}
+              <strong className="text-foreground">{event.title}</strong>? This
+              action <strong>cannot be undone</strong>.
+            </>
+          }
+          disabled={isDeleting}
+          icon={<Trash2 />}
+          mediaClassName="bg-destructive/10 text-destructive"
+          title="Delete Event"
+          variant="destructive"
+          onConfirm={handleDeleteEvent}
         >
-          <Trash2 className="size-4" aria-hidden="true" />
-          {t("routes.eventDetails.actions.delete")}
-        </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive transition hover:border-destructive/70 hover:bg-destructive/20 disabled:pointer-events-none disabled:opacity-50"
+            aria-label={t("routes.eventDetails.actions.delete")}
+            disabled={isDeleting}
+          >
+            <Trash2 className="size-4" aria-hidden="true" />
+            {t("routes.eventDetails.actions.delete")}
+          </button>
+        </ConfirmationDialog>
       </div>
     ) : hasJoined ? (
       <Button className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold"
