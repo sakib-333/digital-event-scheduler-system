@@ -1,17 +1,18 @@
 
 /* eslint-disable react-refresh/only-export-components */
-import { ArrowLeft, CalendarDays, Check, Clock, Edit2, MapPin, Trash2, Users, Link2 } from "lucide-react"
+import { useEffect } from "react"
+import { ArrowLeft, CalendarDays, Clock, Edit2, Link2, MapPin, Trash2, Users } from "lucide-react"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import fallbackBanner from "/images/event-fallback-image.jpg"
 import { formatDate, formatTime, getNameInitials, usePageTitle } from "@/utils"
-import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { ConfirmationDialog } from "@/components/confirmation-dialog"
 import { useManageEventsStore } from "@/stores/manage-events-store"
 import { useManageUsersStore } from "@/stores/manage-users-store"
+import { useManageEventParticipantsStore } from "@/stores/manage-event-participants-store"
 
 /*
  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -30,6 +31,7 @@ function RouteComponent() {
   const { eventId } = Route.useParams()
   const {user: eventCreator, getUserById } = useManageUsersStore()
   const { event, getEventById, deleteEvent, isLoading, isDeleting, error } = useManageEventsStore()
+  const { hasJoined, loading: participationLoading, checkParticipation, joinEvent, leaveEvent } = useManageEventParticipantsStore()
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -50,8 +52,54 @@ function RouteComponent() {
     fetchCreator()
     }, [eventId, event, getUserById])
 
+  useEffect(() => {
+    const fetchParticipation = async () => {
+      if (user && eventId && event) {
+        await checkParticipation(user.uid, eventId)
+      }
+    }
+
+    fetchParticipation()
+  }, [user, eventId, event, checkParticipation])
+
   const isOwner = Boolean(user && event && event.created_by === user.uid)
-  const hasJoined = Boolean(event && !isOwner && false)
+
+  const refreshParticipation = async () => {
+    if (!user || !event) {
+      return
+    }
+
+    await getEventById(event.id)
+    await checkParticipation(user.uid, event.id)
+  }
+
+  const handleJoin = async () => {
+    if (!user || !event) {
+      return
+    }
+
+    const success = await joinEvent(user.uid, event.id)
+
+    if (!success) {
+      return
+    }
+
+    await refreshParticipation()
+  }
+
+  const handleLeave = async () => {
+    if (!user || !event) {
+      return
+    }
+
+    const success = await leaveEvent(user.uid, event.id)
+
+    if (!success) {
+      return
+    }
+
+    await refreshParticipation()
+  }
 
   const handleDeleteEvent = async () => {
     if (!event) return
@@ -106,12 +154,17 @@ function RouteComponent() {
     ) : hasJoined ? (
       <Button className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold"
         variant="secondary"
+        onClick={handleLeave}
+        disabled={participationLoading}
       >
-        <Check className="size-4" aria-hidden="true" />
-        {t("routes.eventDetails.actions.alreadyJoined")}
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        {t("routes.eventDetails.actions.leave")}
       </Button>
     ) : (
-      <Button className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold">
+      <Button className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold"
+        onClick={handleJoin}
+        disabled={participationLoading}
+      >
         <Users className="size-4" aria-hidden="true" />
         {t("routes.eventDetails.actions.join")}
       </Button>
@@ -417,9 +470,9 @@ function RouteComponent() {
                     <p className="text-base font-semibold text-foreground">
                       {isOwner
                         ? t("routes.eventDetails.action.owner")
-                        : hasJoined
-                          ? t("routes.eventDetails.action.joined")
-                          : t("routes.eventDetails.action.ready")}
+                            : hasJoined
+                              ? t("routes.eventDetails.action.joined")
+                              : t("routes.eventDetails.action.ready")}
                     </p>
                   </div>
                   <div>{ctaButton}</div>
@@ -427,6 +480,10 @@ function RouteComponent() {
                 {isOwner ? (
                   <p className="mt-4 text-xs leading-5 text-muted-foreground">
                     {t("routes.eventDetails.action.ownerDescription")}
+                  </p>
+                ) : hasJoined ? (
+                  <p className="mt-4 text-xs leading-5 text-muted-foreground">
+                    {t("routes.eventDetails.action.leaveDescription")}
                   </p>
                 ) : (
                   <p className="mt-4 text-xs leading-5 text-muted-foreground">

@@ -427,7 +427,8 @@
         "edit": "Edit event",
         "delete": "Delete event",
         "alreadyJoined": "Already joined",
-        "join": "Join event"
+        "join": "Join event",
+        "leave": "Leave event"
       },
       "labels": {
         "eventDate": "Event date",
@@ -456,7 +457,8 @@
         "joined": "Already joined",
         "ready": "Ready to join",
         "ownerDescription": "As the creator of this event, you can review the details and prepare the content before launching it to the wider audience.",
-        "joinDescription": "Join or review this event once you are ready. The button is a visual placeholder until the join experience is implemented."
+        "joinDescription": "Join this event when you are ready to participate.",
+        "leaveDescription": "Leave this event if you no longer plan to attend."
       }
     },
     "analytics": {

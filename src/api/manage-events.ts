@@ -58,7 +58,7 @@ class ManageEvents {
     async getEventById(id: string) {
         const { data, error } = await supabase
             .from("events")
-            .select("*")
+            .select("*, event_participants(id)")
             .eq("id", id)
             .maybeSingle();
 
@@ -66,7 +66,16 @@ class ManageEvents {
             throw new Error(error.message);
         }
 
-        return data;
+        if (!data) {
+            return data;
+        }
+
+        const event = data as EventType & { event_participants?: { id: string }[] };
+
+        return {
+            ...event,
+            attendee_count: event.event_participants?.length ?? 0,
+        } as EventType;
     }
 
     // ─── Get all events ───
