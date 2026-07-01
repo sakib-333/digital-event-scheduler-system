@@ -10,7 +10,8 @@ Digital Event Scheduler System helps institutions coordinate academic and campus
 
 - Public home page with hero, feature, about, FAQ, and contact sections
 - Authentication-aware routing with protected dashboard areas
-- Event creation, editing, listing, and detail views
+- Event creation, editing, deleting, listing, and detail views
+- Event detail actions for joining and leaving events
 - Admin event management and approval workflows
 - Calendar-based event visualization
 - Analytics dashboard with charts and summaries
@@ -35,7 +36,6 @@ Digital Event Scheduler System helps institutions coordinate academic and campus
 - React Big Calendar
 - Recharts
 - EmailJS
-- Sonner
 
 ## Getting Started
 
@@ -129,6 +129,7 @@ src/
 - `/events` - Event listing
 - `/event/create-event` - Create event
 - `/event/manage-events` - Manage events
+- `/event/$eventId` - View event details, join or leave an event, and delete an event as the owner
 - `/calendar` - Calendar view
 - `/analytics` - Analytics view
 - `/manage-users` - User management
