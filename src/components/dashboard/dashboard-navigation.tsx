@@ -113,6 +113,34 @@ const secondaryNavItems: NavItem[] = [
 
 const navItems = [...primaryNavItems, ...secondaryNavItems];
 
+const staticHeaderTitleMap: Record<string, string> = {
+  "/dashboard": "dashboard.nav.overview",
+  "/events": "dashboard.nav.events",
+  "/calendar": "dashboard.nav.calendar",
+  "/my-events": "dashboard.nav.myEvents",
+  "/event/manage-events": "dashboard.nav.manageEvents",
+  "/manage-users": "dashboard.nav.manageUsers",
+  "/analytics": "dashboard.nav.analytics",
+  "/profile": "dashboard.nav.profile",
+  "/settings": "dashboard.nav.settings",
+};
+
+function getDashboardHeaderTitle(pathname: string) {
+  if (pathname.startsWith("/event/create-event")) {
+    return "dashboard.nav.createEvent";
+  }
+
+  if (pathname.startsWith("/event/edit-event/")) {
+    return "dashboard.nav.editEvent";
+  }
+
+  if (pathname.startsWith("/event/")) {
+    return "dashboard.nav.eventDetails";
+  }
+
+  return staticHeaderTitleMap[pathname] ?? "dashboard.nav.overview";
+}
+
 export function getNavItemsByRole(
   user?: DashboardUser | null,
   items: NavItem[] = navItems,
@@ -222,21 +250,10 @@ function DashboardHeader() {
   });
 
   const user = useAuthStore((state) => state.user);
-  const allowedNavItems = getNavItemsByRole(user, navItems);
   const allowedPrimaryNavItems = getNavItemsByRole(user, primaryNavItems);
   const allowedSecondaryNavItems = getNavItemsByRole(user, secondaryNavItems);
 
-  let activeTitle =
-    allowedNavItems.find((item) => item.to === pathname)?.labelKey ??
-    "dashboard.nav.overview";
-
-  if (pathname.startsWith("/event/create-event")) {
-    activeTitle = "dashboard.nav.createEvent";
-  } else if(pathname.startsWith("/event/edit-event")) {
-    activeTitle = "dashboard.nav.editEvent";
-  } else {
-    activeTitle = "dashboard.nav.detailsEvent";
-  }
+  const activeTitle = getDashboardHeaderTitle(pathname);
 
   async function handleLogout() {
     await signout();
