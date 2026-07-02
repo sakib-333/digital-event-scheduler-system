@@ -17,6 +17,7 @@ Digital Event Scheduler System helps institutions coordinate academic and campus
 - Analytics dashboard with charts and summaries
 - User role management
 - Notification provider and notification dialog
+- Language translation(English and Bangla)
 - Theme support with light and dark modes
 - Contact form powered by React Hook Form and EmailJS
 - Toast notifications through Sonner/shadcn UI
