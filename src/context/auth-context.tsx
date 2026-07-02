@@ -93,7 +93,6 @@ export function AuthProvider({
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     async function signInWithEmail(email: string, password: string) {
         const credential = await signInWithEmailAndPassword(auth, email, password);
-        await syncSupabaseUser(credential.user);
 
         return credential;
     }
@@ -104,14 +103,12 @@ export function AuthProvider({
 
     async function signInWithGoogle() {
         const credential = await signInWithPopup(auth, googleProvider);
-        await syncSupabaseUser(credential.user);
 
         return credential;
     }
 
     async function signUpWithEmail(email: string, password: string) {
         const credential = await createUserWithEmailAndPassword(auth, email, password);
-        await syncSupabaseUser(credential.user);
 
         return credential;
     }
@@ -192,14 +189,32 @@ export function useAuth() {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Supabase User Sync
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const pendingSupabaseUserSyncs = new Map<string, Promise<UserType>>();
+
 async function syncSupabaseUser(firebaseUser: User) {
-    const supabaseUser = await manageUsers.ensureUserExists(
-        mapFirebaseUserToSupabaseUser(firebaseUser),
-    );
+    const pendingSync = pendingSupabaseUserSyncs.get(firebaseUser.uid);
 
-    useAuthStore.getState().setUser(supabaseUser);
+    if (pendingSync) {
+        return pendingSync;
+    }
 
-    return supabaseUser;
+    const syncPromise = (async () => {
+        const supabaseUser = await manageUsers.ensureUserExists(
+            mapFirebaseUserToSupabaseUser(firebaseUser),
+        );
+
+        useAuthStore.getState().setUser(supabaseUser);
+
+        return supabaseUser;
+    })();
+
+    pendingSupabaseUserSyncs.set(firebaseUser.uid, syncPromise);
+
+    try {
+        return await syncPromise;
+    } finally {
+        pendingSupabaseUserSyncs.delete(firebaseUser.uid);
+    }
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
