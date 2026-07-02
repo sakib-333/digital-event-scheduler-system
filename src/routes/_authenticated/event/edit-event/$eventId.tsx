@@ -231,7 +231,7 @@ function RouteComponent() {
 
     const success = await updateEvent(event.id, updates)
     if (success) {
-      navigate({ to: '/event/manage-events' })
+      navigate({ to: '/my-events' })
     }
   }
 

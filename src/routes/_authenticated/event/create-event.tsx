@@ -145,7 +145,7 @@ function CreateEventPage() {
 
     const success = await createEvent(eventPayload);
     if (success) {
-      navigate({ to: "/event/manage-events" });
+      navigate({ to: "/my-events" });
     }
   };
 
